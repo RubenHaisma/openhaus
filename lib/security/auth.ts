@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import { supabase } from '@/lib/supabase'
+import { prisma } from '@/lib/prisma'
+import { Role, VerificationType } from '@prisma/client'
 
 export interface User {
   id: string
@@ -27,7 +28,7 @@ export interface RegisterData {
   email: string
   password: string
   name: string
-  role?: 'buyer' | 'seller'
+  role?: Role
 }
 
 export class AuthService {
@@ -39,11 +40,9 @@ export class AuthService {
   async register(data: RegisterData): Promise<{ user: User; tokens: AuthTokens }> {
     try {
       // Check if user already exists
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', data.email)
-        .single()
+      const existingUser = await prisma.profile.findUnique({
+        where: { email: data.email }
+      })
 
       if (existingUser) {
         throw new Error('User already exists')
@@ -53,19 +52,15 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(data.password, 12)
 
       // Create user
-      const { data: user, error } = await supabase
-        .from('profiles')
-        .insert({
+      const user = await prisma.profile.create({
+        data: {
           email: data.email,
           name: data.name,
-          password_hash: hashedPassword,
-          role: data.role || 'buyer',
-          verified: false,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
+          passwordHash: hashedPassword,
+          role: data.role || Role.BUYER,
+          verified: false
+        }
+      })
 
       // Generate verification token
       const verificationToken = this.generateVerificationToken()
@@ -99,43 +94,41 @@ export class AuthService {
   async login(credentials: LoginCredentials): Promise<{ user: User; tokens: AuthTokens }> {
     try {
       // Get user with password
-      const { data: user, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', credentials.email)
-        .single()
+      const user = await prisma.profile.findUnique({
+        where: { email: credentials.email }
+      })
 
-      if (error || !user) {
+      if (!user) {
         throw new Error('Invalid credentials')
       }
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(credentials.password, user.password_hash)
+      const isValidPassword = await bcrypt.compare(credentials.password, user.passwordHash)
       if (!isValidPassword) {
         throw new Error('Invalid credentials')
       }
 
       // Check if account is locked
-      if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
         throw new Error('Account is temporarily locked')
       }
 
       // Reset failed login attempts on successful login
-      if (user.failed_login_attempts > 0) {
-        await supabase
-          .from('profiles')
-          .update({
-            failed_login_attempts: 0,
-            locked_until: null,
-          })
-          .eq('id', user.id)
+      if (user.failedLoginAttempts > 0) {
+        await prisma.profile.update({
+          where: { id: user.id },
+          data: {
+            failedLoginAttempts: 0,
+            lockedUntil: null
+          }
+        })
       }
 
       // Update last login
-      await supabase
-        .from('profiles')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', user.id)
+      await prisma.profile.update({
+        where: { id: user.id },
+        data: { lastLogin: new Date() }
+      })
 
       // Generate tokens
       const tokens = await this.generateTokens(user)
@@ -158,13 +151,11 @@ export class AuthService {
       const decoded = jwt.verify(refreshToken, this.JWT_REFRESH_SECRET) as any
       
       // Get user
-      const { data: user, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', decoded.userId)
-        .single()
+      const user = await prisma.profile.findUnique({
+        where: { id: decoded.userId }
+      })
 
-      if (error || !user) {
+      if (!user) {
         throw new Error('Invalid refresh token')
       }
 
@@ -179,33 +170,32 @@ export class AuthService {
   async verifyEmail(token: string): Promise<boolean> {
     try {
       // Get verification token
-      const { data: tokenData, error } = await supabase
-        .from('verification_tokens')
-        .select('*')
-        .eq('token', token)
-        .eq('type', 'email_verification')
-        .single()
+      const tokenData = await prisma.verificationToken.findUnique({
+        where: { 
+          token,
+          type: VerificationType.EMAIL_VERIFICATION
+        }
+      })
 
-      if (error || !tokenData) {
+      if (!tokenData) {
         throw new Error('Invalid verification token')
       }
 
       // Check if token is expired
-      if (new Date(tokenData.expires_at) < new Date()) {
+      if (new Date(tokenData.expiresAt) < new Date()) {
         throw new Error('Verification token expired')
       }
 
       // Update user as verified
-      await supabase
-        .from('profiles')
-        .update({ verified: true })
-        .eq('id', tokenData.user_id)
+      await prisma.profile.update({
+        where: { id: tokenData.userId },
+        data: { verified: true }
+      })
 
       // Delete verification token
-      await supabase
-        .from('verification_tokens')
-        .delete()
-        .eq('id', tokenData.id)
+      await prisma.verificationToken.delete({
+        where: { id: tokenData.id }
+      })
 
       return true
     } catch (error) {
@@ -217,20 +207,19 @@ export class AuthService {
   async requestPasswordReset(email: string): Promise<boolean> {
     try {
       // Get user
-      const { data: user, error } = await supabase
-        .from('profiles')
-        .select('id, email, name')
-        .eq('email', email)
-        .single()
+      const user = await prisma.profile.findUnique({
+        where: { email },
+        select: { id: true, email: true, name: true }
+      })
 
-      if (error || !user) {
+      if (!user) {
         // Don't reveal if email exists
         return true
       }
 
       // Generate reset token
       const resetToken = this.generateVerificationToken()
-      await this.storeVerificationToken(user.id, resetToken, 'password_reset')
+      await this.storeVerificationToken(user.id, resetToken, VerificationType.PASSWORD_RESET)
 
       // Send reset email
       const { emailService } = await import('../integrations/email')
@@ -246,19 +235,19 @@ export class AuthService {
   async resetPassword(token: string, newPassword: string): Promise<boolean> {
     try {
       // Get reset token
-      const { data: tokenData, error } = await supabase
-        .from('verification_tokens')
-        .select('*')
-        .eq('token', token)
-        .eq('type', 'password_reset')
-        .single()
+      const tokenData = await prisma.verificationToken.findFirst({
+        where: {
+          token,
+          type: VerificationType.PASSWORD_RESET
+        }
+      })
 
-      if (error || !tokenData) {
+      if (!tokenData) {
         throw new Error('Invalid reset token')
       }
 
       // Check if token is expired
-      if (new Date(tokenData.expires_at) < new Date()) {
+      if (new Date(tokenData.expiresAt) < new Date()) {
         throw new Error('Reset token expired')
       }
 
@@ -266,20 +255,19 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(newPassword, 12)
 
       // Update user password
-      await supabase
-        .from('profiles')
-        .update({ 
-          password_hash: hashedPassword,
-          failed_login_attempts: 0,
-          locked_until: null,
-        })
-        .eq('id', tokenData.user_id)
+      await prisma.profile.update({
+        where: { id: tokenData.userId },
+        data: {
+          passwordHash: hashedPassword,
+          failedLoginAttempts: 0,
+          lockedUntil: null
+        }
+      })
 
       // Delete reset token
-      await supabase
-        .from('verification_tokens')
-        .delete()
-        .eq('id', tokenData.id)
+      await prisma.verificationToken.delete({
+        where: { id: tokenData.id }
+      })
 
       return true
     } catch (error) {
@@ -292,13 +280,11 @@ export class AuthService {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as any
       
-      const { data: user, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', decoded.userId)
-        .single()
+      const user = await prisma.profile.findUnique({
+        where: { id: decoded.userId }
+      })
 
-      if (error || !user) {
+      if (!user) {
         return null
       }
 
@@ -337,44 +323,43 @@ export class AuthService {
   private async storeVerificationToken(
     userId: string, 
     token: string, 
-    type: string = 'email_verification'
+    type: VerificationType = VerificationType.EMAIL_VERIFICATION
   ): Promise<void> {
     const expiresAt = new Date()
     expiresAt.setHours(expiresAt.getHours() + 24) // 24 hours
 
-    await supabase
-      .from('verification_tokens')
-      .insert({
-        user_id: userId,
+    await prisma.verificationToken.create({
+      data: {
+        userId,
         token,
         type,
-        expires_at: expiresAt.toISOString(),
-      })
+        expiresAt
+      }
+    })
   }
 
   private async handleFailedLogin(email: string): Promise<void> {
     try {
-      const { data: user } = await supabase
-        .from('profiles')
-        .select('id, failed_login_attempts')
-        .eq('email', email)
-        .single()
+      const user = await prisma.profile.findUnique({
+        where: { email },
+        select: { id: true, failedLoginAttempts: true }
+      })
 
       if (user) {
-        const attempts = (user.failed_login_attempts || 0) + 1
-        const updateData: any = { failed_login_attempts: attempts }
+        const attempts = (user.failedLoginAttempts || 0) + 1
+        const updateData: any = { failedLoginAttempts: attempts }
 
         // Lock account after 5 failed attempts
         if (attempts >= 5) {
           const lockUntil = new Date()
           lockUntil.setMinutes(lockUntil.getMinutes() + 30) // 30 minutes
-          updateData.locked_until = lockUntil.toISOString()
+          updateData.lockedUntil = lockUntil
         }
 
-        await supabase
-          .from('profiles')
-          .update(updateData)
-          .eq('id', user.id)
+        await prisma.profile.update({
+          where: { id: user.id },
+          data: updateData
+        })
       }
     } catch (error) {
       console.error('Failed login handling error:', error)
@@ -388,7 +373,7 @@ export class AuthService {
       name: user.name,
       role: user.role,
       verified: user.verified,
-      createdAt: user.created_at,
+      createdAt: user.createdAt.toISOString()
     }
   }
 }

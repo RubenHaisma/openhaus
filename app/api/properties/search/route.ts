@@ -7,7 +7,7 @@ import { z } from 'zod'
 const searchSchema = z.object({
   query: z.string().optional(),
   city: z.string().optional(),
-  propertyType: z.enum(['house', 'apartment', 'townhouse']).optional(),
+  propertyType: z.enum(['HOUSE', 'APARTMENT', 'TOWNHOUSE']).optional(),
   minPrice: z.number().min(0).optional(),
   maxPrice: z.number().min(0).optional(),
   minBedrooms: z.number().min(0).optional(),

@@ -1,11 +1,9 @@
-"use client"
-
 import { useState, useRef, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Search, MapPin, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { realDataValidator } from '@/lib/real-data/validation'
 
 interface AddressInputProps {
   onSearch: (address: string, postalCode: string) => void
@@ -18,7 +16,7 @@ interface AddressSuggestion {
   address: string
   postalCode: string
   city: string
-  country: string
+  fullAddress: string
 }
 
 export function AddressInput({ onSearch, placeholder, className, loading }: AddressInputProps) {
@@ -26,54 +24,102 @@ export function AddressInput({ onSearch, placeholder, className, loading }: Addr
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [validationError, setValidationError] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
-  // Mock address suggestions - in production, integrate with European geocoding services
-  const mockSuggestions: AddressSuggestion[] = [
-    { address: 'Keizersgracht 123', postalCode: '1015 CJ', city: 'Amsterdam', country: 'Netherlands' },
-    { address: 'Herengracht 456', postalCode: '1017 BZ', city: 'Amsterdam', country: 'Netherlands' },
-    { address: 'Prinsengracht 789', postalCode: '1016 HK', city: 'Amsterdam', country: 'Netherlands' },
-    { address: 'Unter den Linden 12', postalCode: '10117', city: 'Berlin', country: 'Germany' },
-    { address: 'Champs-Élysées 100', postalCode: '75008', city: 'Paris', country: 'France' },
-    { address: 'Baker Street 221B', postalCode: 'NW1 6XE', city: 'London', country: 'United Kingdom' },
-  ]
+  // Dutch postal code and address validation
+  const validateDutchAddress = (input: string): { address?: string; postalCode?: string } => {
+    // Pattern for Dutch addresses: "Street 123, 1234AB" or "Street 123 1234AB" or "1234AB Street 123"
+    const patterns = [
+      /^(.+?)\s*,?\s*(\d{4}\s?[A-Z]{2})$/i, // Street 123, 1234AB
+      /^(\d{4}\s?[A-Z]{2})\s+(.+)$/i,       // 1234AB Street 123
+    ]
 
-  useEffect(() => {
-    if (value.length >= 3) {
-      const filtered = mockSuggestions.filter(suggestion =>
-        suggestion.address.toLowerCase().includes(value.toLowerCase()) ||
-        suggestion.city.toLowerCase().includes(value.toLowerCase()) ||
-        suggestion.postalCode.toLowerCase().includes(value.toLowerCase())
-      )
-      setSuggestions(filtered)
-      setShowSuggestions(true)
-      setSelectedIndex(-1)
-    } else {
-      setShowSuggestions(false)
-      setSuggestions([])
+    for (const pattern of patterns) {
+      const match = input.trim().match(pattern)
+      if (match) {
+        const [, part1, part2] = match
+        
+        // Check which part is the postal code
+        if (/^\d{4}\s?[A-Z]{2}$/i.test(part1)) {
+          return { postalCode: part1.replace(/\s/g, '').toUpperCase(), address: part2.trim() }
+        } else if (/^\d{4}\s?[A-Z]{2}$/i.test(part2)) {
+          return { postalCode: part2.replace(/\s/g, '').toUpperCase(), address: part1.trim() }
+        }
+      }
     }
-  }, [value])
+
+    return {}
+  }
+
+  // Mock address suggestions (in production, this would call a real address API)
+  const getAddressSuggestions = async (query: string): Promise<AddressSuggestion[]> => {
+    if (query.length < 3) return []
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 200))
+
+    // Mock suggestions based on common Dutch addresses
+    const mockSuggestions: AddressSuggestion[] = [
+      { address: 'Keizersgracht 123', postalCode: '1015CJ', city: 'Amsterdam', fullAddress: 'Keizersgracht 123, 1015CJ Amsterdam' },
+      { address: 'Herengracht 456', postalCode: '1017BZ', city: 'Amsterdam', fullAddress: 'Herengracht 456, 1017BZ Amsterdam' },
+      { address: 'Prinsengracht 789', postalCode: '1016HT', city: 'Amsterdam', fullAddress: 'Prinsengracht 789, 1016HT Amsterdam' },
+      { address: 'Lange Voorhout 45', postalCode: '2514EC', city: 'Den Haag', fullAddress: 'Lange Voorhout 45, 2514EC Den Haag' },
+      { address: 'Erasmuslaan 78', postalCode: '3062PA', city: 'Rotterdam', fullAddress: 'Erasmuslaan 78, 3062PA Rotterdam' },
+      { address: 'Oudegracht 156', postalCode: '3511AP', city: 'Utrecht', fullAddress: 'Oudegracht 156, 3511AP Utrecht' },
+    ]
+
+    return mockSuggestions.filter(suggestion =>
+      suggestion.fullAddress.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 5)
+  }
+
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setValue(newValue)
+    setSelectedIndex(-1)
+
+    if (newValue.length >= 3) {
+      setIsSearching(true)
+      try {
+        const suggestions = await getAddressSuggestions(newValue)
+        setSuggestions(suggestions)
+        setShowSuggestions(suggestions.length > 0)
+      } catch (error) {
+        console.error('Failed to get address suggestions:', error)
+        setSuggestions([])
+        setShowSuggestions(false)
+      } finally {
+        setIsSearching(false)
+      }
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions) return
+    if (!showSuggestions) {
+      if (e.key === 'Enter') {
+        handleSearch()
+      }
+      return
+    }
 
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault()
-        setSelectedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        )
+        setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1))
         break
       case 'ArrowUp':
         e.preventDefault()
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1)
+        setSelectedIndex(prev => Math.max(prev - 1, -1))
         break
       case 'Enter':
         e.preventDefault()
         if (selectedIndex >= 0) {
-          handleSelectSuggestion(suggestions[selectedIndex])
+          selectSuggestion(suggestions[selectedIndex])
         } else {
           handleSearch()
         }
@@ -85,136 +131,106 @@ export function AddressInput({ onSearch, placeholder, className, loading }: Addr
     }
   }
 
-  const handleSelectSuggestion = (suggestion: AddressSuggestion) => {
-    setValue(`${suggestion.address}, ${suggestion.city}`)
+  const selectSuggestion = (suggestion: AddressSuggestion) => {
+    setValue(suggestion.fullAddress)
     setShowSuggestions(false)
+    setSelectedIndex(-1)
     onSearch(suggestion.address, suggestion.postalCode)
   }
 
   const handleSearch = () => {
-    if (value.trim()) {
-      // Extract postal code from input if possible
-      const postalCodeMatch = value.match(/\b\d{4}\s?[A-Z]{2}\b|\b[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}\b|\b\d{5}\b/)
-      const postalCode = postalCodeMatch ? postalCodeMatch[0] : ''
-      
-      // Validate postal code format for real data
-      const validation = realDataValidator.validateCalculationInputs({
-        postalCode: postalCode.trim()
-      })
-      
-      if (!validation.valid) {
-        setValidationError(validation.errors[0])
-        return
-      }
-      
-      setValidationError('')
-      onSearch(value, postalCode)
-      setShowSuggestions(false)
+    const { address, postalCode } = validateDutchAddress(value)
+    
+    if (address && postalCode) {
+      onSearch(address, postalCode)
+    } else {
+      // Show error or try to parse differently
+      alert('Voer een geldig Nederlands adres in (bijv. "Keizersgracht 123, 1015CJ" of "1015CJ Keizersgracht 123")')
     }
   }
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node) &&
+        !inputRef.current?.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <div className="relative w-full">
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Search className="h-6 w-6 text-gray-400" />
-        </div>
-        
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
         <Input
           ref={inputRef}
           type="text"
+          placeholder={placeholder || "Voer je adres in (bijv. Keizersgracht 123, 1015CJ)"}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder || "Voer je adres in..."}
-          className={cn(
-            "pl-12 pr-24 h-14 text-lg border-2 border-gray-300 rounded-xl",
-            "focus:border-primary focus:ring-4 focus:ring-primary/20",
-            "transition-all duration-200",
-            className
-          )}
+          className={cn("pl-12 pr-24 h-14 text-lg", className)}
           disabled={loading}
-          maxLength={7}
         />
-        
-        <div className="absolute inset-y-0 right-0 flex items-center">
-          <Button
-            onClick={handleSearch}
-            disabled={loading || !value.trim()}
-            className="mr-2 h-10 px-6 bg-primary hover:bg-primary/90 text-white rounded-lg font-semibold"
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Taxeer'
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {validationError && (
-        <div className="mt-2 text-sm text-red-600">
-          {validationError}
-        </div>
-      )}
-      
-      <div className="mt-2 text-xs text-gray-500">
-        Gegevens worden opgehaald uit Kadaster, CBS en NVM databases
-      </div>
-
-      {/* Suggestions Dropdown */}
-      {showSuggestions && suggestions.length > 0 && (
-        <div
-          ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-80 overflow-y-auto"
+        <Button
+          onClick={handleSearch}
+          disabled={loading || !value.trim()}
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 px-6 bg-primary hover:bg-primary/90"
         >
-          {suggestions.map((suggestion, index) => (
-            <button
-              key={index}
-              onClick={() => handleSelectSuggestion(suggestion)}
-              className={cn(
-                "w-full px-4 py-4 text-left hover:bg-gray-50 transition-colors",
-                "flex items-center space-x-3 border-b border-gray-100 last:border-b-0",
-                selectedIndex === index && "bg-blue-50 border-blue-200"
-              )}
-            >
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <MapPin className="w-4 h-4 text-gray-600" />
-                </div>
+          {loading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            'Zoek'
+          )}
+        </Button>
+      </div>
+
+      {/* Address Suggestions */}
+      {showSuggestions && (
+        <Card className="absolute top-full left-0 right-0 z-50 mt-1 shadow-lg border-gray-200">
+          <CardContent className="p-0" ref={suggestionsRef}>
+            {isSearching ? (
+              <div className="p-4 text-center text-gray-500">
+                <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+                Adressen zoeken...
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-900 truncate">
-                  {suggestion.address}
-                </div>
-                <div className="text-sm text-gray-600 truncate">
-                  {suggestion.postalCode} {suggestion.city}, {suggestion.country}
-                </div>
+            ) : (
+              <div className="max-h-60 overflow-y-auto">
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => selectSuggestion(suggestion)}
+                    className={cn(
+                      "w-full text-left p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors",
+                      selectedIndex === index && "bg-blue-50"
+                    )}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-gray-900">{suggestion.address}</div>
+                        <div className="text-sm text-gray-600">{suggestion.postalCode} {suggestion.city}</div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
-              <div className="flex-shrink-0">
-                <div className="text-xs text-gray-400 font-medium">
-                  {suggestion.country === 'Netherlands' ? '🇳🇱' :
-                   suggestion.country === 'Germany' ? '🇩🇪' :
-                   suggestion.country === 'France' ? '🇫🇷' :
-                   suggestion.country === 'United Kingdom' ? '🇬🇧' : '🇪🇺'}
-                </div>
-              </div>
-            </button>
-          ))}
-          
-          {/* Footer */}
-          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 rounded-b-xl">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>Powered by European Property Database</span>
-              <div className="flex items-center space-x-2">
-                <span>Gebruik ↑↓ om te navigeren</span>
-                <span>•</span>
-                <span>Enter om te selecteren</span>
-              </div>
-            </div>
-          </div>
-        </div>
+            )}
+          </CardContent>
+        </Card>
       )}
+
+      {/* Input Help Text */}
+      <div className="mt-2 text-sm text-gray-500">
+        Voer een volledig Nederlands adres in inclusief postcode (bijv. "Keizersgracht 123, 1015CJ")
+      </div>
     </div>
   )
 }

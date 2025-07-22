@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPropertyData, calculateValuation } from '@/lib/kadaster'
 import { Logger } from '@/lib/monitoring/logger'
+import { cacheService } from '@/lib/cache/redis'
 import { z } from 'zod'
 
 const valuationSchema = z.object({
@@ -8,70 +9,38 @@ const valuationSchema = z.object({
   postalCode: z.string().regex(/^\d{4}\s?[A-Z]{2}$/i, 'Valid Dutch postal code required'),
 })
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
+  let address: string | undefined
+  let postalCode: string | undefined
   try {
-    const body = await request.json()
-    const validatedData = valuationSchema.parse(body)
-
-    Logger.info('Starting WOZ-based valuation calculation', {
-      address: validatedData.address,
-      postalCode: validatedData.postalCode
-    })
-
-    // Get property data using WOZ scraping
-    const propertyData = await getPropertyData(validatedData.address, validatedData.postalCode)
+    // Try to parse JSON body, handle empty/invalid JSON
+    const body = await req.text()
+    if (!body) {
+      return NextResponse.json({ error: 'Missing request body' }, { status: 400 })
+    }
+    let parsed
+    try {
+      parsed = JSON.parse(body)
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    }
+    address = parsed.address
+    postalCode = parsed.postalCode
+    // Validate input
+    const validation = valuationSchema.safeParse({ address, postalCode })
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 })
+    }
+    // After validation, these are guaranteed to be strings
+    const { address: validAddress, postalCode: validPostalCode } = validation.data
+    const propertyData = await getPropertyData(validAddress, validPostalCode)
     if (!propertyData) {
-      return NextResponse.json(
-        { error: 'Property not found or WOZ value unavailable' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Property not found' }, { status: 404 })
     }
-
-    // Calculate valuation using WOZ data and market analysis
     const valuation = await calculateValuation(propertyData)
-
-    Logger.audit('WOZ-based valuation calculated', {
-      address: validatedData.address,
-      estimatedValue: valuation.estimatedValue,
-      confidenceScore: valuation.confidenceScore,
-      wozValue: valuation.wozValue,
-      dataSource: valuation.dataSource
-    })
-
-    return NextResponse.json({
-      property: propertyData,
-      valuation,
-      wozBased: true,
-      timestamp: new Date().toISOString(),
-      disclaimer: 'Valuation based on WOZ value and market analysis'
-    })
-
-  } catch (error) {
-    Logger.error('WOZ-based valuation calculation failed', error as Error)
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
-        { status: 400 }
-      )
-    }
-
-    // Check if it's a scraping error
-    if (error.message.includes('scraping') || error.message.includes('WOZ')) {
-      return NextResponse.json(
-        { 
-          error: 'WOZ data service unavailable',
-          message: error.message,
-          suggestion: 'Please check the address and postal code, or try again later'
-        },
-        { status: 503 }
-      )
-    }
-
-    return NextResponse.json(
-      { error: 'Valuation calculation failed', message: error.message },
-      { status: 500 }
-    )
+    return NextResponse.json({ valuation })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
@@ -80,19 +49,25 @@ export async function GET(request: NextRequest) {
     // Health check for WOZ scraping service
     const { wozScraper } = await import('@/lib/woz-scraper')
     
-    // Test with a known address
-    const testResult = await wozScraper.getWOZValue('Test 1', '1000AA')
+    // Quick health check
+    const isHealthy = await wozScraper.healthCheck()
 
     return NextResponse.json({
       wozScrapingEnabled: true,
-      testScraping: testResult.success,
+      serviceHealthy: isHealthy,
       service: 'WOZ Waardeloket Scraping',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      cacheEnabled: true,
+      rateLimitEnabled: true
     })
   } catch (error) {
     Logger.error('WOZ scraping health check failed', error as Error)
     return NextResponse.json(
-      { error: 'Health check failed' },
+      { 
+        error: 'Health check failed',
+        serviceHealthy: false,
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     )
   }

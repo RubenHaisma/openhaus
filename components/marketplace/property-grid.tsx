@@ -17,7 +17,7 @@ interface Property {
   bathrooms: number
   square_meters: number
   images: string[]
-  status: string
+  status: 'AVAILABLE' | 'SOLD' | 'PENDING'
   energy_label: string
   description: string
   features: string[]
@@ -176,13 +176,13 @@ export function PropertyGrid({ properties, loading, onFavorite, favorites = [] }
               </Badge>
 
               {/* Status Badge */}
-              {property.status !== 'available' && (
+              {property.status !== 'AVAILABLE' && (
                 <Badge 
                   variant="destructive"
                   className="absolute top-2 left-2"
                 >
-                  {property.status === 'sold' ? 'Verkocht' : 
-                   property.status === 'pending' ? 'Onder bod' : property.status}
+                  {property.status === 'SOLD' ? 'Verkocht' : 
+                   property.status === 'PENDING' ? 'Onder bod' : property.status}
                 </Badge>
               )}
             </div>

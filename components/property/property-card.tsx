@@ -19,7 +19,7 @@ interface Property {
   bathrooms: number
   square_meters: number
   images: string[]
-  status: string
+  status: 'AVAILABLE' | 'SOLD' | 'PENDING'
   energy_label: string
   description: string
   features: string[]
@@ -140,12 +140,12 @@ export function PropertyCard({
           </Badge>
 
           {/* Status Badge */}
-          {property.status !== 'available' && (
+          {property.status !== 'AVAILABLE' && (
             <Badge 
               className="absolute top-3 left-3 bg-red-500 text-white font-bold px-3 py-1"
             >
-              {property.status === 'sold' ? 'Verkocht' : 
-               property.status === 'pending' ? 'Onder bod' : property.status}
+              {property.status === 'SOLD' ? 'Verkocht' : 
+               property.status === 'PENDING' ? 'Onder bod' : property.status}
             </Badge>
           )}
         </div>

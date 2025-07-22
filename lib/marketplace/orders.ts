@@ -1,9 +1,5 @@
-import { supabase } from '@/lib/supabase'
-import { Database } from '@/types/database'
-
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderInsert = Database['public']['Tables']['orders']['Insert']
-type OrderUpdate = Database['public']['Tables']['orders']['Update']
+import { prisma } from '@/lib/prisma'
+import { Order, OrderStatus } from '@prisma/client'
 
 export interface CreateOrderData {
   buyerId: string
@@ -29,26 +25,26 @@ export interface OrderFilters {
 export class OrderManager {
   async createOrder(data: CreateOrderData): Promise<Order> {
     try {
-      const orderData: OrderInsert = {
-        buyer_id: data.buyerId,
-        seller_id: data.sellerId,
-        property_id: data.propertyId,
-        amount: data.amount,
-        currency: data.currency,
-        payment_method: data.paymentMethod,
-        status: 'pending',
-        shipping_address: data.shippingAddress,
-        notes: data.notes,
-        order_number: this.generateOrderNumber(),
-      }
+      const order = await prisma.order.create({
+        data: {
+          buyerId: data.buyerId,
+          sellerId: data.sellerId,
+          propertyId: data.propertyId,
+          amount: data.amount,
+          currency: data.currency,
+          paymentMethod: data.paymentMethod,
+          status: OrderStatus.PENDING,
+          shippingAddress: data.shippingAddress,
+          notes: data.notes,
+          orderNumber: this.generateOrderNumber()
+        },
+        include: {
+          buyer: true,
+          seller: true,
+          property: true
+        }
+      })
 
-      const { data: order, error } = await supabase
-        .from('orders')
-        .insert(orderData)
-        .select()
-        .single()
-
-      if (error) throw error
       return order
     } catch (error) {
       console.error('Order creation failed:', error)
@@ -58,20 +54,20 @@ export class OrderManager {
 
   async updateOrderStatus(orderId: string, status: string, metadata?: any): Promise<Order> {
     try {
-      const updateData: OrderUpdate = {
-        status,
-        metadata: metadata || {},
-        updated_at: new Date().toISOString(),
-      }
+      const order = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: status as OrderStatus,
+          metadata: metadata || {},
+          updatedAt: new Date()
+        },
+        include: {
+          buyer: true,
+          seller: true,
+          property: true
+        }
+      })
 
-      const { data: order, error } = await supabase
-        .from('orders')
-        .update(updateData)
-        .eq('id', orderId)
-        .select()
-        .single()
-
-      if (error) throw error
       return order
     } catch (error) {
       console.error('Order status update failed:', error)
@@ -81,18 +77,15 @@ export class OrderManager {
 
   async getOrder(orderId: string): Promise<Order | null> {
     try {
-      const { data: order, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          buyer:profiles!orders_buyer_id_fkey(*),
-          seller:profiles!orders_seller_id_fkey(*),
-          property:properties(*)
-        `)
-        .eq('id', orderId)
-        .single()
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          buyer: true,
+          seller: true,
+          property: true
+        }
+      })
 
-      if (error && error.code !== 'PGRST116') throw error
       return order
     } catch (error) {
       console.error('Order retrieval failed:', error)
@@ -102,42 +95,33 @@ export class OrderManager {
 
   async getOrders(filters: OrderFilters = {}): Promise<Order[]> {
     try {
-      let query = supabase
-        .from('orders')
-        .select(`
-          *,
-          buyer:profiles!orders_buyer_id_fkey(*),
-          seller:profiles!orders_seller_id_fkey(*),
-          property:properties(*)
-        `)
+      const where: any = {}
 
-      if (filters.status) {
-        query = query.eq('status', filters.status)
-      }
-      if (filters.buyerId) {
-        query = query.eq('buyer_id', filters.buyerId)
-      }
-      if (filters.sellerId) {
-        query = query.eq('seller_id', filters.sellerId)
-      }
-      if (filters.dateFrom) {
-        query = query.gte('created_at', filters.dateFrom)
-      }
+      if (filters.status) where.status = filters.status as OrderStatus
+      if (filters.buyerId) where.buyerId = filters.buyerId
+      if (filters.sellerId) where.sellerId = filters.sellerId
+      if (filters.dateFrom) where.createdAt = { gte: new Date(filters.dateFrom) }
       if (filters.dateTo) {
-        query = query.lte('created_at', filters.dateTo)
+        where.createdAt = { ...where.createdAt, lte: new Date(filters.dateTo) }
       }
-      if (filters.minAmount) {
-        query = query.gte('amount', filters.minAmount)
-      }
+      if (filters.minAmount) where.amount = { gte: filters.minAmount }
       if (filters.maxAmount) {
-        query = query.lte('amount', filters.maxAmount)
+        where.amount = { ...where.amount, lte: filters.maxAmount }
       }
 
-      const { data: orders, error } = await query
-        .order('created_at', { ascending: false })
+      const orders = await prisma.order.findMany({
+        where,
+        include: {
+          buyer: true,
+          seller: true,
+          property: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
 
-      if (error) throw error
-      return orders || []
+      return orders
     } catch (error) {
       console.error('Orders retrieval failed:', error)
       return []
@@ -146,20 +130,20 @@ export class OrderManager {
 
   async cancelOrder(orderId: string, reason?: string): Promise<Order> {
     try {
-      const updateData: OrderUpdate = {
-        status: 'cancelled',
-        metadata: { cancellation_reason: reason },
-        updated_at: new Date().toISOString(),
-      }
+      const order = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.CANCELLED,
+          metadata: { cancellation_reason: reason },
+          updatedAt: new Date()
+        },
+        include: {
+          buyer: true,
+          seller: true,
+          property: true
+        }
+      })
 
-      const { data: order, error } = await supabase
-        .from('orders')
-        .update(updateData)
-        .eq('id', orderId)
-        .select()
-        .single()
-
-      if (error) throw error
       return order
     } catch (error) {
       console.error('Order cancellation failed:', error)

@@ -15,7 +15,7 @@ const properties = [
     bathrooms: 2,
     squareMeters: 120,
     images: ["https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg"],
-    status: "available",
+    status: "AVAILABLE",
     energyLabel: "B",
     description: "Karakteristieke grachtenpand in het hart van Amsterdam"
   },
@@ -28,7 +28,7 @@ const properties = [
     bathrooms: 1,
     squareMeters: 85,
     images: ["https://images.pexels.com/photos/280222/pexels-photo-280222.jpeg"],
-    status: "available",
+    status: "AVAILABLE",
     energyLabel: "C",
     description: "Modern appartement nabij het centrum"
   },
@@ -41,7 +41,7 @@ const properties = [
     bathrooms: 2,
     squareMeters: 140,
     images: ["https://images.pexels.com/photos/323772/pexels-photo-323772.jpeg"],
-    status: "available",
+    status: "AVAILABLE",
     energyLabel: "A",
     description: "Ruime eengezinswoning met tuin"
   },
@@ -54,7 +54,7 @@ const properties = [
     bathrooms: 1,
     squareMeters: 95,
     images: ["https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg"],
-    status: "available",
+    status: "AVAILABLE",
     energyLabel: "B",
     description: "Historisch pand met moderne afwerking"
   },
@@ -67,7 +67,7 @@ const properties = [
     bathrooms: 2,
     squareMeters: 110,
     images: ["https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg"],
-    status: "available",
+    status: "AVAILABLE",
     energyLabel: "A+",
     description: "Nieuwbouw appartement met balkon"
   },
@@ -80,7 +80,7 @@ const properties = [
     bathrooms: 1,
     squareMeters: 75,
     images: ["https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg"],
-    status: "available",
+    status: "AVAILABLE",
     energyLabel: "C",
     description: "Gezellig stadshuis in historisch centrum"
   }

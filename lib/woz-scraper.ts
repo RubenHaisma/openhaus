@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer'
-import { supabase } from '@/lib/supabase'
+import { prisma } from '@/lib/prisma'
 import { Logger } from '@/lib/monitoring/logger'
+import { cacheService } from '@/lib/cache/redis'
 
 export interface WOZData {
   address: string
@@ -23,10 +24,18 @@ export interface ScrapingResult {
 export class WOZScraper {
   private baseUrl = 'https://www.wozwaardeloket.nl'
   private browser: puppeteer.Browser | null = null
+  private static instance: WOZScraper
+  private browserPromise: Promise<puppeteer.Browser> | null = null
 
+  static getInstance(): WOZScraper {
+    if (!WOZScraper.instance) {
+      WOZScraper.instance = new WOZScraper()
+    }
+    return WOZScraper.instance
+  }
   async initBrowser(): Promise<void> {
-    if (!this.browser) {
-      this.browser = await puppeteer.launch({
+    if (!this.browser && !this.browserPromise) {
+      this.browserPromise = puppeteer.launch({
         headless: true,
         args: [
           '--no-sandbox',
@@ -35,10 +44,16 @@ export class WOZScraper {
           '--disable-accelerated-2d-canvas',
           '--no-first-run',
           '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
         ]
       })
+      this.browser = await this.browserPromise
+      this.browserPromise = null
     }
   }
 
@@ -51,13 +66,29 @@ export class WOZScraper {
 
   async getWOZValue(address: string, postalCode: string): Promise<ScrapingResult> {
     try {
-      // First check if we have cached data
-      const cachedData = await this.getCachedWOZData(address, postalCode)
+      // Create cache key
+      const cacheKey = `woz:${address}:${postalCode.replace(/\s/g, '').toUpperCase()}`
+      
+      // Check Redis cache first (faster than database)
+      const cachedData = await cacheService.get<WOZData>(cacheKey, 'woz')
       if (cachedData) {
-        Logger.info('WOZ data retrieved from cache', { address, postalCode })
+        Logger.info('WOZ data retrieved from Redis cache', { address, postalCode: postalCode.replace(/\s/g, '').toUpperCase() })
         return {
           success: true,
           data: cachedData,
+          cached: true
+        }
+      }
+
+      // First check if we have cached data
+      const cachedWOZData = await this.getCachedWOZData(address, postalCode)
+      if (cachedWOZData) {
+        Logger.info('WOZ data retrieved from cache', { address, postalCode: postalCode.replace(/\s/g, '').toUpperCase() })
+        // Store in Redis for faster future access
+        await cacheService.set(cacheKey, cachedWOZData, { ttl: 86400, prefix: 'woz' }) // 24 hours
+        return {
+          success: true,
+          data: cachedWOZData,
           cached: true
         }
       }
@@ -71,66 +102,88 @@ export class WOZScraper {
 
       const page = await this.browser.newPage()
       
+      // Optimize page for speed
+      await page.setRequestInterception(true)
+      page.on('request', (req) => {
+        // Block unnecessary resources for faster loading
+        if (req.resourceType() === 'stylesheet' || 
+            req.resourceType() === 'font' ||
+            req.resourceType() === 'image' ||
+            req.resourceType() === 'media') {
+          req.abort()
+        } else {
+          req.continue()
+        }
+      })
+      
       // Set user agent to avoid detection
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+      
+      // Set viewport for consistent rendering
+      await page.setViewport({ width: 1280, height: 720 })
       
       // Navigate to WOZ website
-      await page.goto(this.baseUrl, { waitUntil: 'networkidle2' })
+      await page.goto(this.baseUrl, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 15000 
+      })
 
-      // Wait for the search form to load
-      await page.waitForSelector('input[name="postcode"]', { timeout: 10000 })
+      // Wait for the new search input to load
+      await page.waitForSelector('#ggcSearchInput', { timeout: 10000 })
 
-      // Clean postal code (remove spaces)
-      const cleanPostalCode = postalCode.replace(/\s/g, '').toUpperCase()
-      
-      // Extract house number from address
-      const houseNumberMatch = address.match(/(\d+)/)
-      if (!houseNumberMatch) {
-        throw new Error('Could not extract house number from address')
-      }
-      const houseNumber = houseNumberMatch[1]
+      // Type the full address (e.g., "Kampweg 10, 3769DG") into the search input
+      const fullAddress = `${address}, ${postalCode.replace(/\s/g, '').toUpperCase()}`
+      await page.type('#ggcSearchInput', fullAddress)
 
-      // Fill in the search form
-      await page.type('input[name="postcode"]', cleanPostalCode)
-      await page.type('input[name="huisnummer"]', houseNumber)
+      // Wait for the suggestion list to appear and have at least one suggestion
+      await page.waitForSelector('#ggcSuggestionList', { visible: true, timeout: 10000 })
+      // Wait for at least one suggestion item (try common class names)
+      await page.waitForFunction(() => {
+        const list = document.querySelector('#ggcSuggestionList');
+        if (!list || list.hasAttribute('hidden')) return false;
+        return list.querySelectorAll('.list-group-item, [role="option"]').length > 0;
+      }, { timeout: 10000 })
 
-      // Check if there's a house number addition field
-      const houseAdditionMatch = address.match(/\d+\s*([a-zA-Z]+)/)
-      if (houseAdditionMatch) {
-        const houseAddition = houseAdditionMatch[1]
-        const additionField = await page.$('input[name="huisnummer_toevoeging"]')
-        if (additionField) {
-          await page.type('input[name="huisnummer_toevoeging"]', houseAddition)
-        }
-      }
+      // Click the first suggestion
+      await page.evaluate(() => {
+        const list = document.querySelector('#ggcSuggestionList');
+        if (!list) return;
+        const item = list.querySelector('.list-group-item, [role="option"]');
+        if (item) (item as HTMLElement).click();
+      })
 
-      // Submit the form
-      await Promise.all([
-        page.waitForNavigation({ waitUntil: 'networkidle2' }),
-        page.click('button[type="submit"], input[type="submit"]')
-      ])
-
-      // Wait for results to load
-      await page.waitForSelector('.woz-result, .result-container, .woz-waarde', { timeout: 15000 })
+      // Wait for the results sidebar to appear (sidebar-block--open)
+      await page.waitForSelector('.sidebar-block.sidebar-block--open', { timeout: 20000 })
 
       // Extract WOZ data from the results page
       const wozData = await page.evaluate(() => {
-        // Try multiple selectors as the website structure might vary
-        const selectors = [
-          '.woz-waarde .bedrag',
-          '.woz-result .waarde',
-          '.result-value',
-          '[data-testid="woz-value"]',
-          '.woz-bedrag',
-          '.waarde-bedrag'
-        ]
+        // Try new table-based selector first
+        const waardeCell = document.querySelector('.woz-table .waarden-row:first-child .wozwaarde-waarde')
+        const datumCell = document.querySelector('.woz-table .waarden-row:first-child .wozwaarde-datum')
+        let wozValueText = waardeCell ? waardeCell.textContent || '' : ''
+        let year = datumCell ? datumCell.textContent || '' : ''
 
-        let wozValueText = ''
-        for (const selector of selectors) {
-          const element = document.querySelector(selector)
-          if (element) {
-            wozValueText = element.textContent || ''
-            break
+        // Fallback to old selectors if not found
+        if (!wozValueText) {
+          const selectors = [
+            '.woz-waarde .bedrag',
+            '.woz-waarde',
+            '.woz-result .waarde',
+            '.woz-result',
+            '.result-value',
+            '.waarde-bedrag',
+            '.bedrag',
+            '.waarde',
+            '[data-testid="woz-value"]',
+            '.woz-bedrag'
+          ]
+
+          for (const selector of selectors) {
+            const element = document.querySelector(selector)
+            if (element) {
+              wozValueText = element.textContent || ''
+              break
+            }
           }
         }
 
@@ -139,7 +192,7 @@ export class WOZScraper {
           const allElements = document.querySelectorAll('*')
           for (const element of allElements) {
             const text = element.textContent || ''
-            if (text.includes('€') && /\d{3,}/.test(text) && text.length < 50) {
+            if (text.includes('€') && /\d{3,}/.test(text) && text.length < 100 && !text.includes('per')) {
               wozValueText = text
               break
             }
@@ -147,17 +200,17 @@ export class WOZScraper {
         }
 
         // Extract additional information
-        const addressElement = document.querySelector('.adres, .address, .woz-adres')
-        const yearElement = document.querySelector('.peiljaar, .reference-year, .jaar')
-        const typeElement = document.querySelector('.objecttype, .object-type, .type')
-        const surfaceElement = document.querySelector('.oppervlakte, .surface-area, .m2')
+        const addressElement = document.querySelector('.adres, .address, .woz-adres, .property-address')
+        const typeElement = document.querySelector('.objecttype, .object-type, .type, .property-type')
+        const surfaceElement = document.querySelector('.oppervlakte, .surface-area, .m2, .area')
 
         return {
           wozValueText: wozValueText.trim(),
           address: addressElement?.textContent?.trim() || '',
-          year: yearElement?.textContent?.trim() || '',
+          year: year.trim(),
           objectType: typeElement?.textContent?.trim() || '',
-          surfaceArea: surfaceElement?.textContent?.trim() || ''
+          surfaceArea: surfaceElement?.textContent?.trim() || '',
+          fullPageText: document.body.textContent || ''
         }
       })
 
@@ -166,7 +219,11 @@ export class WOZScraper {
       // Parse the WOZ value
       const wozValue = this.parseWOZValue(wozData.wozValueText)
       if (!wozValue) {
-        throw new Error('Could not extract WOZ value from page')
+        // Try to extract from full page text as fallback
+        const fallbackValue = this.parseWOZValue(wozData.fullPageText)
+        if (!fallbackValue) {
+          throw new Error(`Could not extract WOZ value from page. Found text: ${wozData.wozValueText}`)
+        }
       }
 
       // Parse reference year
@@ -177,8 +234,8 @@ export class WOZScraper {
 
       const result: WOZData = {
         address,
-        postalCode: cleanPostalCode,
-        wozValue,
+        postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
+        wozValue: wozValue || fallbackValue!,
         referenceYear,
         objectType: wozData.objectType || 'Woning',
         surfaceArea,
@@ -188,11 +245,14 @@ export class WOZScraper {
 
       // Cache the result in database
       await this.cacheWOZData(result)
+      
+      // Cache in Redis for faster access
+      await cacheService.set(cacheKey, result, { ttl: 86400, prefix: 'woz' }) // 24 hours
 
       Logger.audit('WOZ value scraped successfully', {
         address,
-        postalCode: cleanPostalCode,
-        wozValue,
+        postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
+        wozValue: result.wozValue,
         referenceYear
       })
 
@@ -217,14 +277,44 @@ export class WOZScraper {
   private parseWOZValue(text: string): number | null {
     if (!text) return null
 
-    // Remove all non-digit characters except decimal separators
+    // Find all potential WOZ values in the text
+    const wozPatterns = [
+      /€\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/g,
+      /(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)\s*euro/gi,
+      /(\d{1,3}(?:[.,]\d{3})*)\s*(?:euro|€)/gi,
+      /woz[^€\d]*€?\s*(\d{1,3}(?:[.,]\d{3})*)/gi,
+      /waarde[^€\d]*€?\s*(\d{1,3}(?:[.,]\d{3})*)/gi
+    ]
+    
+    const potentialValues: number[] = []
+    
+    for (const pattern of wozPatterns) {
+      let match
+      while ((match = pattern.exec(text)) !== null) {
+        const value = this.normalizeNumber(match[1])
+        if (value && value >= 50000 && value <= 5000000) { // Reasonable WOZ value range
+          potentialValues.push(value)
+        }
+      }
+    }
+    
+    // Return the most likely WOZ value (highest value in reasonable range)
+    if (potentialValues.length > 0) {
+      return Math.max(...potentialValues)
+    }
+    
+    // Fallback to original parsing
     const cleanText = text.replace(/[^\d.,]/g, '')
     
     // Handle different number formats
     const numberMatch = cleanText.match(/(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/)
     if (!numberMatch) return null
 
-    let numberStr = numberMatch[1]
+    return this.normalizeNumber(numberMatch[1])
+  }
+  
+  private normalizeNumber(numberStr: string): number | null {
+    if (!numberStr) return null
     
     // Convert European number format to standard format
     if (numberStr.includes(',') && numberStr.includes('.')) {
@@ -264,40 +354,43 @@ export class WOZScraper {
 
   private parseYear(text: string): number | null {
     if (!text) return null
-    const yearMatch = text.match(/20\d{2}/)
+    const yearMatch = text.match(/(20\d{2})/)
     return yearMatch ? parseInt(yearMatch[0]) : null
   }
 
   private parseSurfaceArea(text: string): number | null {
     if (!text) return null
-    const areaMatch = text.match(/(\d+(?:[.,]\d+)?)\s*m/)
+    const areaMatch = text.match(/(\d+(?:[.,]\d+)?)\s*m[²2]?/)
     if (!areaMatch) return null
     return parseFloat(areaMatch[1].replace(',', '.'))
   }
 
   private async getCachedWOZData(address: string, postalCode: string): Promise<WOZData | null> {
     try {
-      const { data, error } = await supabase
-        .from('woz_cache')
-        .select('*')
-        .eq('address', address)
-        .eq('postal_code', postalCode.replace(/\s/g, '').toUpperCase())
-        .gte('scraped_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // 30 days cache
-        .order('scraped_at', { ascending: false })
-        .limit(1)
-        .single()
+      const data = await prisma.wozCache.findFirst({
+        where: {
+          address,
+          postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
+          scrapedAt: {
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days cache for faster updates
+          }
+        },
+        orderBy: {
+          scrapedAt: 'desc'
+        }
+      })
 
-      if (error || !data) return null
+      if (!data) return null
 
       return {
         address: data.address,
-        postalCode: data.postal_code,
-        wozValue: data.woz_value,
-        referenceYear: data.reference_year,
-        objectType: data.object_type,
-        surfaceArea: data.surface_area,
-        scrapedAt: data.scraped_at,
-        sourceUrl: data.source_url
+        postalCode: data.postalCode,
+        wozValue: data.wozValue,
+        referenceYear: data.referenceYear,
+        objectType: data.objectType,
+        surfaceArea: data.surfaceArea ? Number(data.surfaceArea) : undefined,
+        scrapedAt: data.scrapedAt.toISOString(),
+        sourceUrl: data.sourceUrl
       }
     } catch (error) {
       Logger.error('Failed to retrieve cached WOZ data', error as Error)
@@ -307,24 +400,34 @@ export class WOZScraper {
 
   private async cacheWOZData(data: WOZData): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('woz_cache')
-        .upsert({
+      await prisma.wozCache.upsert({
+        where: {
+          address_postalCode: {
+            address: data.address,
+            postalCode: data.postalCode
+          }
+        },
+        update: {
+          wozValue: data.wozValue,
+          referenceYear: data.referenceYear,
+          objectType: data.objectType,
+          surfaceArea: data.surfaceArea,
+          scrapedAt: new Date(data.scrapedAt),
+          sourceUrl: data.sourceUrl,
+          updatedAt: new Date()
+        },
+        create: {
           address: data.address,
-          postal_code: data.postalCode,
-          woz_value: data.wozValue,
-          reference_year: data.referenceYear,
-          object_type: data.objectType,
-          surface_area: data.surfaceArea,
-          scraped_at: data.scrapedAt,
-          source_url: data.sourceUrl
-        }, {
-          onConflict: 'address,postal_code'
+          postalCode: data.postalCode,
+          wozValue: data.wozValue,
+          referenceYear: data.referenceYear,
+          objectType: data.objectType,
+          surfaceArea: data.surfaceArea,
+          scrapedAt: new Date(data.scrapedAt),
+          sourceUrl: data.sourceUrl
+        }
         })
 
-      if (error) {
-        Logger.error('Failed to cache WOZ data', error)
-      }
     } catch (error) {
       Logger.error('Failed to cache WOZ data', error as Error)
     }
@@ -333,9 +436,19 @@ export class WOZScraper {
   async cleanup(): Promise<void> {
     await this.closeBrowser()
   }
+  
+  // Health check method
+  async healthCheck(): Promise<boolean> {
+    try {
+      const testResult = await this.getWOZValue('Test 1', '1000AA')
+      return testResult.success || testResult.cached === true
+    } catch (error) {
+      return false
+    }
+  }
 }
 
-export const wozScraper = new WOZScraper()
+export const wozScraper = WOZScraper.getInstance()
 
 // Cleanup on process exit
 process.on('exit', () => {

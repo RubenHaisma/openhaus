@@ -187,9 +187,9 @@ export function PropertySearch({ onResults }: PropertySearchProps) {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Alle types</SelectItem>
-                        <SelectItem value="house">Eengezinswoning</SelectItem>
-                        <SelectItem value="apartment">Appartement</SelectItem>
-                        <SelectItem value="townhouse">Rijtjeshuis</SelectItem>
+                        <SelectItem value="HOUSE">Eengezinswoning</SelectItem>
+                        <SelectItem value="APARTMENT">Appartement</SelectItem>
+                        <SelectItem value="TOWNHOUSE">Rijtjeshuis</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -376,8 +376,8 @@ export function PropertySearch({ onResults }: PropertySearchProps) {
               
               {filters.propertyType && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  {filters.propertyType === 'house' ? 'Eengezinswoning' : 
-                   filters.propertyType === 'apartment' ? 'Appartement' : 'Rijtjeshuis'}
+                  {filters.propertyType === 'HOUSE' ? 'Eengezinswoning' : 
+                   filters.propertyType === 'APARTMENT' ? 'Appartement' : 'Rijtjeshuis'}
                   <button
                     onClick={() => handleFilterChange('propertyType', '')}
                     className="ml-1 hover:text-red-600"

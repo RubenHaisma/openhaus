@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { inventoryManager } from '@/lib/marketplace/inventory'
 import { authService } from '@/lib/security/auth'
 import { Logger } from '@/lib/monitoring/logger'
+import { PropertyType } from '@prisma/client'
 import { z } from 'zod'
 
 const createPropertySchema = z.object({
@@ -9,7 +10,7 @@ const createPropertySchema = z.object({
   postalCode: z.string().min(1, 'Postal code is required'),
   city: z.string().min(1, 'City is required'),
   province: z.string().min(1, 'Province is required'),
-  propertyType: z.enum(['house', 'apartment', 'townhouse']),
+  propertyType: z.enum(['HOUSE', 'APARTMENT', 'TOWNHOUSE']),
   bedrooms: z.number().min(0),
   bathrooms: z.number().min(0),
   squareMeters: z.number().min(1),
@@ -46,17 +47,17 @@ export async function POST(request: NextRequest) {
       postal_code: validatedData.postalCode,
       city: validatedData.city,
       province: validatedData.province,
-      property_type: validatedData.propertyType,
+      property_type: validatedData.propertyType as PropertyType,
       bedrooms: validatedData.bedrooms,
       bathrooms: validatedData.bathrooms,
       square_meters: validatedData.squareMeters,
       construction_year: validatedData.constructionYear,
       asking_price: validatedData.askingPrice,
-      energy_label: validatedData.energyLabel || 'Unknown',
+      energy_label: validatedData.energyLabel || 'C',
       features: validatedData.features,
       images: validatedData.images,
       description: validatedData.description,
-      status: 'available',
+      status: 'AVAILABLE',
       estimated_value: validatedData.askingPrice, // Would be calculated
       confidence_score: 0.8, // Would be calculated
     })
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0')
 
     const properties = await inventoryManager.searchProperties(
-      { status: 'available' },
+      { status: 'AVAILABLE' },
       { limit, offset }
     )
 

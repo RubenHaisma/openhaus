@@ -9,7 +9,7 @@ const updatePropertySchema = z.object({
   postalCode: z.string().optional(),
   city: z.string().optional(),
   province: z.string().optional(),
-  propertyType: z.enum(['house', 'apartment', 'townhouse']).optional(),
+  propertyType: z.enum(['HOUSE', 'APARTMENT', 'TOWNHOUSE']).optional(),
   bedrooms: z.number().min(0).optional(),
   bathrooms: z.number().min(0).optional(),
   squareMeters: z.number().min(1).optional(),
@@ -19,7 +19,7 @@ const updatePropertySchema = z.object({
   features: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
   description: z.string().min(10).optional(),
-  status: z.enum(['available', 'sold', 'pending']).optional(),
+  status: z.enum(['AVAILABLE', 'SOLD', 'PENDING']).optional(),
 })
 
 export async function GET(
@@ -72,16 +72,16 @@ export async function PUT(
     // Update property
     const updateData: any = {}
     if (validatedData.address) updateData.address = validatedData.address
-    if (validatedData.postalCode) updateData.postal_code = validatedData.postalCode
+    if (validatedData.postalCode) updateData.postalCode = validatedData.postalCode
     if (validatedData.city) updateData.city = validatedData.city
     if (validatedData.province) updateData.province = validatedData.province
-    if (validatedData.propertyType) updateData.property_type = validatedData.propertyType
+    if (validatedData.propertyType) updateData.propertyType = validatedData.propertyType
     if (validatedData.bedrooms !== undefined) updateData.bedrooms = validatedData.bedrooms
     if (validatedData.bathrooms !== undefined) updateData.bathrooms = validatedData.bathrooms
-    if (validatedData.squareMeters) updateData.square_meters = validatedData.squareMeters
-    if (validatedData.constructionYear) updateData.construction_year = validatedData.constructionYear
-    if (validatedData.askingPrice) updateData.asking_price = validatedData.askingPrice
-    if (validatedData.energyLabel) updateData.energy_label = validatedData.energyLabel
+    if (validatedData.squareMeters) updateData.squareMeters = validatedData.squareMeters
+    if (validatedData.constructionYear) updateData.constructionYear = validatedData.constructionYear
+    if (validatedData.askingPrice) updateData.askingPrice = validatedData.askingPrice
+    if (validatedData.energyLabel) updateData.energyLabel = validatedData.energyLabel
     if (validatedData.features) updateData.features = validatedData.features
     if (validatedData.images) updateData.images = validatedData.images
     if (validatedData.description) updateData.description = validatedData.description

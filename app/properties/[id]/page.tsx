@@ -72,7 +72,7 @@ const mockProperty = {
   square_meters: 120,
   lot_size: 150,
   construction_year: 1985,
-  property_type: 'Canal House',
+  property_type: 'HOUSE',
   energy_label: 'B',
   woz_value: 820000,
   images: [
@@ -81,7 +81,7 @@ const mockProperty = {
     'https://images.pexels.com/photos/323772/pexels-photo-323772.jpeg',
     'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg'
   ],
-  description: 'Prachtig gerenoveerd grachtenpand in het hart van Amsterdam. Deze karakteristieke woning combineert historische charme met moderne comfort. Gelegen aan een van de mooiste grachten van Amsterdam, biedt deze woning een unieke kans om te wonen in het centrum van de stad.',
+  description: 'Prachtig gerenoveerd grachtenpand in het hart van Amsterdam.',
   features: [
     'Monumentaal pand',
     'Volledig gerenoveerd',

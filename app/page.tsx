@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { AddressInput } from '@/components/ui/address-input'
 import { ValuationResult } from '@/components/valuation/valuation-result'
 import { PropertyCard } from '@/components/property/property-card'
-import { getPropertyData, calculateValuation, PropertyValuation } from '@/lib/kadaster'
+import type { PropertyValuation } from '@/lib/kadaster'
 import { 
   Home, 
   TrendingUp, 
@@ -40,7 +40,7 @@ const featuredProperties = [
     bathrooms: 2,
     square_meters: 120,
     images: ['https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'],
-    status: 'available',
+    status: 'AVAILABLE',
     energy_label: 'B',
     description: 'Karakteristieke grachtenpand in het hart van Amsterdam',
     features: ['Tuin', 'Balkon', 'Garage'],
@@ -54,7 +54,7 @@ const featuredProperties = [
     bathrooms: 1,
     square_meters: 85,
     images: ['https://images.pexels.com/photos/280222/pexels-photo-280222.jpeg'],
-    status: 'available',
+    status: 'AVAILABLE',
     energy_label: 'C',
     description: 'Modern appartement nabij het centrum',
     features: ['Lift', 'Balkon'],
@@ -68,7 +68,7 @@ const featuredProperties = [
     bathrooms: 2,
     square_meters: 140,
     images: ['https://images.pexels.com/photos/323772/pexels-photo-323772.jpeg'],
-    status: 'available',
+    status: 'AVAILABLE',
     energy_label: 'A',
     description: 'Ruime eengezinswoning met tuin',
     features: ['Tuin', 'Garage', 'Zonnepanelen'],
@@ -84,16 +84,20 @@ export default function HomePage() {
   const handleAddressSearch = async (address: string, postalCode: string) => {
     setLoading(true)
     try {
-      const propertyData = await getPropertyData(address, postalCode)
-      if (propertyData) {
-        const valuationResult = await calculateValuation(propertyData)
-        setValuation(valuationResult)
+      const res = await fetch('/api/valuation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address, postalCode }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setValuation(data.valuation)
         setSearchedAddress(address)
         setSearchedPostalCode(postalCode)
+      } else {
+        alert(`Fout bij het ophalen van woninggegevens: ${data.error}`)
       }
-    } catch (error) {
-      console.error('Valuation error:', error)
-      // Show user-friendly error message
+    } catch (error: any) {
       alert(`Fout bij het ophalen van woninggegevens: ${error.message}`)
     } finally {
       setLoading(false)

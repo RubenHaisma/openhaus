@@ -1,13 +1,13 @@
 import Redis from 'ioredis'
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  retryDelayOnFailover: 100,
-  maxRetriesPerRequest: 3,
-  lazyConnect: true,
-})
+const redis = new Redis(
+  process.env.REDIS_URL ||
+    'redis://default:4gY5MhiDZ6V4EWwkHIF09dGfaWoiozBWnOvYPJ6EYZDh3J1tov5PoCMGACsFlms2@188.34.194.202:5472/0',
+  {
+    maxRetriesPerRequest: 3,
+    lazyConnect: true,
+  }
+)
 
 export interface CacheOptions {
   ttl?: number // Time to live in seconds

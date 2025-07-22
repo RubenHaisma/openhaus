@@ -1,13 +1,9 @@
-import { supabase } from '@/lib/supabase'
-import { Database } from '@/types/database'
-
-type Property = Database['public']['Tables']['properties']['Row']
-type PropertyInsert = Database['public']['Tables']['properties']['Insert']
-type PropertyUpdate = Database['public']['Tables']['properties']['Update']
+import { prisma } from '@/lib/prisma'
+import { Property, PropertyType, PropertyStatus } from '@prisma/client'
 
 export interface PropertyFilters {
   city?: string
-  propertyType?: string
+  propertyType?: PropertyType
   minPrice?: number
   maxPrice?: number
   minBedrooms?: number
@@ -17,7 +13,7 @@ export interface PropertyFilters {
   minSquareMeters?: number
   maxSquareMeters?: number
   energyLabel?: string
-  status?: string
+  status?: PropertyStatus
   features?: string[]
 }
 
@@ -32,15 +28,29 @@ export interface PropertySearchParams {
 }
 
 export class InventoryManager {
-  async createProperty(data: PropertyInsert): Promise<Property> {
+  async createProperty(data: any): Promise<Property> {
     try {
-      const { data: property, error } = await supabase
-        .from('properties')
-        .insert(data)
-        .select()
-        .single()
-
-      if (error) throw error
+      const property = await prisma.property.create({
+        data: {
+          address: data.address,
+          postalCode: data.postal_code,
+          city: data.city,
+          province: data.province,
+          propertyType: data.property_type as PropertyType,
+          bedrooms: data.bedrooms,
+          bathrooms: data.bathrooms,
+          squareMeters: data.square_meters,
+          constructionYear: data.construction_year,
+          askingPrice: data.asking_price,
+          energyLabel: data.energy_label,
+          features: data.features,
+          images: data.images,
+          description: data.description,
+          status: data.status as PropertyStatus,
+          estimatedValue: data.estimated_value,
+          confidenceScore: data.confidence_score
+        }
+      })
 
       // Index property for search
       await this.indexPropertyForSearch(property.id)
@@ -52,21 +62,15 @@ export class InventoryManager {
     }
   }
 
-  async updateProperty(propertyId: string, data: PropertyUpdate): Promise<Property> {
+  async updateProperty(propertyId: string, data: any): Promise<Property> {
     try {
-      const updateData = {
-        ...data,
-        updated_at: new Date().toISOString(),
-      }
-
-      const { data: property, error } = await supabase
-        .from('properties')
-        .update(updateData)
-        .eq('id', propertyId)
-        .select()
-        .single()
-
-      if (error) throw error
+      const property = await prisma.property.update({
+        where: { id: propertyId },
+        data: {
+          ...data,
+          updatedAt: new Date()
+        }
+      })
 
       // Re-index property for search
       await this.indexPropertyForSearch(propertyId)
@@ -80,13 +84,10 @@ export class InventoryManager {
 
   async getProperty(propertyId: string): Promise<Property | null> {
     try {
-      const { data: property, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .single()
+      const property = await prisma.property.findUnique({
+        where: { id: propertyId }
+      })
 
-      if (error && error.code !== 'PGRST116') throw error
       return property
     } catch (error) {
       console.error('Property retrieval failed:', error)
@@ -99,85 +100,79 @@ export class InventoryManager {
     searchParams: PropertySearchParams = {}
   ): Promise<{ properties: Property[]; total: number }> {
     try {
-      let query = supabase
-        .from('properties')
-        .select('*', { count: 'exact' })
+      const where: any = {}
 
-      // Apply filters
       if (filters.city) {
-        query = query.ilike('city', `%${filters.city}%`)
+        where.city = { contains: filters.city, mode: 'insensitive' }
       }
-      if (filters.propertyType) {
-        query = query.eq('property_type', filters.propertyType)
-      }
-      if (filters.minPrice) {
-        query = query.gte('asking_price', filters.minPrice)
-      }
+      if (filters.propertyType) where.propertyType = filters.propertyType
+      if (filters.minPrice) where.askingPrice = { gte: filters.minPrice }
       if (filters.maxPrice) {
-        query = query.lte('asking_price', filters.maxPrice)
+        where.askingPrice = { ...where.askingPrice, lte: filters.maxPrice }
       }
-      if (filters.minBedrooms) {
-        query = query.gte('bedrooms', filters.minBedrooms)
-      }
+      if (filters.minBedrooms) where.bedrooms = { gte: filters.minBedrooms }
       if (filters.maxBedrooms) {
-        query = query.lte('bedrooms', filters.maxBedrooms)
+        where.bedrooms = { ...where.bedrooms, lte: filters.maxBedrooms }
       }
-      if (filters.minBathrooms) {
-        query = query.gte('bathrooms', filters.minBathrooms)
-      }
+      if (filters.minBathrooms) where.bathrooms = { gte: filters.minBathrooms }
       if (filters.maxBathrooms) {
-        query = query.lte('bathrooms', filters.maxBathrooms)
+        where.bathrooms = { ...where.bathrooms, lte: filters.maxBathrooms }
       }
-      if (filters.minSquareMeters) {
-        query = query.gte('square_meters', filters.minSquareMeters)
-      }
+      if (filters.minSquareMeters) where.squareMeters = { gte: filters.minSquareMeters }
       if (filters.maxSquareMeters) {
-        query = query.lte('square_meters', filters.maxSquareMeters)
+        where.squareMeters = { ...where.squareMeters, lte: filters.maxSquareMeters }
       }
-      if (filters.energyLabel) {
-        query = query.eq('energy_label', filters.energyLabel)
-      }
-      if (filters.status) {
-        query = query.eq('status', filters.status)
-      }
+      if (filters.energyLabel) where.energyLabel = filters.energyLabel
+      if (filters.status) where.status = filters.status
       if (filters.features && filters.features.length > 0) {
-        query = query.contains('features', filters.features)
+        where.features = { hasEvery: filters.features }
       }
 
       // Apply search parameters
       if (searchParams.query) {
-        query = query.or(`address.ilike.%${searchParams.query}%,description.ilike.%${searchParams.query}%`)
+        where.OR = [
+          { address: { contains: searchParams.query, mode: 'insensitive' } },
+          { description: { contains: searchParams.query, mode: 'insensitive' } }
+        ]
       }
 
       // Apply sorting
       const sortBy = searchParams.sortBy || 'created_at'
       const sortOrder = searchParams.sortOrder || 'desc'
       
+      let orderBy: any = {}
       switch (sortBy) {
         case 'price':
-          query = query.order('asking_price', { ascending: sortOrder === 'asc' })
+          orderBy = { askingPrice: sortOrder }
           break
         case 'size':
-          query = query.order('square_meters', { ascending: sortOrder === 'asc' })
+          orderBy = { squareMeters: sortOrder }
           break
         case 'date':
         default:
-          query = query.order('created_at', { ascending: sortOrder === 'asc' })
+          orderBy = { createdAt: sortOrder }
           break
       }
 
       // Apply pagination
       const limit = searchParams.limit || 20
       const offset = searchParams.offset || 0
-      query = query.range(offset, offset + limit - 1)
 
-      const { data: properties, error, count } = await query
+      
+      const [properties, total] = await Promise.all([
+        prisma.property.findMany({
+          where,
+          orderBy,
+          take: limit,
+          skip: offset
+        }),
+        prisma.property.count({ where })
+      ])
 
-      if (error) throw error
 
       return {
-        properties: properties || [],
-        total: count || 0
+        properties,
+        total
       }
     } catch (error) {
       console.error('Property search failed:', error)
@@ -187,15 +182,13 @@ export class InventoryManager {
 
   async getFeaturedProperties(limit: number = 10): Promise<Property[]> {
     try {
-      const { data: properties, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('status', 'available')
-        .order('created_at', { ascending: false })
-        .limit(limit)
+      const properties = await prisma.property.findMany({
+        where: { status: PropertyStatus.AVAILABLE },
+        orderBy: { createdAt: 'desc' },
+        take: limit
+      })
 
-      if (error) throw error
-      return properties || []
+      return properties
     } catch (error) {
       console.error('Featured properties retrieval failed:', error)
       return []
@@ -207,37 +200,36 @@ export class InventoryManager {
       const property = await this.getProperty(propertyId)
       if (!property) return []
 
-      const { data: properties, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('city', property.city)
-        .eq('property_type', property.property_type)
-        .neq('id', propertyId)
-        .eq('status', 'available')
-        .gte('asking_price', property.asking_price * 0.8)
-        .lte('asking_price', property.asking_price * 1.2)
-        .limit(limit)
+      const properties = await prisma.property.findMany({
+        where: {
+          city: property.city,
+          propertyType: property.propertyType,
+          id: { not: propertyId },
+          status: PropertyStatus.AVAILABLE,
+          askingPrice: {
+            gte: Number(property.askingPrice) * 0.8,
+            lte: Number(property.askingPrice) * 1.2
+          }
+        },
+        take: limit
+      })
 
-      if (error) throw error
-      return properties || []
+      return properties
     } catch (error) {
       console.error('Similar properties retrieval failed:', error)
       return []
     }
   }
 
-  async updatePropertyStatus(propertyId: string, status: string): Promise<Property> {
+  async updatePropertyStatus(propertyId: string, status: PropertyStatus): Promise<Property> {
     return this.updateProperty(propertyId, { status })
   }
 
   async deleteProperty(propertyId: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', propertyId)
-
-      if (error) throw error
+      await prisma.property.delete({
+        where: { id: propertyId }
+      })
 
       // Remove from search index
       await this.removePropertyFromSearch(propertyId)
