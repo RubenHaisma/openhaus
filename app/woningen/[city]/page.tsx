@@ -384,21 +384,21 @@ export default function CityPropertyPage() {
                 Krijg een gratis taxatie en plaats je advertentie zonder makelaarskosten
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/instant-offer">
+                <Link href="/list-property">
                   <Button 
                     size="lg" 
                     className="bg-white text-primary hover:bg-gray-100 px-8 py-3 text-lg font-bold"
                   >
-                    Gratis taxatie
+                    Plaats je woning
                   </Button>
                 </Link>
-                <Link href="/sell">
+                <Link href="/instant-offer">
                   <Button 
                     size="lg" 
                     variant="outline" 
                     className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-3 text-lg font-bold"
                   >
-                    Plaats advertentie
+                    Gratis taxatie
                   </Button>
                 </Link>
               </div>

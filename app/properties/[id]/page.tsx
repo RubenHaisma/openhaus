@@ -557,7 +557,7 @@ export default function PropertyDetailPage() {
                   <Link href={`/properties/${mockProperty.id}/offer`}>
                     <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg">
                       <Euro className="w-5 h-5 mr-2" />
-                      Bod uitbrengen
+                      Contact opnemen
                     </Button>
                   </Link>
 

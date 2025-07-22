@@ -91,12 +91,12 @@ export default function MarketplacePage() {
           <Card key={index}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                Plaats je woning op ons platform en kom direct in contact met kopers. 
+                Geen makelaarskosten, geen tussenpersonen.
                   <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
                   <p className={`text-sm ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
                     {stat.change} vs vorige maand
-                  </p>
+                  Plaats je woning
                 </div>
                 <div className={`p-3 rounded-full bg-gray-100 ${stat.color}`}>
                   <stat.icon className="w-6 h-6" />

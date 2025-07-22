@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navigation = [
-  { name: 'Verkopen', href: '/sell' },
+  { name: 'Verkopen', href: '/list-property' },
   { name: 'Kopen', href: '/buy' },
   { name: 'Financiering', href: '/finance' },
   { name: 'Over ons', href: '/about' },
@@ -101,7 +101,7 @@ export function Header() {
                 </SignInButton>
                 <SignUpButton mode="modal">
                   <Button className="opendoor-button-primary shadow-lg hover:shadow-xl transition-all duration-200">
-                    Gratis taxatie
+                    Plaats woning
                   </Button>
                 </SignUpButton>
               </div>
@@ -178,7 +178,7 @@ export function Header() {
                         </SignInButton>
                         <SignUpButton mode="modal">
                           <Button className="opendoor-button-primary w-full">
-                            Gratis taxatie
+                            Plaats woning
                           </Button>
                         </SignUpButton>
                       </div>

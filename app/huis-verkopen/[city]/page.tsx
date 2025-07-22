@@ -217,16 +217,16 @@ export default function CitySellingPage() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/instant-offer">
+                <Link href="/list-property">
                   <Button size="lg" className="bg-green-600 hover:bg-green-700 px-8 py-3">
                     <Calculator className="w-5 h-5 mr-2" />
-                    Gratis taxatie {city.name}
+                    Plaats je woning
                   </Button>
                 </Link>
-                <Link href="/sell">
+                <Link href="/instant-offer">
                   <Button size="lg" variant="outline" className="px-8 py-3">
-                    <Home className="w-5 h-5 mr-2" />
-                    Plaats advertentie
+                    <Calculator className="w-5 h-5 mr-2" />
+                    Gratis taxatie
                   </Button>
                 </Link>
               </div>
@@ -385,11 +385,11 @@ export default function CitySellingPage() {
                 
                 <div className="text-center mt-8">
                   <p className="text-gray-700 mb-6">
-                    Door je huis zelf te verkopen in {city.name} bespaar je gemiddeld <strong>{formatPrice(city.averageSavings)}</strong> aan makelaarskosten.
+                    Door je huis via ons platform te verkopen in {city.name} bespaar je gemiddeld <strong>{formatPrice(city.averageSavings)}</strong> aan makelaarskosten.
                   </p>
-                  <Link href="/instant-offer">
+                  <Link href="/list-property">
                     <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                      Bereken je exacte besparing
+                      Plaats je woning
                     </Button>
                   </Link>
                 </div>
@@ -438,13 +438,13 @@ export default function CitySellingPage() {
                   Start met een gratis taxatie en ontdek wat je huis waard is
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/instant-offer">
+                  <Link href="/list-property">
                     <Button 
                       size="lg" 
                       className="bg-white text-primary hover:bg-gray-100 px-8 py-3 text-lg font-bold"
                     >
                       <Calculator className="w-5 h-5 mr-2" />
-                      Gratis taxatie
+                      Plaats je woning
                     </Button>
                   </Link>
                   <Button 

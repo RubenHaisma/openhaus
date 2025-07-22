@@ -1,56 +1,56 @@
 {
   "navigation": {
-    "sell": "Verkopen",
+    "sell": "Plaats woning",
     "buy": "Kopen", 
     "financing": "Financiering",
     "about": "Over ons",
     "dashboard": "Dashboard",
     "login": "Inloggen",
-    "signup": "Gratis taxatie"
+    "signup": "Plaats woning"
   },
   "homepage": {
     "hero": {
-      "title": "Verkoop je huis direct zonder gedoe",
-      "subtitle": "Ontvang een eerlijk bod binnen 2 minuten. Geen makelaarskosten, geen onzekerheid, geen wachtlijsten. Gewoon een snelle, transparante verkoop.",
-      "placeholder": "Voer je volledige adres in voor een gratis taxatie...",
+      "title": "Koop en verkoop direct van particulier",
+      "subtitle": "Vind je droomhuis of plaats je woning zonder makelaarskosten. Direct contact tussen kopers en verkopers.",
+      "placeholder": "Zoek woningen of voer je adres in voor een gratis taxatie...",
       "features": {
-        "free": "100% gratis taxatie",
-        "noObligations": "Geen verplichtingen",
-        "instant": "Direct resultaat"
+        "free": "Gratis platform",
+        "noObligations": "Direct contact",
+        "instant": "Geen makelaarskosten"
       }
     },
     "stats": {
-      "homesSold": "Huizen verkocht",
+      "homesSold": "Woningen geplaatst",
       "totalValue": "Totale waarde", 
       "rating": "Klantbeoordeling",
-      "avgSale": "Gemiddelde verkoop"
+      "avgSale": "Gemiddelde reactietijd"
     },
     "howItWorks": {
       "title": "Zo werkt het",
-      "subtitle": "Van taxatie tot sleuteloverdracht in 4 eenvoudige stappen",
+      "subtitle": "Van advertentie tot verkoop in 4 eenvoudige stappen",
       "steps": {
         "valuation": {
-          "title": "Gratis taxatie",
-          "description": "Vul je adres in en ontvang direct een nauwkeurige woningwaarde"
+          "title": "Plaats advertentie",
+          "description": "Upload je woning met foto's en beschrijving op ons platform"
         },
         "offer": {
-          "title": "Direct bod",
-          "description": "Accepteer ons eerlijke bod of kies voor traditionele verkoop"
+          "title": "Ontvang interesse",
+          "description": "Geïnteresseerde kopers nemen direct contact met je op"
         },
         "inspection": {
-          "title": "Inspectie & documenten", 
-          "description": "We regelen de inspectie en alle juridische documenten"
+          "title": "Onderhandel direct", 
+          "description": "Onderhandel rechtstreeks met kopers over prijs en voorwaarden"
         },
         "completion": {
-          "title": "Sleuteloverdracht",
-          "description": "Na tekening bij de notaris ontvang je het geld op je rekening"
+          "title": "Notaris & overdracht",
+          "description": "Regel samen met de koper de notaris en eigendomsoverdracht"
         }
       }
     }
   },
   "search": {
     "title": "Zoek je droomhuis",
-    "subtitle": "Ontdek duizenden zorgvuldig geselecteerde woningen",
+    "subtitle": "Ontdek woningen van particulieren zonder makelaarskosten",
     "filters": "Filters",
     "results": "{count} woningen gevonden", 
     "noResults": "Geen woningen gevonden",
@@ -62,7 +62,7 @@
     "sqm": "m²", 
     "energyLabel": "Energielabel",
     "viewProperty": "Bekijk woning",
-    "makeOffer": "Bod uitbrengen",
+    "makeOffer": "Contact opnemen",
     "favorite": "Toevoegen aan favorieten",
     "share": "Deel woning"
   }

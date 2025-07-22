@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ListPropertyWizard } from '@/components/listing/list-property-wizard'
-import { getPropertyData, calculateValuation } from '@/lib/kadaster'
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertCircle } from 'lucide-react'
 
@@ -25,8 +24,8 @@ function ListPropertyPageContent() {
       setError(null)
       
       try {
-        // Get REAL property data using WOZ scraping + EP Online
-        const response = await fetch('/api/valuation', {
+        // Get REAL property data using WOZ scraper directly
+        const response = await fetch('/api/woz/scrape', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ address, postalCode }),
@@ -36,29 +35,24 @@ function ListPropertyPageContent() {
           throw new Error('Failed to get real property data')
         }
         
-        const data = await response.json()
+        const result = await response.json()
+        const data = result.data
         setRealPropertyData({
           address,
           postalCode,
-          estimatedValue: data.valuation.estimatedValue,
-          wozValue: data.valuation.wozValue,
-          confidenceScore: data.valuation.confidenceScore,
-          dataSource: data.valuation.dataSource,
-          realTimeData: data.valuation.realTimeData,
-          marketTrends: data.valuation.marketTrends,
-          factors: data.valuation.factors,
-          propertyType: data.valuation.propertyType,
-          constructionYear: data.valuation.constructionYear,
-          squareMeters: data.valuation.squareMeters,
-          energyLabel: data.valuation.energyLabel,
-          grondOppervlakte: data.valuation.grondOppervlakte,
-          bouwjaar: data.valuation.bouwjaar,
-          gebruiksdoel: data.valuation.gebruiksdoel,
-          oppervlakte: data.valuation.oppervlakte,
-          identificatie: data.valuation.identificatie,
-          adresseerbaarObject: data.valuation.adresseerbaarObject,
-          nummeraanduiding: data.valuation.nummeraanduiding,
-          wozValues: data.valuation.wozValues
+          estimatedValue: data.wozValue || providedValue || 450000,
+          wozValue: data.wozValue,
+          propertyType: data.objectType,
+          squareMeters: data.surfaceArea,
+          oppervlakte: data.oppervlakte,
+          bouwjaar: data.bouwjaar,
+          identificatie: data.identificatie,
+          nummeraanduiding: data.nummeraanduiding,
+          grondOppervlakte: data.grondOppervlakte,
+          gebruiksdoel: data.gebruiksdoel,
+          adresseerbaarObject: data.adresseerbaarObject,
+          wozValues: data.wozValues,
+          dataSource: 'WOZ Direct',
         })
       } catch (error) {
         console.error('Failed to load real property data:', error)

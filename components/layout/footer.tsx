@@ -5,10 +5,10 @@ import { Input } from '@/components/ui/input'
 
 const navigation = {
   diensten: [
-    { name: 'Huis verkopen', href: '/sell' },
+    { name: 'Huis verkopen', href: '/list-property' },
     { name: 'Huis kopen', href: '/buy' },
     { name: 'Hypotheekadvies', href: '/finance' },
-    { name: 'Gratis taxatie', href: '/taxatie' },
+    { name: 'Gratis taxatie', href: '/instant-offer' },
     { name: 'Marktplaats', href: '/marketplace' },
   ],
   bedrijf: [
@@ -48,10 +48,10 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <h3 className="text-3xl font-bold mb-6 text-gray-900">
-              Blijf op de hoogte van de woningmarkt
+              Blijf op de hoogte van nieuwe woningen
             </h3>
             <p className="text-gray-700 mb-8 text-lg">
-              Ontvang wekelijks marktinzichten, tips voor kopers en verkopers, en exclusieve aanbiedingen.
+              Ontvang meldingen van nieuwe woningen die voldoen aan jouw criteria en tips voor particuliere verkoop.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
               <Input
@@ -85,8 +85,8 @@ export function Footer() {
               <span className="text-2xl font-bold text-gray-900">OpenHaus</span>
             </div>
             <p className="text-gray-700 mb-8 max-w-sm text-lg leading-relaxed">
-              Direct je huis verkopen of kopen in Nederland. 
-              Snel, transparant en volledig digitaal – van taxatie tot notaris.
+              Koop en verkoop huizen direct van particulier in Nederland. 
+              Snel, transparant en zonder makelaarskosten.
             </p>
             {/* Contact Info */}
             <div className="space-y-4">

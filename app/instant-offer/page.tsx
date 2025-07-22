@@ -71,7 +71,7 @@ interface OfferResult {
 export default function InstantOfferPage() {
   const [step, setStep] = useState(1)
   const [propertyData, setPropertyData] = useState<Partial<PropertyData>>({})
-  const [offerResult, setOfferResult] = useState<OfferResult | null>(null)
+  const [valuationResult, setValuationResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
   const totalSteps = 4
@@ -105,7 +105,7 @@ export default function InstantOfferPage() {
     }
   }
 
-  const calculateOffer = async () => {
+  const calculateValuation = async () => {
     setLoading(true)
     try {
       // Get REAL property data using our API
@@ -130,7 +130,7 @@ export default function InstantOfferPage() {
         throw new Error('Onvoldoende gegevens voor betrouwbare waardering. Probeer een ander adres.')
       }
 
-      // Store the valuation and get its ID
+      // Store the valuation
       const valuationResponse = await fetch('/api/valuations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -143,68 +143,23 @@ export default function InstantOfferPage() {
       
       const valuationData = await valuationResponse.json()
       const valuationId = valuationData.id
-    
-      const marketValue = valuation.estimatedValue
       
-      // Calculate REAL instant offer based on actual market conditions
-      let offerMultiplier = 0.95 // Base 5% below market
-      
-      // Adjust based on REAL market trends from valuation
-      if (valuation.marketTrends.averagePriceChange > 5) {
-        offerMultiplier = 0.97 // Hot market - higher offer
-      } else if (valuation.marketTrends.averagePriceChange < -2) {
-        offerMultiplier = 0.92 // Cold market - lower offer
-      }
-      
-      // Adjust based on days on market
-      if (valuation.marketTrends.averageDaysOnMarket > 90) {
-        offerMultiplier -= 0.02 // Slow market
-      } else if (valuation.marketTrends.averageDaysOnMarket < 30) {
-        offerMultiplier += 0.01 // Fast market
-      }
-      
-      const instantOffer = Math.round(marketValue * offerMultiplier)
-      
-      const result: OfferResult = {
-        instantOffer,
-        marketValue,
-        confidenceScore: valuation.confidenceScore,
-        offerValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        fees: {
-          inspection: 750, // Real inspection cost
-          legal: 1500, // Estimated notary fees
-          transfer: Math.round(marketValue * 0.02), // 2% transfer tax
-          total: 750 + 1500 + Math.round(marketValue * 0.02),
-          breakdown: []
-        },
-        timeline: {
-          inspection: valuation.marketTrends.averageDaysOnMarket < 30 ? '2-3 werkdagen' : '3-5 werkdagen',
-          contract: '1-2 weken',
-          completion: '4-6 weken'
-        },
-        realTimeData: {
-          valuationSource: valuation.dataSource,
-          lastUpdated: valuation.lastUpdated,
-          confidence: valuation.confidenceScore
-        }
-      }
-      
-      Logger.audit('Real instant offer calculated using WOZ + EP Online', {
+      Logger.audit('Real valuation calculated using WOZ + EP Online', {
         address: propertyData.address,
-        marketValue,
-        instantOffer,
+        estimatedValue: valuation.estimatedValue,
         confidenceScore: valuation.confidenceScore,
         dataSource: valuation.dataSource,
         wozValue: valuation.wozValue,
         valuationId
       })
       
-      setOfferResult(result)
-      // Store valuation ID for potential redirect to sell page
-      sessionStorage.setItem('lastValuationId', valuationId)
+      setValuationResult({
+        ...valuation,
+        valuationId
+      })
       setStep(5)
     } catch (error) {
-      console.error('Offer calculation error:', error)
+      console.error('Valuation calculation error:', error)
       alert(`Fout bij berekening: ${error.message}`)
     } finally {
       setLoading(false)
@@ -456,10 +411,10 @@ export default function InstantOfferPage() {
                 Terug
               </Button>
               <Button
-                onClick={calculateOffer}
+                onClick={calculateValuation}
                 className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-lg"
               >
-                Bereken mijn bod
+                Bereken woningwaarde
                 <Calculator className="ml-2 w-5 h-5" />
               </Button>
             </div>
@@ -478,7 +433,7 @@ export default function InstantOfferPage() {
             </div>
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                We berekenen je bod...
+                We berekenen je woningwaarde...
               </h2>
               <p className="text-xl text-gray-600">
                 We analyseren marktgegevens en vergelijkbare verkopen
@@ -491,146 +446,101 @@ export default function InstantOfferPage() {
         )
 
       case 5:
-        return offerResult && (
+        return valuationResult && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8"
           >
-            {/* Main Offer */}
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+            {/* Main Valuation */}
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
               <CardContent className="p-8 text-center">
                 <div className="mb-6">
-                  <div className="text-sm text-green-700 font-medium mb-2">Ons directe bod voor</div>
+                  <div className="text-sm text-blue-700 font-medium mb-2">Geschatte waarde van</div>
                   <div className="text-lg text-gray-600 mb-4">{propertyData.address}</div>
-                  <div className="text-5xl font-bold text-green-800 mb-4">
-                    {formatPrice(offerResult.instantOffer)}
+                  <div className="text-5xl font-bold text-blue-800 mb-4">
+                    {formatPrice(valuationResult.estimatedValue)}
                   </div>
-                  <div className="flex items-center justify-center space-x-4 text-sm text-green-700">
+                  <div className="flex items-center justify-center space-x-4 text-sm text-blue-700">
                     <div className="flex items-center space-x-1">
                       <CheckCircle className="w-4 h-4" />
-                      <span>Geen financieringsvoorbehoud</span>
+                      <span>Gebaseerd op WOZ + marktdata</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4" />
-                      <span>Geldig tot {new Date(offerResult.offerValidUntil).toLocaleDateString('nl-NL')}</span>
+                      <span>Betrouwbaarheid: {Math.round(valuationResult.confidenceScore * 100)}%</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">0%</div>
-                    <div className="text-sm text-gray-600">Makelaarskosten</div>
+                    <div className="text-2xl font-bold text-gray-900">{formatPrice(valuationResult.wozValue)}</div>
+                    <div className="text-sm text-gray-600">WOZ waarde</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">4-6</div>
-                    <div className="text-sm text-gray-600">Weken tot afronding</div>
+                    <div className="text-2xl font-bold text-gray-900">{(valuationResult.marketMultiplier * 100).toFixed(1)}%</div>
+                    <div className="text-sm text-gray-600">Marktfactor</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{Math.round(offerResult.confidenceScore * 100)}%</div>
+                    <div className="text-2xl font-bold text-gray-900">{Math.round(valuationResult.confidenceScore * 100)}%</div>
                     <div className="text-sm text-gray-600">Betrouwbaarheid</div>
                   </div>
                 </div>
 
-                <div className="mb-6 p-3 bg-green-100 rounded-lg">
-                  <div className="text-xs text-green-700 font-medium mb-1">Gebaseerd op actuele gegevens</div>
-                  <div className="text-xs text-green-800">
-                    {offerResult.realTimeData.valuationSource}
+                <div className="mb-6 p-3 bg-blue-100 rounded-lg">
+                  <div className="text-xs text-blue-700 font-medium mb-1">Gebaseerd op actuele gegevens</div>
+                  <div className="text-xs text-blue-800">
+                    {valuationResult.dataSource}
                     <br />
-                    Bijgewerkt: {new Date(offerResult.realTimeData.lastUpdated).toLocaleString('nl-NL')}
+                    Bijgewerkt: {new Date(valuationResult.lastUpdated).toLocaleString('nl-NL')}
                     <br />
-                    Betrouwbaarheid: {Math.round(offerResult.realTimeData.confidence * 100)}% (2025 marktdata)
+                    Betrouwbaarheid: {Math.round(valuationResult.confidenceScore * 100)}% (2025 marktdata)
                   </div>
                 </div>
 
-                <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-xl font-bold">
-                  Accepteer dit bod
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button 
+                    onClick={() => {
+                      const listUrl = `/list-property?address=${encodeURIComponent(propertyData.address || '')}&postal=${encodeURIComponent(propertyData.postalCode || '')}&value=${valuationResult.estimatedValue}`
+                      window.location.href = listUrl
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-xl font-bold"
+                  >
+                    Plaats je woning
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      if (valuationResult.valuationId) {
+                        window.location.href = `/valuation/${valuationResult.valuationId}`
+                      }
+                    }}
+                    className="px-8 py-4 text-xl font-bold"
+                  >
+                    Bekijk volledige taxatie
+                  </Button>
+                </div>
                 </Button>
                 
-                <div className="mt-4 p-3 bg-green-100 rounded-lg">
-                  <p className="text-green-800 text-sm">
-                    💡 <strong>Tip:</strong> Dit bod is gebaseerd op actuele WOZ-gegevens en marktdata.
+                <div className="mt-4 p-3 bg-blue-100 rounded-lg">
+                  <p className="text-blue-800 text-sm">
+                    💡 <strong>Tip:</strong> Deze taxatie is gebaseerd op actuele WOZ-gegevens en marktdata.
                     <br />
-                    Bron: {offerResult.realTimeData.valuationSource}
+                    Bron: {valuationResult.dataSource}
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Market Comparison */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <span>Marktwaarde vergelijking</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Geschatte marktwaarde</span>
-                      <span className="font-bold text-gray-900">{formatPrice(offerResult.marketValue)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Ons directe bod</span>
-                      <span className="font-bold text-green-600">{formatPrice(offerResult.instantOffer)}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Verschil</span>
-                      <span className="text-gray-500">
-                        {formatPrice(offerResult.marketValue - offerResult.instantOffer)} 
-                        ({Math.round(((offerResult.marketValue - offerResult.instantOffer) / offerResult.marketValue) * 100)}%)
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Euro className="w-5 h-5 text-primary" />
-                    <span>Kosten overzicht</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Inspectie</span>
-                      <span className="font-medium">{formatPrice(offerResult.fees.inspection)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Juridische kosten</span>
-                      <span className="font-medium">{formatPrice(offerResult.fees.legal)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Overdrachtsbelasting (2%)</span>
-                      <span className="font-medium">{formatPrice(offerResult.fees.transfer)}</span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between font-bold">
-                      <span>Totale kosten</span>
-                      <span>{formatPrice(offerResult.fees.total)}</span>
-                    </div>
-                    
-                    <div className="mt-3 p-2 bg-gray-50 rounded">
-                      <div className="text-xs text-gray-600">
-                        * Gebaseerd op actuele tarieven van Belastingdienst en KNB (2024)
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
 
-            {/* Timeline */}
+            {/* Next Steps */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Calendar className="w-5 h-5 text-primary" />
-                  <span>Verwachte tijdlijn</span>
+                  <span>Volgende stappen</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -639,22 +549,22 @@ export default function InstantOfferPage() {
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Home className="w-6 h-6 text-blue-600" />
                     </div>
-                    <div className="font-semibold text-gray-900">Inspectie</div>
-                    <div className="text-gray-600">{offerResult.timeline.inspection}</div>
+                    <div className="font-semibold text-gray-900">Plaats advertentie</div>
+                    <div className="text-gray-600">Upload foto's en beschrijving</div>
                   </div>
                   <div className="text-center">
                     <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Shield className="w-6 h-6 text-yellow-600" />
+                      <Users className="w-6 h-6 text-yellow-600" />
                     </div>
-                    <div className="font-semibold text-gray-900">Contract</div>
-                    <div className="text-gray-600">{offerResult.timeline.contract}</div>
+                    <div className="font-semibold text-gray-900">Ontvang interesse</div>
+                    <div className="text-gray-600">Kopers nemen contact op</div>
                   </div>
                   <div className="text-center">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <CheckCircle className="w-6 h-6 text-green-600" />
                     </div>
-                    <div className="font-semibold text-gray-900">Afronding</div>
-                    <div className="text-gray-600">{offerResult.timeline.completion}</div>
+                    <div className="font-semibold text-gray-900">Verkoop</div>
+                    <div className="text-gray-600">Onderhandel en verkoop</div>
                   </div>
                 </div>
               </CardContent>
@@ -669,7 +579,7 @@ export default function InstantOfferPage() {
                     <h4 className="font-semibold text-blue-900 mb-2">Privacy en gegevensbescherming</h4>
                     <p className="text-blue-800 text-sm">
                       Jouw gegevens worden veilig behandeld conform AVG/GDPR wetgeving. We delen geen persoonlijke 
-                      informatie met derden zonder jouw toestemming. Dit bod is vrijblijvend en je kunt op elk moment 
+                      informatie met derden zonder jouw toestemming. Deze taxatie is vrijblijvend en je kunt op elk moment 
                       je gegevens laten verwijderen. Alle waarderingen zijn gebaseerd op officiële bronnen (WOZ, EP Online).
                     </p>
                   </div>
@@ -696,11 +606,11 @@ export default function InstantOfferPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Ontvang een direct bod
+            Gratis woningtaxatie
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Krijg binnen enkele minuten een eerlijk bod op je woning, 
-            gebaseerd op actuele marktgegevens
+            Ontdek binnen enkele minuten wat je woning waard is, 
+            gebaseerd op actuele WOZ-gegevens en marktdata
           </p>
         </div>
 

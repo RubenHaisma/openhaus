@@ -403,7 +403,7 @@ export class WOZScraper {
 
   private parseSurfaceArea(text: string): number | null {
     if (!text) return null
-    const areaMatch = text.match(/(\d+(?:[.,]\d+)?)\s*m[²2]?/)
+    const areaMatch = text.match(/(\d+(?:[.,]\d+)?)[ ]*m[²2]?/)
     if (!areaMatch) return null
     return parseFloat(areaMatch[1].replace(',', '.'))
   }

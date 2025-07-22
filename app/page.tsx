@@ -69,8 +69,8 @@ export default function HomePage() {
       })
       const data = await res.json()
       if (res.ok) {
-        // Redirect to /sell with all relevant data as query params
-        router.push(`/sell?address=${encodeURIComponent(address)}&postal=${encodeURIComponent(postalCode)}&value=${encodeURIComponent(data.valuation.estimatedValue)}`)
+        // Redirect to /list-property with valuation data
+        router.push(`/list-property?address=${encodeURIComponent(address)}&postal=${encodeURIComponent(postalCode)}&value=${encodeURIComponent(data.valuation.estimatedValue)}`)
       } else {
         alert(`Fout bij het ophalen van woninggegevens: ${data.error}`)
       }
@@ -102,7 +102,7 @@ export default function HomePage() {
                 </div>
                 
                 <h1 className="text-6xl lg:text-8xl font-bold text-gray-900 leading-[0.9] tracking-tight">
-                  Verkoop je huis{' '}
+                  Koop en verkoop{' '}
                   <span className="text-primary relative">
                     direct
                     <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
@@ -110,13 +110,13 @@ export default function HomePage() {
                     </svg>
                   </span>
                   <br />
-                  <span className="text-gray-600">zonder gedoe</span>
+                  <span className="text-gray-600">van particulier</span>
                 </h1>
                 
                 <p className="text-2xl lg:text-3xl text-gray-600 leading-relaxed max-w-2xl font-light">
-                  Ontvang een <strong className="font-semibold text-gray-900">eerlijk bod binnen 2 minuten</strong>. 
-                  Geen makelaarskosten, geen onzekerheid, geen wachtlijsten. 
-                  <br />Gewoon een snelle, transparante verkoop.
+                  Vind je <strong className="font-semibold text-gray-900">droomhuis of verkoop direct</strong> aan andere particulieren. 
+                  Geen makelaarskosten, geen tussenpersonen. 
+                  <br />Gewoon eerlijke deals tussen mensen.
                 </p>
               </div>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
               <div className="space-y-6">
                 <AddressInput
                   onSearch={handleAddressSearch}
-                  placeholder="Voer je volledige adres in voor een gratis taxatie..."
+                  placeholder="Zoek woningen of voer je adres in voor een gratis taxatie..."
                   className="opendoor-input shadow-2xl h-16 text-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/20"
                   loading={loading}
                 />
@@ -134,19 +134,19 @@ export default function HomePage() {
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     </div>
-                    <span className="font-medium">100% gratis taxatie</span>
+                    <span className="font-medium">Gratis platform</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     </div>
-                    <span className="font-medium">Geen verplichtingen</span>
+                    <span className="font-medium">Direct contact</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     </div>
-                    <span className="font-medium">Direct resultaat</span>
+                    <span className="font-medium">Geen makelaarskosten</span>
                   </div>
                 </div>
               </div>
@@ -298,29 +298,29 @@ export default function HomePage() {
             {[
               {
                 step: '1',
-                title: 'Gratis taxatie',
-                description: 'Vul je adres in en ontvang direct een nauwkeurige woningwaarde',
+                title: 'Plaats advertentie',
+                description: 'Upload je woning met foto\'s en beschrijving op ons platform',
                 icon: Calculator,
                 color: 'bg-blue-500'
               },
               {
                 step: '2',
-                title: 'Direct bod',
-                description: 'Accepteer ons eerlijke bod of kies voor traditionele verkoop',
+                title: 'Ontvang interesse',
+                description: 'Geïnteresseerde kopers nemen direct contact met je op',
                 icon: DollarSign,
                 color: 'bg-green-500'
               },
               {
                 step: '3',
-                title: 'Inspectie & documenten',
-                description: 'We regelen de inspectie en alle juridische documenten',
+                title: 'Onderhandel direct',
+                description: 'Onderhandel rechtstreeks met kopers over prijs en voorwaarden',
                 icon: FileText,
                 color: 'bg-purple-500'
               },
               {
                 step: '4',
-                title: 'Sleuteloverdracht',
-                description: 'Na tekening bij de notaris ontvang je het geld op je rekening',
+                title: 'Notaris & overdracht',
+                description: 'Regel samen met de koper de notaris en eigendomsoverdracht',
                 icon: Home,
                 color: 'bg-primary'
               }
@@ -381,20 +381,20 @@ export default function HomePage() {
             {[
               {
                 icon: Clock,
-                title: 'Direct bod binnen 2 minuten',
-                description: 'Geen weken wachten op kopers. Ontvang een eerlijk bod gebaseerd op AI-analyse en marktdata van vergelijkbare woningen.',
+                title: 'Sneller dan makelaars',
+                description: 'Direct contact met kopers betekent snellere reacties en kortere doorlooptijden dan via makelaars.',
                 color: 'bg-blue-100 text-blue-600'
               },
               {
                 icon: Shield,
-                title: '100% zekerheid',
-                description: 'Geen financieringsvoorbehoud of afvallers. Ons bod is definitief en we regelen alles van inspectie tot notaris.',
+                title: 'Veilige transacties',
+                description: 'Alle communicatie verloopt via ons platform. Identiteitsverificatie en veilige berichtgeving.',
                 color: 'bg-green-100 text-green-600'
               },
               {
                 icon: TrendingUp,
                 title: 'Geen makelaarskosten',
-                description: 'Bespaar duizenden euro\'s aan makelaarskosten. Ons digitale platform maakt tussenpersonen overbodig.',
+                description: 'Bespaar duizenden euro\'s aan makelaarskosten door direct te handelen met andere particulieren.',
                 color: 'bg-purple-100 text-purple-600'
               }
             ].map((feature, index) => (
@@ -436,7 +436,7 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
               >
-                Uitgelichte woningen
+                Nieuwste woningen
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -445,7 +445,7 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 className="text-xl text-gray-600"
               >
-                Ontdek ons aanbod van zorgvuldig geselecteerde woningen
+                Ontdek woningen van particulieren zonder makelaarskosten
               </motion.p>
             </div>
             <Link href="/buy">
@@ -598,17 +598,17 @@ export default function HomePage() {
             className="space-y-8"
           >
             <h2 className="text-4xl lg:text-5xl font-bold leading-tight">
-              Klaar om je huis te verkopen?
+              Klaar om te beginnen?
             </h2>
             <p className="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">
-              Voeg je adres toe en ontdek binnen 2 minuten wat je huis waard is
+              Plaats je woning of zoek je droomhuis op ons platform
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center max-w-lg mx-auto">
               <Button 
                 size="lg" 
                 className="bg-white text-primary hover:bg-gray-100 px-10 py-4 rounded-lg text-xl font-bold shadow-lg hover:shadow-xl transition-all"
               >
-                Start gratis taxatie
+                Plaats je woning
               </Button>
               <Link href="/buy">
                 <Button 

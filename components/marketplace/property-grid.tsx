@@ -259,7 +259,7 @@ export function PropertyGrid({ properties, loading, onFavorite, favorites = [] }
                   
                   <Link href={`/properties/${property.id}/offer`}>
                     <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                      Bod uitbrengen
+                      Contact opnemen
                     </Button>
                   </Link>
                 </div>

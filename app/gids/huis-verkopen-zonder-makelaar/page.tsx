@@ -234,14 +234,14 @@ export default function SellingGuide() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/instant-offer">
+                <Link href="/list-property">
                   <Button size="lg" className="bg-primary hover:bg-primary/90 px-8 py-3">
-                    Start gratis taxatie
+                    Plaats je woning
                   </Button>
                 </Link>
-                <Link href="/sell">
+                <Link href="/instant-offer">
                   <Button size="lg" variant="outline" className="px-8 py-3">
-                    Plaats advertentie
+                    Gratis taxatie
                   </Button>
                 </Link>
               </div>
@@ -414,13 +414,13 @@ export default function SellingGuide() {
                   Start met een gratis taxatie en ontdek wat je huis waard is
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/instant-offer">
+                  <Link href="/list-property">
                     <Button 
                       size="lg" 
                       className="bg-white text-primary hover:bg-gray-100 px-8 py-3 text-lg font-bold"
                     >
                       <Calculator className="w-5 h-5 mr-2" />
-                      Gratis taxatie
+                      Plaats je woning
                     </Button>
                   </Link>
                   <Button 

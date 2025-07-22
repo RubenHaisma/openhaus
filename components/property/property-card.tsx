@@ -222,7 +222,7 @@ export function PropertyCard({
               
               <Link href={`/properties/${property.id}/offer`}>
                 <Button className="opendoor-button-primary text-sm px-4 py-2">
-                  Bod uitbrengen
+                  Contact opnemen
                 </Button>
               </Link>
             </div>

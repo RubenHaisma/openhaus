@@ -147,17 +147,17 @@ export default function MakeOfferPage() {
               </div>
               
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                Je bod is verzonden!
+                Je bericht is verzonden!
               </h1>
               
               <p className="text-gray-600 mb-6">
-                De eigenaar van {property.address} heeft je bod ontvangen en zal binnenkort reageren.
+                De eigenaar van {property.address} heeft je bericht ontvangen en zal binnenkort reageren.
               </p>
 
               <div className="bg-blue-50 p-4 rounded-lg mb-6">
                 <h3 className="font-medium text-blue-900 mb-2">Wat gebeurt er nu?</h3>
                 <div className="text-sm text-blue-800 space-y-1">
-                  <p>• De eigenaar bekijkt je bod en contactgegevens</p>
+                  <p>• De eigenaar bekijkt je bericht en contactgegevens</p>
                   <p>• Je ontvangt een email zodra er reactie is</p>
                   <p>• Bij interesse neemt de eigenaar direct contact op</p>
                 </div>
@@ -195,7 +195,7 @@ export default function MakeOfferPage() {
           </Link>
           
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Doe een bod
+            Neem contact op
           </h1>
           <p className="text-gray-600">
             {property.address} • Vraagprijs: {formatPrice(property.askingPrice)}
@@ -211,19 +211,19 @@ export default function MakeOfferPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Euro className="w-5 h-5 text-primary" />
-                    <span>Je bod</span>
+                    <span>Je interesse</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="amount">Bod bedrag (€)</Label>
+                    <Label htmlFor="amount">Bod bedrag (€) - optioneel</Label>
                     <Input
                       id="amount"
                       type="number"
                       value={offerData.amount}
                       onChange={(e) => setOfferData(prev => ({ ...prev, amount: e.target.value }))}
                       className="text-xl font-bold"
-                      required
+                      placeholder="Laat leeg om geen specifiek bod te doen"
                     />
                     <p className="text-sm text-gray-600 mt-1">
                       Vraagprijs: {formatPrice(property.askingPrice)}
@@ -236,7 +236,7 @@ export default function MakeOfferPage() {
                       id="message"
                       value={offerData.message}
                       onChange={(e) => setOfferData(prev => ({ ...prev, message: e.target.value }))}
-                      placeholder="Vertel waarom je geïnteresseerd bent in deze woning..."
+                      placeholder="Stel jezelf voor en vertel waarom je geïnteresseerd bent in deze woning..."
                       rows={4}
                     />
                   </div>
@@ -349,10 +349,10 @@ export default function MakeOfferPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={submitting || !offerData.amount || !offerData.buyerName || !offerData.buyerEmail}
+                disabled={submitting || !offerData.buyerName || !offerData.buyerEmail}
                 className="w-full bg-primary hover:bg-primary/90 text-white py-4 text-lg font-bold"
               >
-                {submitting ? 'Bod verzenden...' : 'Verzend bod'}
+                {submitting ? 'Bericht verzenden...' : 'Verstuur bericht'}
               </Button>
             </form>
           </div>
@@ -408,7 +408,7 @@ export default function MakeOfferPage() {
                 <div className="space-y-3 text-sm text-blue-800">
                   <div className="flex items-start space-x-2">
                     <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5" />
-                    <span>Onderzoek vergelijkbare woningen in de buurt</span>
+                    <span>Stel jezelf voor in je bericht</span>
                   </div>
                   <div className="flex items-start space-x-2">
                     <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5" />
@@ -416,11 +416,11 @@ export default function MakeOfferPage() {
                   </div>
                   <div className="flex items-start space-x-2">
                     <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5" />
-                    <span>Wees eerlijk over je situatie</span>
+                    <span>Onderzoek vergelijkbare woningen in de buurt</span>
                   </div>
                   <div className="flex items-start space-x-2">
                     <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5" />
-                    <span>Reageer snel op vragen van de eigenaar</span>
+                    <span>Wees respectvol en professioneel</span>
                   </div>
                 </div>
               </CardContent>
@@ -434,7 +434,7 @@ export default function MakeOfferPage() {
                   <div>
                     <h4 className="font-semibold text-green-900 mb-2">Veilig bieden</h4>
                     <p className="text-green-800 text-sm">
-                      Je contactgegevens worden alleen gedeeld met de eigenaar van deze woning. 
+                      Je contactgegevens worden alleen gedeeld met de eigenaar van deze woning.
                       Alle communicatie verloopt via ons beveiligde platform.
                     </p>
                   </div>

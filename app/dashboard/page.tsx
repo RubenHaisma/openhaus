@@ -298,13 +298,13 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4">
-                    <Link href="/instant-offer">
+                    <Link href="/list-property">
                       <Button className="w-full justify-start h-auto p-4 bg-primary hover:bg-primary/90">
                         <div className="flex items-center space-x-3">
                           <Home className="w-6 h-6" />
                           <div className="text-left">
-                            <div className="font-semibold">Verkoop je huis</div>
-                            <div className="text-sm opacity-90">Ontvang een direct bod</div>
+                            <div className="font-semibold">Plaats je woning</div>
+                            <div className="text-sm opacity-90">Adverteer zonder makelaar</div>
                           </div>
                         </div>
                       </Button>
@@ -342,7 +342,7 @@ export default function DashboardPage() {
           <TabsContent value="properties" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Mijn woningen</h2>
-              <Link href="/instant-offer">
+              <Link href="/list-property">
                 <Button className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Woning toevoegen
@@ -402,11 +402,11 @@ export default function DashboardPage() {
                   <Home className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Geen woningen gevonden</h3>
                   <p className="text-gray-600 mb-6">
-                    Je hebt nog geen woningen toegevoegd. Start met het verkopen van je huis.
+                    Je hebt nog geen woningen geplaatst. Start met het plaatsen van je woning.
                   </p>
-                  <Link href="/instant-offer">
+                  <Link href="/list-property">
                     <Button className="bg-primary hover:bg-primary/90">
-                      Verkoop je huis
+                      Plaats je woning
                     </Button>
                   </Link>
                 </CardContent>
