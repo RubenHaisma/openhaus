@@ -1,74 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authService } from '@/lib/security/auth'
+import { prisma } from '@/lib/prisma'
 import { Logger } from '@/lib/monitoring/logger'
-import { cacheService } from '@/lib/cache/redis'
+import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
 const registerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  role: z.enum(['buyer', 'seller']).optional(),
+  role: z.enum(['BUYER', 'SELLER']).default('BUYER'),
 })
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const clientIP = request.headers.get('x-forwarded-for') || 'unknown'
-    
-    // Rate limiting
-    const rateLimitResult = await cacheService.rateLimitCheck(
-      `register:${clientIP}`, 
-      5, // 5 attempts
-      3600 // per hour
-    )
-    
-    if (!rateLimitResult.allowed) {
-      Logger.security('Registration rate limit exceeded', {
-        ipAddress: clientIP,
-        userAgent: request.headers.get('user-agent'),
-      })
-      
+    const validatedData = registerSchema.parse(body)
+
+    // Check if user already exists
+    const existingUser = await prisma.profile.findUnique({
+      where: { email: validatedData.email }
+    })
+
+    if (existingUser) {
       return NextResponse.json(
-        { error: 'Too many registration attempts. Please try again later.' },
-        { status: 429 }
+        { error: 'User already exists' },
+        { status: 400 }
       )
     }
 
-    // Validate input
-    const validatedData = registerSchema.parse(body)
+    // Hash password
+    const hashedPassword = await bcrypt.hash(validatedData.password, 12)
 
-    // Register user
-    const result = await authService.register(validatedData)
+    // Create user
+    const user = await prisma.profile.create({
+      data: {
+        name: validatedData.name,
+        email: validatedData.email,
+        passwordHash: hashedPassword,
+        role: validatedData.role,
+        verified: false
+      }
+    })
 
     Logger.audit('User registered', {
-      userId: result.user.id,
-      email: result.user.email,
-      role: result.user.role,
-      ipAddress: clientIP,
-      userAgent: request.headers.get('user-agent'),
+      userId: user.id,
+      email: user.email,
+      role: user.role,
     })
 
-    // Set HTTP-only cookie for refresh token
-    const response = NextResponse.json({
-      user: result.user,
-      accessToken: result.tokens.accessToken,
-      expiresIn: result.tokens.expiresIn,
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }
     })
-
-    response.cookies.set('refreshToken', result.tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-    })
-
-    return response
   } catch (error) {
-    Logger.error('Registration failed', error as Error, {
-      ipAddress: request.headers.get('x-forwarded-for'),
-      userAgent: request.headers.get('user-agent'),
-    })
+    Logger.error('Registration failed', error as Error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

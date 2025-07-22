@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Home, Menu, X, Phone } from 'lucide-react'
-import { useUser, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
+import { Home, Menu, X, Phone, User, LogOut } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -17,7 +19,7 @@ const navigation = [
 ]
 
 export function Header() {
-  const { isSignedIn, user } = useUser()
+  const { data: session, status } = useSession()
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -64,7 +66,7 @@ export function Header() {
               </Link>
             ))}
             
-            {isSignedIn && (
+            {session && (
               <Link
                 href="/dashboard"
                 className="nav-link text-gray-700 hover:text-primary font-semibold transition-all duration-200 text-lg group"
@@ -83,27 +85,43 @@ export function Header() {
               <span className="lg:hidden">Bel ons</span>
             </Button>
             
-            {isSignedIn ? (
-              <UserButton 
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: "h-8 w-8",
-                  },
-                }}
-              />
+            {session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user?.image || ''} alt={session.user?.name || ''} />
+                      <AvatarFallback>
+                        {session.user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Uitloggen
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-3">
-                <SignInButton mode="modal">
+                <Link href="/auth/signin">
                   <Button variant="ghost" className="text-gray-700 hover:text-primary text-lg font-semibold transition-all duration-200">
                     Inloggen
                   </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
+                </Link>
+                <Link href="/auth/signup">
                   <Button className="opendoor-button-primary shadow-lg hover:shadow-xl transition-all duration-200">
                     Plaats woning
                   </Button>
-                </SignUpButton>
+                </Link>
               </div>
             )}
           </div>
@@ -142,7 +160,7 @@ export function Header() {
                       </Link>
                     ))}
                     
-                    {isSignedIn && (
+                    {session && (
                       <Link
                         href="/dashboard"
                         onClick={() => setMobileMenuOpen(false)}
@@ -162,25 +180,40 @@ export function Header() {
                       020 123 4567
                     </Button>
                     
-                    {isSignedIn ? (
-                      <div className="flex items-center space-x-3 px-3 py-2">
-                        <UserButton afterSignOutUrl="/" />
-                        <span className="text-sm text-neutral-600">
-                          {user?.firstName} {user?.lastName}
-                        </span>
+                    {session ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-3 px-3 py-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={session.user?.image || ''} alt={session.user?.name || ''} />
+                            <AvatarFallback>
+                              {session.user?.name?.charAt(0).toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm text-neutral-600">
+                            {session.user?.name}
+                          </span>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => signOut()}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Uitloggen
+                        </Button>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <SignInButton mode="modal">
+                        <Link href="/auth/signin">
                           <Button className="opendoor-button-secondary w-full">
                             Inloggen
                           </Button>
-                        </SignInButton>
-                        <SignUpButton mode="modal">
+                        </Link>
+                        <Link href="/auth/signup">
                           <Button className="opendoor-button-primary w-full">
                             Plaats woning
                           </Button>
-                        </SignUpButton>
+                        </Link>
                       </div>
                     )}
                   </div>

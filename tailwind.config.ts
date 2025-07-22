@@ -141,6 +141,13 @@ const config: Config = {
         'scale-in-fade': 'scaleInFade 0.4s ease-out',
         'elegant-float': 'elegantFloat 3s ease-in-out infinite',
         'elegant-pulse': 'elegantPulse 2s infinite',
+        'dashboard-fade-in': 'dashboardFadeIn 0.6s ease-out',
+        'dashboard-slide-in': 'dashboardSlideIn 0.5s ease-out',
+        'dashboard-pulse': 'dashboardPulse 2s infinite',
+        'dashboard-glow': 'dashboardGlow 3s infinite',
+        'skeleton-loading': 'skeletonLoading 1.5s infinite',
+        'notification-slide-in': 'notificationSlideIn 0.3s ease-out',
+        'notification-slide-out': 'notificationSlideOut 0.3s ease-in',
       },
       keyframes: {
         fadeIn: {
@@ -175,6 +182,34 @@ const config: Config = {
           '0%, 100%': { boxShadow: '0 0 0 0 hsl(var(--elegant-red-500) / 0.4)' },
           '50%': { boxShadow: '0 0 0 20px hsl(var(--elegant-red-500) / 0)' },
         },
+        dashboardFadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(20px) scale(0.95)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        dashboardSlideIn: {
+          '0%': { opacity: '0', transform: 'translateX(-30px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        dashboardPulse: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.05)', opacity: '0.8' },
+        },
+        dashboardGlow: {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' },
+          '50%': { boxShadow: '0 0 30px rgba(59, 130, 246, 0.5)' },
+        },
+        skeletonLoading: {
+          '0%': { backgroundPosition: '-200px 0' },
+          '100%': { backgroundPosition: 'calc(200px + 100%) 0' },
+        },
+        notificationSlideIn: {
+          '0%': { opacity: '0', transform: 'translateX(100%)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        notificationSlideOut: {
+          '0%': { opacity: '1', transform: 'translateX(0)' },
+          '100%': { opacity: '0', transform: 'translateX(100%)' },
+        },
       },
       spacing: {
         '18': '4.5rem',
@@ -186,6 +221,17 @@ const config: Config = {
         'elegant': '0 10px 25px -5px hsl(var(--elegant-red-500) / 0.15)',
         'elegant-lg': '0 25px 50px -12px hsl(var(--elegant-red-500) / 0.25)',
         'elegant-xl': '0 30px 60px -12px hsl(var(--elegant-red-500) / 0.3)',
+        'dashboard': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'dashboard-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'dashboard-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        'dashboard-glow': '0 0 20px rgba(59, 130, 246, 0.3)',
+      },
+      backdropBlur: {
+        'dashboard': '12px',
+      },
+      transitionTimingFunction: {
+        'dashboard': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'dashboard-bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
     },
   },

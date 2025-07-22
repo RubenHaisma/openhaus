@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { CheckCircle, ArrowRight, ArrowLeft, Home, Camera, FileText, Users, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -43,8 +45,10 @@ interface WizardStep {
 
 export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps) {
   const router = useRouter()
+  const { data: session } = useSession()
   const [currentStep, setCurrentStep] = useState(0)
   const [propertyListed, setPropertyListed] = useState(false)
+  const [propertyId, setPropertyId] = useState<string | null>(null)
 
   // Property listing data
   const [listingData, setListingData] = useState({
@@ -53,7 +57,7 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
     bathrooms: '',
     description: '',
     features: [] as string[],
-    images: [] as string[],
+    images: [] as any[],
     contactPreference: 'email',
     availableFrom: '',
     viewingInstructions: ''
@@ -123,6 +127,11 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
 
   const handlePublish = async () => {
     try {
+      if (!session?.user) {
+        router.push('/auth/signin')
+        return
+      }
+
       // Create property listing
       const propertyData = {
         address: initialProperty?.address,
@@ -137,16 +146,20 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
         askingPrice: parseInt(listingData.askingPrice),
         energyLabel: initialProperty?.energyLabel || 'C',
         features: listingData.features,
-        images: listingData.images,
+        images: listingData.images.map(img => img.url),
         description: listingData.description,
         status: 'AVAILABLE',
         estimatedValue: initialProperty?.estimatedValue || parseInt(listingData.askingPrice),
-        confidenceScore: initialProperty?.confidenceScore || 0.8
+        confidenceScore: initialProperty?.confidenceScore || 0.8,
+        userId: session.user.id
       }
 
       const response = await fetch('/api/properties', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.accessToken}`
+        },
         body: JSON.stringify(propertyData)
       })
 
@@ -356,42 +369,12 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
               </p>
             </div>
 
-            <Card className="p-6">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Upload foto's van je woning
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Sleep foto's hierheen of klik om te selecteren
-                </p>
-                <Button variant="outline">
-                  Selecteer foto's
-                </Button>
-              </div>
-              
-              <div className="mt-6">
-                <h4 className="font-medium mb-3">Tips voor goede foto's:</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span>Gebruik natuurlijk licht</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span>Ruim persoonlijke spullen op</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span>Fotografeer alle kamers</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span>Maak ook buitenfoto's</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <ImageUpload
+              propertyId={propertyId || 'temp-' + Date.now()}
+              onImagesChange={(images) => setListingData(prev => ({ ...prev, images }))}
+              existingImages={listingData.images}
+              maxImages={20}
+            />
           </div>
         )
 
@@ -642,7 +625,8 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
             disabled={
               currentStep === steps.length - 1 || 
               (currentStep === 0 && (!listingData.bedrooms || !listingData.bathrooms)) ||
-              (currentStep === 1 && (!listingData.askingPrice || !listingData.description))
+              (currentStep === 1 && (!listingData.askingPrice || !listingData.description)) ||
+              (currentStep === 2 && listingData.images.length === 0)
             }
             className="bg-blue-600 hover:bg-blue-700 px-6"
           >

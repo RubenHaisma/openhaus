@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { inventoryManager } from '@/lib/marketplace/inventory'
-import { authService } from '@/lib/security/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { Logger } from '@/lib/monitoring/logger'
 import { PropertyType } from '@prisma/client'
 import { z } from 'zod'
@@ -10,7 +11,7 @@ const createPropertySchema = z.object({
   postalCode: z.string().min(1, 'Postal code is required'),
   city: z.string().min(1, 'City is required'),
   province: z.string().min(1, 'Province is required'),
-  propertyType: z.enum(['HOUSE', 'APARTMENT', 'TOWNHOUSE']),
+  propertyType: z.nativeEnum(PropertyType),
   bedrooms: z.number().min(0),
   bathrooms: z.number().min(0),
   squareMeters: z.number().min(1),
@@ -27,15 +28,9 @@ const updatePropertySchema = createPropertySchema.partial()
 export async function POST(request: NextRequest) {
   try {
     // Authenticate user
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const token = authHeader.substring(7)
-    const user = await authService.verifyToken(token)
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -47,23 +42,23 @@ export async function POST(request: NextRequest) {
       postal_code: validatedData.postalCode,
       city: validatedData.city,
       province: validatedData.province,
-      property_type: validatedData.propertyType as PropertyType,
+      property_type: validatedData.propertyType,
       bedrooms: validatedData.bedrooms,
       bathrooms: validatedData.bathrooms,
-      square_meters: validatedData.squareMeters,
+      square_meters: validatedData.squareMeters.toString(),
       construction_year: validatedData.constructionYear,
-      asking_price: validatedData.askingPrice,
+      asking_price: validatedData.askingPrice.toString(),
       energy_label: validatedData.energyLabel || 'C',
       features: validatedData.features,
       images: validatedData.images,
       description: validatedData.description,
       status: 'AVAILABLE',
-      estimated_value: validatedData.askingPrice, // Would be calculated
-      confidence_score: 0.8, // Would be calculated
+      estimated_value: validatedData.askingPrice.toString(), // Would be calculated
+      confidence_score: '0.8', // Would be calculated
     })
 
     Logger.audit('Property created', {
-      userId: user.id,
+      userId: session.user.id,
       propertyId: property.id,
       address: property.address,
       askingPrice: property.asking_price,
@@ -75,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.message },
         { status: 400 }
       )
     }

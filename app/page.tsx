@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, Suspense } from 'react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { AddressInput } from '@/components/ui/address-input'
@@ -43,6 +44,7 @@ async function fetchFeaturedProperties() {
 }
 
 export default function HomePage() {
+  const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const [featuredProperties, setFeaturedProperties] = useState([])
@@ -62,6 +64,13 @@ export default function HomePage() {
   const handleAddressSearch = async (address: string, postalCode: string) => {
     setLoading(true)
     try {
+      if (!session) {
+        // Store the search data and redirect to sign in
+        sessionStorage.setItem('pendingSearch', JSON.stringify({ address, postalCode }))
+        router.push('/auth/signin?callbackUrl=/list-property')
+        return
+      }
+
       const res = await fetch('/api/valuation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

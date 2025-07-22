@@ -1,15 +1,32 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { withAuth } from 'next-auth/middleware'
 
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/sell/wizard(.*)',
-  '/profile(.*)'
-])
-
-export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect()
-})
+export default withAuth(
+  function middleware(req) {
+    // Add any additional middleware logic here
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        // Protect these routes
+        if (req.nextUrl.pathname.startsWith('/dashboard')) {
+          return !!token
+        }
+        if (req.nextUrl.pathname.startsWith('/list-property')) {
+          return !!token
+        }
+        return true
+      },
+    },
+  }
+)
 
 export const config = {
-  matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: [
+    '/dashboard/:path*',
+    '/list-property/:path*',
+    '/profile/:path*',
+    '/((?!.*\\..*|_next).*)',
+    '/',
+    '/(api|trpc)(.*)'
+  ]
 }
