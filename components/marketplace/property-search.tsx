@@ -15,6 +15,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface PropertySearchProps {
   onResults?: (results: any) => void
+  initialQuery?: string
+  initialLocation?: string
 }
 
 interface SearchFilters {

@@ -76,13 +76,14 @@ export function PropertyCard({
   }
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-    >
-      <Card className={cn("property-card", className)}>
+    <Card className={cn("property-card opendoor-card", className)}>
+      <motion.div
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.3 }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="h-full"
+      >
         <div className="property-card-image relative">
           {/* Property Image */}
           {property.images.length > 0 && !imageError ? (
@@ -90,7 +91,7 @@ export function PropertyCard({
               src={property.images[0]}
               alt={property.address}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
               onError={() => setImageError(true)}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
@@ -103,9 +104,9 @@ export function PropertyCard({
           {/* Overlay Actions */}
           <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <Button
-              variant="secondary"
+              variant="ghost"
               size="sm"
-              className="bg-white/90 hover:bg-white backdrop-blur-sm shadow-sm"
+              className="bg-white/95 hover:bg-white backdrop-blur-sm shadow-lg rounded-full w-10 h-10 p-0"
               onClick={handleShare}
             >
               <Share2 className="w-4 h-4" />
@@ -113,13 +114,13 @@ export function PropertyCard({
             
             {onFavorite && (
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 className={cn(
-                  "backdrop-blur-sm shadow-sm transition-colors",
+                  "backdrop-blur-sm shadow-lg transition-colors rounded-full w-10 h-10 p-0",
                   isFavorite
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-white/90 hover:bg-white'
+                    ? 'bg-red-500/95 hover:bg-red-600 text-white'
+                    : 'bg-white/95 hover:bg-white'
                 )}
                 onClick={() => onFavorite(property.id)}
               >
@@ -131,7 +132,7 @@ export function PropertyCard({
           {/* Energy Label */}
           <Badge 
             className={cn(
-              "absolute bottom-3 left-3 text-white font-medium",
+              "absolute bottom-3 left-3 text-white font-bold px-3 py-1",
               getEnergyLabelColor(property.energy_label)
             )}
           >
@@ -141,8 +142,7 @@ export function PropertyCard({
           {/* Status Badge */}
           {property.status !== 'available' && (
             <Badge 
-              variant="destructive"
-              className="absolute top-3 left-3"
+              className="absolute top-3 left-3 bg-red-500 text-white font-bold px-3 py-1"
             >
               {property.status === 'sold' ? 'Verkocht' : 
                property.status === 'pending' ? 'Onder bod' : property.status}
@@ -150,50 +150,50 @@ export function PropertyCard({
           )}
         </div>
 
-        <CardContent className="p-6">
+        <CardContent className="p-6 space-y-4">
           {/* Address and City */}
-          <div className="mb-4">
-            <h3 className="font-semibold text-lg text-neutral-900 mb-1 line-clamp-1">
+          <div>
+            <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-1">
               {property.address}
             </h3>
-            <div className="flex items-center space-x-1 text-neutral-600">
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">{property.city}</span>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <MapPin className="w-5 h-5" />
+              <span className="text-lg">{property.city}</span>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-neutral-600 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-600 leading-relaxed line-clamp-2">
             {property.description}
           </p>
 
           {/* Property Details */}
-          <div className="flex items-center justify-between text-sm text-neutral-600 mb-4">
+          <div className="flex items-center justify-between text-gray-600">
             <div className="flex items-center space-x-1">
-              <Bed className="w-4 h-4" />
-              <span>{property.bedrooms}</span>
+              <Bed className="w-5 h-5" />
+              <span className="font-medium">{property.bedrooms}</span>
             </div>
             <div className="flex items-center space-x-1">
-              <Bath className="w-4 h-4" />
-              <span>{property.bathrooms}</span>
+              <Bath className="w-5 h-5" />
+              <span className="font-medium">{property.bathrooms}</span>
             </div>
             <div className="flex items-center space-x-1">
-              <Square className="w-4 h-4" />
-              <span>{property.square_meters} m²</span>
+              <Square className="w-5 h-5" />
+              <span className="font-medium">{property.square_meters} m²</span>
             </div>
           </div>
 
           {/* Features */}
           {property.features.length > 0 && (
-            <div className="mb-4">
+            <div>
               <div className="flex flex-wrap gap-1">
                 {property.features.slice(0, 3).map((feature, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
+                  <Badge key={index} variant="outline" className="text-sm font-medium">
                     {feature}
                   </Badge>
                 ))}
                 {property.features.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-sm font-medium">
                     +{property.features.length - 3} meer
                   </Badge>
                 )}
@@ -204,31 +204,31 @@ export function PropertyCard({
           {/* Price and Action */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-2xl font-bold text-neutral-900">
+              <div className="text-3xl font-bold text-gray-900">
                 {formatPrice(property.asking_price)}
               </div>
-              <div className="text-sm text-neutral-600">
+              <div className="text-gray-600">
                 {formatPrice(Math.round(property.asking_price / property.square_meters))}/m²
               </div>
             </div>
             
-            <div className="flex space-x-2">
+            <div className="flex flex-col space-y-2">
               <Link href={`/properties/${property.id}`}>
-                <Button variant="outline" size="sm" className="flex items-center space-x-1">
-                  <Eye className="w-4 h-4" />
+                <Button variant="outline" className="opendoor-button-secondary text-sm px-4 py-2">
+                  <Eye className="w-4 h-4 mr-1" />
                   <span>Bekijk</span>
                 </Button>
               </Link>
               
               <Link href={`/properties/${property.id}/offer`}>
-                <Button size="sm" className="bg-primary-500 hover:bg-primary-600 text-white">
+                <Button className="opendoor-button-primary text-sm px-4 py-2">
                   Bod uitbrengen
                 </Button>
               </Link>
             </div>
           </div>
         </CardContent>
-      </Card>
-    </motion.div>
+      </motion.div>
+    </Card>
   )
 }

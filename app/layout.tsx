@@ -1,7 +1,7 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProviders } from '@/components/ClerkProviders'
 import { Providers } from '@/components/providers'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -105,7 +105,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProviders>
       <html lang="nl" className={inter.variable} suppressHydrationWarning>
         <head>
           <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -130,6 +130,6 @@ export default function RootLayout({
           <SpeedInsights />
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviders>
   )
 }

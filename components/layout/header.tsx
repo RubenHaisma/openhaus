@@ -43,21 +43,21 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 group-hover:bg-primary-600 transition-colors">
-              <Home className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary group-hover:bg-primary/90 transition-colors">
+              <Home className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-neutral-900 group-hover:text-primary-600 transition-colors">
+            <span className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors">
               OpenHaus
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-10">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="nav-link text-neutral-700 hover:text-primary-600 font-medium transition-colors relative"
+                className="nav-link text-gray-700 hover:text-primary font-semibold transition-colors relative text-lg"
               >
                 {item.name}
               </Link>
@@ -66,7 +66,7 @@ export function Header() {
             {isSignedIn && (
               <Link
                 href="/dashboard"
-                className="nav-link text-neutral-700 hover:text-primary-600 font-medium transition-colors"
+                className="nav-link text-gray-700 hover:text-primary font-semibold transition-colors text-lg"
               >
                 Dashboard
               </Link>
@@ -74,9 +74,9 @@ export function Header() {
           </nav>
 
           {/* Desktop Auth & CTA */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="text-neutral-600 hover:text-primary-600">
-              <Phone className="mr-2 h-4 w-4" />
+          <div className="hidden md:flex items-center space-x-6">
+            <Button variant="ghost" size="lg" className="text-gray-600 hover:text-primary text-lg">
+              <Phone className="mr-2 h-5 w-5" />
               020 123 4567
             </Button>
             
@@ -92,12 +92,12 @@ export function Header() {
             ) : (
               <div className="flex items-center space-x-3">
                 <SignInButton mode="modal">
-                  <Button variant="ghost" className="text-neutral-700 hover:text-primary-600">
+                  <Button variant="ghost" className="text-gray-700 hover:text-primary text-lg font-semibold">
                     Inloggen
                   </Button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <Button className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-xl font-medium shadow-sm hover:shadow-md transition-all">
+                  <Button className="opendoor-button-primary">
                     Gratis taxatie
                   </Button>
                 </SignUpButton>
@@ -118,10 +118,10 @@ export function Header() {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between pb-6 border-b border-neutral-200">
                   <Link href="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500">
-                      <Home className="h-5 w-5 text-white" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
+                      <Home className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-xl font-bold text-neutral-900">OpenHaus</span>
+                    <span className="text-2xl font-bold text-gray-900">OpenHaus</span>
                   </Link>
                 </div>
 
@@ -133,7 +133,7 @@ export function Header() {
                         key={item.name}
                         href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block px-3 py-3 text-base font-medium text-neutral-700 hover:text-primary-600 hover:bg-neutral-50 rounded-lg transition-colors"
+                        className="block px-4 py-4 text-lg font-semibold text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         {item.name}
                       </Link>
@@ -143,7 +143,7 @@ export function Header() {
                       <Link
                         href="/dashboard"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block px-3 py-3 text-base font-medium text-neutral-700 hover:text-primary-600 hover:bg-neutral-50 rounded-lg transition-colors"
+                        className="block px-4 py-4 text-lg font-semibold text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         Dashboard
                       </Link>
@@ -154,8 +154,8 @@ export function Header() {
                 {/* Mobile Auth */}
                 <div className="border-t border-neutral-200 pt-6">
                   <div className="space-y-3">
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-neutral-600">
-                      <Phone className="mr-2 h-4 w-4" />
+                    <Button variant="ghost" size="lg" className="w-full justify-start text-gray-600 text-lg">
+                      <Phone className="mr-2 h-5 w-5" />
                       020 123 4567
                     </Button>
                     
@@ -169,12 +169,12 @@ export function Header() {
                     ) : (
                       <div className="space-y-2">
                         <SignInButton mode="modal">
-                          <Button variant="outline" className="w-full">
+                          <Button className="opendoor-button-secondary w-full">
                             Inloggen
                           </Button>
                         </SignInButton>
                         <SignUpButton mode="modal">
-                          <Button className="w-full bg-primary-500 hover:bg-primary-600 text-white">
+                          <Button className="opendoor-button-primary w-full">
                             Gratis taxatie
                           </Button>
                         </SignUpButton>

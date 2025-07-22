@@ -45,27 +45,27 @@ export function Footer() {
     <footer className="bg-neutral-900 text-white">
       {/* Newsletter Section */}
       <div className="border-b border-neutral-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16">
           <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-3xl font-bold mb-6">
               Blijf op de hoogte van de woningmarkt
             </h3>
-            <p className="text-neutral-400 mb-6">
+            <p className="text-neutral-400 mb-8 text-lg">
               Ontvang wekelijks marktinzichten, tips voor kopers en verkopers, en exclusieve aanbiedingen.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
               <Input
                 type="email"
                 placeholder="Je e-mailadres"
-                className="flex-1 bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-400 focus:border-primary-500"
+                className="flex-1 bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-400 focus:border-primary h-14 text-lg"
               />
-              <Button className="bg-primary-500 hover:bg-primary-600 text-white px-6">
+              <Button className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold">
                 Aanmelden
               </Button>
             </div>
-            <p className="text-xs text-neutral-500 mt-3">
+            <p className="text-sm text-neutral-500 mt-4">
               Door je aan te melden ga je akkoord met onze{' '}
-              <Link href="/privacy" className="underline hover:text-primary-400">
+              <Link href="/privacy" className="underline hover:text-primary">
                 Privacy Policy
               </Link>
             </p>
@@ -74,47 +74,47 @@ export function Footer() {
       </div>
 
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-2 mb-6">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500">
-                <Home className="h-5 w-5 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
+                <Home className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold">OpenHaus</span>
+              <span className="text-2xl font-bold">OpenHaus</span>
             </div>
-            <p className="text-neutral-400 mb-6 max-w-sm">
+            <p className="text-neutral-400 mb-8 max-w-sm text-lg leading-relaxed">
               Direct je huis verkopen of kopen in Nederland. 
               Snel, transparant en volledig digitaal – van taxatie tot notaris.
             </p>
             
             {/* Contact Info */}
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <span className="text-neutral-300">020 123 4567</span>
+                <Phone className="w-5 h-5 text-primary flex-shrink-0" />
+                <span className="text-neutral-300 text-lg">020 123 4567</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <span className="text-neutral-300">info@openhaus.nl</span>
+                <Mail className="w-5 h-5 text-primary flex-shrink-0" />
+                <span className="text-neutral-300 text-lg">info@openhaus.nl</span>
               </div>
               <div className="flex items-center space-x-3">
-                <MapPin className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <span className="text-neutral-300">Amsterdam, Nederland</span>
+                <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
+                <span className="text-neutral-300 text-lg">Amsterdam, Nederland</span>
               </div>
             </div>
 
             {/* Social Links */}
-            <div className="flex space-x-4 mt-6">
+            <div className="flex space-x-6 mt-8">
               {socialLinks.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-neutral-400 hover:text-primary-400 transition-colors"
+                  className="text-neutral-400 hover:text-primary transition-colors"
                 >
                   <span className="sr-only">{item.name}</span>
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-6 w-6" />
                 </Link>
               ))}
             </div>
@@ -122,15 +122,15 @@ export function Footer() {
 
           {/* Navigation Links */}
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+            <h3 className="text-lg font-bold text-white mb-6">
               Diensten
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {navigation.diensten.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-neutral-400 hover:text-white transition-colors text-sm"
+                    className="text-neutral-400 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -140,15 +140,15 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+            <h3 className="text-lg font-bold text-white mb-6">
               Bedrijf
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {navigation.bedrijf.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-neutral-400 hover:text-white transition-colors text-sm"
+                    className="text-neutral-400 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -158,15 +158,15 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+            <h3 className="text-lg font-bold text-white mb-6">
               Ondersteuning
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {navigation.ondersteuning.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-neutral-400 hover:text-white transition-colors text-sm"
+                    className="text-neutral-400 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -176,15 +176,15 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+            <h3 className="text-lg font-bold text-white mb-6">
               Juridisch
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {navigation.juridisch.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-neutral-400 hover:text-white transition-colors text-sm"
+                    className="text-neutral-400 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -197,13 +197,13 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-neutral-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-neutral-400 text-sm">
+            <p className="text-neutral-400">
               © 2024 OpenHaus. Alle rechten voorbehouden.
             </p>
             
-            <div className="flex items-center space-x-6 text-sm text-neutral-400">
+            <div className="flex items-center space-x-8 text-neutral-400">
               <span>🇳🇱 Nederlands</span>
               <span>AFM vergunning: 12345678</span>
               <span>KvK: 87654321</span>
