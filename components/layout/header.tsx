@@ -57,27 +57,30 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="nav-link text-gray-700 hover:text-primary font-semibold transition-colors relative text-lg"
+                className="nav-link text-gray-700 hover:text-primary font-semibold transition-all duration-200 relative text-lg group"
               >
                 {item.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
               </Link>
             ))}
             
             {isSignedIn && (
               <Link
                 href="/dashboard"
-                className="nav-link text-gray-700 hover:text-primary font-semibold transition-colors text-lg"
+                className="nav-link text-gray-700 hover:text-primary font-semibold transition-all duration-200 text-lg group"
               >
                 Dashboard
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
               </Link>
             )}
           </nav>
 
           {/* Desktop Auth & CTA */}
           <div className="hidden md:flex items-center space-x-6">
-            <Button variant="ghost" size="lg" className="text-gray-600 hover:text-primary text-lg">
+            <Button variant="ghost" size="lg" className="text-gray-600 hover:text-primary text-lg font-medium">
               <Phone className="mr-2 h-5 w-5" />
-              020 123 4567
+              <span className="hidden lg:inline">020 123 4567</span>
+              <span className="lg:hidden">Bel ons</span>
             </Button>
             
             {isSignedIn ? (
@@ -92,12 +95,12 @@ export function Header() {
             ) : (
               <div className="flex items-center space-x-3">
                 <SignInButton mode="modal">
-                  <Button variant="ghost" className="text-gray-700 hover:text-primary text-lg font-semibold">
+                  <Button variant="ghost" className="text-gray-700 hover:text-primary text-lg font-semibold transition-all duration-200">
                     Inloggen
                   </Button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <Button className="opendoor-button-primary">
+                  <Button className="opendoor-button-primary shadow-lg hover:shadow-xl transition-all duration-200">
                     Gratis taxatie
                   </Button>
                 </SignUpButton>

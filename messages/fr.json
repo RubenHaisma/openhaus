@@ -1,0 +1,69 @@
+{
+  "navigation": {
+    "sell": "Vendre",
+    "buy": "Acheter",
+    "financing": "Financement",
+    "about": "À propos", 
+    "dashboard": "Tableau de bord",
+    "login": "Se connecter",
+    "signup": "Évaluation gratuite"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Vendez votre maison directement sans tracas",
+      "subtitle": "Recevez une offre équitable en 2 minutes. Pas de frais d'agent, pas d'incertitude, pas de listes d'attente. Juste une vente rapide et transparente.",
+      "placeholder": "Entrez votre adresse complète pour une évaluation gratuite...",
+      "features": {
+        "free": "Évaluation 100% gratuite",
+        "noObligations": "Aucune obligation",
+        "instant": "Résultats instantanés"
+      }
+    },
+    "stats": {
+      "homesSold": "Maisons vendues",
+      "totalValue": "Valeur totale",
+      "rating": "Note client",
+      "avgSale": "Vente moyenne"
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "subtitle": "De l'évaluation à la remise des clés en 4 étapes simples",
+      "steps": {
+        "valuation": {
+          "title": "Évaluation gratuite",
+          "description": "Entrez votre adresse et recevez instantanément une valeur immobilière précise"
+        },
+        "offer": {
+          "title": "Offre directe",
+          "description": "Acceptez notre offre équitable ou choisissez la vente traditionnelle"
+        },
+        "inspection": {
+          "title": "Inspection et documents",
+          "description": "Nous organisons l'inspection et tous les documents juridiques"
+        },
+        "completion": {
+          "title": "Remise des clés",
+          "description": "Après signature chez le notaire, vous recevez l'argent sur votre compte"
+        }
+      }
+    }
+  },
+  "search": {
+    "title": "Trouvez la maison de vos rêves",
+    "subtitle": "Découvrez des milliers de propriétés soigneusement sélectionnées",
+    "filters": "Filtres",
+    "results": "{count} propriétés trouvées",
+    "noResults": "Aucune propriété trouvée",
+    "loadMore": "Charger plus de propriétés"
+  },
+  "property": {
+    "bedrooms": "chambres",
+    "bathrooms": "salles de bain",
+    "sqm": "m²",
+    "energyLabel": "Label énergétique",
+    "viewProperty": "Voir la propriété",
+    "makeOffer": "Faire une offre",
+    "favorite": "Ajouter aux favoris",
+    "share": "Partager la propriété"
+  }
+}

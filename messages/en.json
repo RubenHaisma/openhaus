@@ -1,0 +1,69 @@
+{
+  "navigation": {
+    "sell": "Sell",
+    "buy": "Buy",
+    "financing": "Financing",
+    "about": "About",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "signup": "Get Free Valuation"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Sell your home directly without hassle",
+      "subtitle": "Get a fair offer within 2 minutes. No realtor fees, no uncertainty, no waiting lists. Just a fast, transparent sale.",
+      "placeholder": "Enter your full address for a free valuation...",
+      "features": {
+        "free": "100% free valuation",
+        "noObligations": "No obligations", 
+        "instant": "Instant results"
+      }
+    },
+    "stats": {
+      "homesSold": "Homes sold",
+      "totalValue": "Total value",
+      "rating": "Customer rating",
+      "avgSale": "Average sale time"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "From valuation to key handover in 4 simple steps",
+      "steps": {
+        "valuation": {
+          "title": "Free valuation",
+          "description": "Enter your address and receive an accurate property value instantly"
+        },
+        "offer": {
+          "title": "Direct offer", 
+          "description": "Accept our fair offer or choose traditional sale"
+        },
+        "inspection": {
+          "title": "Inspection & documents",
+          "description": "We arrange the inspection and all legal documents"
+        },
+        "completion": {
+          "title": "Key handover",
+          "description": "After signing with the notary, you receive the money in your account"
+        }
+      }
+    }
+  },
+  "search": {
+    "title": "Find your dream home",
+    "subtitle": "Discover thousands of carefully selected properties",
+    "filters": "Filters",
+    "results": "{count} properties found",
+    "noResults": "No properties found",
+    "loadMore": "Load more properties"
+  },
+  "property": {
+    "bedrooms": "bedrooms",
+    "bathrooms": "bathrooms", 
+    "sqm": "m²",
+    "energyLabel": "Energy label",
+    "viewProperty": "View property",
+    "makeOffer": "Make offer",
+    "favorite": "Add to favorites",
+    "share": "Share property"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "navigation": {
+    "sell": "Verkaufen",
+    "buy": "Kaufen",
+    "financing": "Finanzierung", 
+    "about": "Über uns",
+    "dashboard": "Dashboard",
+    "login": "Anmelden",
+    "signup": "Kostenlose Bewertung"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Verkaufen Sie Ihr Haus direkt ohne Aufwand",
+      "subtitle": "Erhalten Sie ein faires Angebot innerhalb von 2 Minuten. Keine Maklergebühren, keine Unsicherheit, keine Wartelisten. Einfach ein schneller, transparenter Verkauf.",
+      "placeholder": "Geben Sie Ihre vollständige Adresse für eine kostenlose Bewertung ein...",
+      "features": {
+        "free": "100% kostenlose Bewertung",
+        "noObligations": "Keine Verpflichtungen",
+        "instant": "Sofortige Ergebnisse"
+      }
+    },
+    "stats": {
+      "homesSold": "Verkaufte Häuser",
+      "totalValue": "Gesamtwert",
+      "rating": "Kundenbewertung", 
+      "avgSale": "Durchschnittliche Verkaufszeit"
+    },
+    "howItWorks": {
+      "title": "So funktioniert es",
+      "subtitle": "Von der Bewertung bis zur Schlüsselübergabe in 4 einfachen Schritten",
+      "steps": {
+        "valuation": {
+          "title": "Kostenlose Bewertung",
+          "description": "Geben Sie Ihre Adresse ein und erhalten Sie sofort einen genauen Immobilienwert"
+        },
+        "offer": {
+          "title": "Direktes Angebot",
+          "description": "Akzeptieren Sie unser faires Angebot oder wählen Sie den traditionellen Verkauf"
+        },
+        "inspection": {
+          "title": "Inspektion & Dokumente",
+          "description": "Wir organisieren die Inspektion und alle rechtlichen Dokumente"
+        },
+        "completion": {
+          "title": "Schlüsselübergabe", 
+          "description": "Nach der Unterzeichnung beim Notar erhalten Sie das Geld auf Ihr Konto"
+        }
+      }
+    }
+  },
+  "search": {
+    "title": "Finden Sie Ihr Traumhaus",
+    "subtitle": "Entdecken Sie Tausende sorgfältig ausgewählter Immobilien",
+    "filters": "Filter",
+    "results": "{count} Immobilien gefunden",
+    "noResults": "Keine Immobilien gefunden", 
+    "loadMore": "Mehr Immobilien laden"
+  },
+  "property": {
+    "bedrooms": "Schlafzimmer",
+    "bathrooms": "Badezimmer",
+    "sqm": "m²",
+    "energyLabel": "Energielabel", 
+    "viewProperty": "Immobilie ansehen",
+    "makeOffer": "Angebot machen",
+    "favorite": "Zu Favoriten hinzufügen",
+    "share": "Immobilie teilen"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "navigation": {
+    "sell": "Verkopen",
+    "buy": "Kopen", 
+    "financing": "Financiering",
+    "about": "Over ons",
+    "dashboard": "Dashboard",
+    "login": "Inloggen",
+    "signup": "Gratis taxatie"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Verkoop je huis direct zonder gedoe",
+      "subtitle": "Ontvang een eerlijk bod binnen 2 minuten. Geen makelaarskosten, geen onzekerheid, geen wachtlijsten. Gewoon een snelle, transparante verkoop.",
+      "placeholder": "Voer je volledige adres in voor een gratis taxatie...",
+      "features": {
+        "free": "100% gratis taxatie",
+        "noObligations": "Geen verplichtingen",
+        "instant": "Direct resultaat"
+      }
+    },
+    "stats": {
+      "homesSold": "Huizen verkocht",
+      "totalValue": "Totale waarde", 
+      "rating": "Klantbeoordeling",
+      "avgSale": "Gemiddelde verkoop"
+    },
+    "howItWorks": {
+      "title": "Zo werkt het",
+      "subtitle": "Van taxatie tot sleuteloverdracht in 4 eenvoudige stappen",
+      "steps": {
+        "valuation": {
+          "title": "Gratis taxatie",
+          "description": "Vul je adres in en ontvang direct een nauwkeurige woningwaarde"
+        },
+        "offer": {
+          "title": "Direct bod",
+          "description": "Accepteer ons eerlijke bod of kies voor traditionele verkoop"
+        },
+        "inspection": {
+          "title": "Inspectie & documenten", 
+          "description": "We regelen de inspectie en alle juridische documenten"
+        },
+        "completion": {
+          "title": "Sleuteloverdracht",
+          "description": "Na tekening bij de notaris ontvang je het geld op je rekening"
+        }
+      }
+    }
+  },
+  "search": {
+    "title": "Zoek je droomhuis",
+    "subtitle": "Ontdek duizenden zorgvuldig geselecteerde woningen",
+    "filters": "Filters",
+    "results": "{count} woningen gevonden", 
+    "noResults": "Geen woningen gevonden",
+    "loadMore": "Meer woningen laden"
+  },
+  "property": {
+    "bedrooms": "slaapkamers",
+    "bathrooms": "badkamers",
+    "sqm": "m²", 
+    "energyLabel": "Energielabel",
+    "viewProperty": "Bekijk woning",
+    "makeOffer": "Bod uitbrengen",
+    "favorite": "Toevoegen aan favorieten",
+    "share": "Deel woning"
+  }
+}

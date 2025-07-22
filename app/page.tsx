@@ -118,51 +118,68 @@ export default function HomePage() {
   return (
     <div className="bg-white">
       {/* Hero Section - OpenDoor Style */}
-      <section className="opendoor-hero">
+      <section className="opendoor-hero min-h-screen flex items-center">
         <div className="hero-content">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center min-h-[80vh]">
             {/* Left Column - Content */}
             <motion.div 
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
-              className="space-y-8"
+              className="space-y-10"
             >
-              <div className="space-y-6">
-                <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
+              <div className="space-y-8">
+                <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                  Nieuw: Nu ook beschikbaar in Duitsland en Frankrijk
+                </div>
+                
+                <h1 className="text-6xl lg:text-8xl font-bold text-gray-900 leading-[0.9] tracking-tight">
                   Verkoop je huis{' '}
-                  <span className="text-primary">direct</span>
+                  <span className="text-primary relative">
+                    direct
+                    <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
+                      <path d="M2 10C60 2 140 2 198 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                    </svg>
+                  </span>
                   <br />
-                  zonder gedoe
+                  <span className="text-gray-600">zonder gedoe</span>
                 </h1>
                 
-                <p className="text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-2xl">
-                  Ontvang een eerlijk bod binnen 2 minuten. Geen makelaarskosten, 
-                  geen onzekerheid, geen wachtlijsten. Gewoon een snelle, transparante verkoop.
+                <p className="text-2xl lg:text-3xl text-gray-600 leading-relaxed max-w-2xl font-light">
+                  Ontvang een <strong className="font-semibold text-gray-900">eerlijk bod binnen 2 minuten</strong>. 
+                  Geen makelaarskosten, geen onzekerheid, geen wachtlijsten. 
+                  <br />Gewoon een snelle, transparante verkoop.
                 </p>
               </div>
 
               {/* Address Search */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <AddressInput
                   onSearch={handleAddressSearch}
-                  placeholder="Voer je adres in voor een gratis taxatie"
-                  className="opendoor-input shadow-xl"
+                  placeholder="Voer je volledige adres in voor een gratis taxatie..."
+                  className="opendoor-input shadow-2xl h-16 text-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/20"
                   loading={loading}
                 />
                 
-                <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-8 text-base text-gray-600">
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span>100% gratis taxatie</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="font-medium">100% gratis taxatie</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span>Geen verplichtingen</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="font-medium">Geen verplichtingen</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span>Direct resultaat</span>
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="font-medium">Direct resultaat</span>
                   </div>
                 </div>
               </div>
@@ -173,31 +190,66 @@ export default function HomePage() {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
+              className="relative lg:pl-8"
             >
-              <div className="relative">
+              <div className="relative group">
+                {/* Main Image */}
                 <img
                   src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg"
                   alt="Modern house"
-                  className="w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-2xl"
+                  className="w-full h-[400px] lg:h-[600px] object-cover rounded-3xl shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
                 />
+                
+                {/* Decorative Elements */}
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20 blur-xl"></div>
+                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-red-400 to-pink-600 rounded-full opacity-20 blur-xl"></div>
                 
                 {/* Floating Stats Card */}
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.8 }}
-                  className="absolute -bottom-8 -left-8 bg-white p-6 rounded-xl shadow-xl border border-gray-200"
+                  className="absolute -bottom-6 -left-6 bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 backdrop-blur-sm"
                 >
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">2.500+</div>
-                      <div className="text-sm text-gray-600">Huizen verkocht</div>
+                      <div className="text-3xl font-bold text-gray-900">2.847</div>
+                      <div className="text-sm text-gray-600 font-medium">Huizen verkocht</div>
                     </div>
-                    <div className="w-px h-12 bg-gray-200"></div>
+                    <div className="w-px h-16 bg-gray-200"></div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">€450M+</div>
-                      <div className="text-sm text-gray-600">Totale waarde</div>
+                      <div className="text-3xl font-bold text-primary">€650M+</div>
+                      <div className="text-sm text-gray-600 font-medium">Totale waarde</div>
+                    </div>
+                  </div>
+                  
+                  {/* Trust Indicators */}
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>Live data</span>
+                      </div>
+                      <span>•</span>
+                      <span>Laatste update: vandaag</span>
+                    </div>
+                  </div>
+                </motion.div>
+                
+                {/* Additional Floating Element */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.0 }}
+                  className="absolute top-8 -right-4 bg-white p-4 rounded-xl shadow-lg border border-gray-100"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">+12%</div>
+                      <div className="text-xs text-gray-600">Dit jaar</div>
                     </div>
                   </div>
                 </motion.div>
