@@ -93,6 +93,8 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error('Valuation error:', error)
+      // Show user-friendly error message
+      alert(`Fout bij het ophalen van woninggegevens: ${error.message}`)
     } finally {
       setLoading(false)
     }

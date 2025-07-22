@@ -148,6 +148,34 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['valuations']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['valuations']['Insert']>
       }
+      woz_cache: {
+        Row: {
+          id: string
+          address: string
+          postal_code: string
+          woz_value: number
+          reference_year: number
+          object_type: string
+          surface_area: number | null
+          scraped_at: string
+          source_url: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['woz_cache']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['woz_cache']['Insert']>
+      }
+      market_data_cache: {
+        Row: {
+          id: string
+          postal_code_area: string
+          market_multiplier: number
+          updated_at: string
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['market_data_cache']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['market_data_cache']['Insert']>
+      }
       transactions: {
         Row: {
           id: string

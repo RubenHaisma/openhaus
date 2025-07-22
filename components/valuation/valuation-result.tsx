@@ -16,7 +16,7 @@ interface ValuationResultProps {
 }
 
 export function ValuationResult({ address, postalCode, valuation, onSellRequest }: ValuationResultProps) {
-  const { estimatedValue, confidenceScore, comparableSales, factors } = valuation
+  const { estimatedValue, confidenceScore, wozValue, marketMultiplier, factors } = valuation
   
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -83,23 +83,23 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
             </span>
           </div>
           
-          {valuation.realTimeData && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <div className="text-xs text-blue-600 font-medium mb-1">Actuele marktgegevens</div>
-              <div className="text-xs text-blue-800">
-                Bronnen: {valuation.realTimeData.dataSource}
-                <br />
-                Bijgewerkt: {new Date(valuation.realTimeData.lastUpdated).toLocaleString('nl-NL')}
-                <br />
-                API versie: {valuation.realTimeData.apiVersion}
-              </div>
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="text-xs text-blue-600 font-medium mb-1">WOZ-gebaseerde waardering</div>
+            <div className="text-xs text-blue-800">
+              WOZ waarde: {formatPrice(wozValue)}
+              <br />
+              Marktfactor: {(marketMultiplier * 100).toFixed(1)}%
+              <br />
+              Bron: {valuation.dataSource}
+              <br />
+              Bijgewerkt: {new Date(valuation.lastUpdated).toLocaleString('nl-NL')}
             </div>
-          )}
+          </div>
         </CardHeader>
 
         <CardContent className="text-center">
           <p className="text-gray-600 mb-6">
-            Deze schatting is gebaseerd op vergelijkbare verkopen in de buurt, 
+            Deze schatting is gebaseerd op de officiële WOZ waarde, 
             huidige marktcondities en specifieke eigenschappen van je woning.
           </p>
           
@@ -113,6 +113,46 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
               Verkoop je huis via OpenHaus
             </Button>
           )}
+        </CardContent>
+      </Card>
+
+      {/* WOZ vs Market Value Comparison */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <TrendingUp className="w-5 h-5 text-blue-600" />
+            <span>WOZ vs Marktwaarde</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <h4 className="font-medium text-gray-900">Officiële WOZ waarde</h4>
+                <p className="text-sm text-gray-600">Vastgesteld door gemeente</p>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-bold text-gray-900">{formatPrice(wozValue)}</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div>
+                <h4 className="font-medium text-green-900">Geschatte marktwaarde</h4>
+                <p className="text-sm text-green-600">WOZ + marktcorrectie ({(marketMultiplier * 100).toFixed(1)}%)</p>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-bold text-green-800">{formatPrice(estimatedValue)}</div>
+              </div>
+            </div>
+            
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="text-sm text-blue-800">
+                Verschil: {formatPrice(estimatedValue - wozValue)} 
+                ({(((estimatedValue - wozValue) / wozValue) * 100).toFixed(1)}% boven WOZ)
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -131,7 +171,6 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
                 <div>
                   <h4 className="font-medium text-gray-900">{factor.factor}</h4>
                   <p className="text-sm text-gray-600">{factor.description}</p>
-                  <p className="text-xs text-gray-500 mt-1">Bron: {factor.dataSource}</p>
                 </div>
                 <div className={`flex items-center space-x-2 ${factor.impact > 0 ? 'text-green-600' : factor.impact < 0 ? 'text-red-600' : 'text-gray-600'}`}>
                   {factor.impact > 0 ? (
@@ -149,74 +188,23 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
         </CardContent>
       </Card>
 
-      {/* Comparable Sales */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Home className="w-5 h-5 text-blue-600" />
-            <span>Vergelijkbare verkopen</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {comparableSales.map((sale, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">{sale.address}</h4>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                    <div className="flex items-center space-x-1">
-                      <Home className="w-4 h-4" />
-                      <span>{sale.squareMeters} m²</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{sale.distance} km</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{formatDate(sale.soldDate)}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-lg text-gray-900">
-                    {formatPrice(sale.soldPrice)}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {formatPrice(sale.soldPrice / sale.squareMeters)}/m²
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Market Insight */}
-      <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+      {/* Disclaimer */}
+      <Card className="bg-yellow-50 border-yellow-200">
         <CardContent className="p-6">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="p-2 bg-green-100 rounded-full">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-yellow-100 rounded-full">
+              <Zap className="w-5 h-5 text-yellow-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Marktinzicht</h3>
-              <p className="text-sm text-gray-600">Huidige trends in jouw buurt</p>
+              <h4 className="font-semibold text-yellow-900 mb-2">Belangrijke disclaimer</h4>
+              <p className="text-yellow-800 text-sm">
+                Deze waardering is een schatting gebaseerd op de WOZ waarde en marktanalyse. 
+                De werkelijke verkoopprijs kan afwijken afhankelijk van de staat van de woning, 
+                marktomstandigheden en onderhandelingen. Voor een nauwkeurige waardering 
+                adviseren wij een professionele taxatie.
+              </p>
             </div>
           </div>
-          {valuation.marketTrends && (
-            <div className="space-y-2">
-              <p className="text-gray-700">
-                De huizenmarkt in jouw gebied toont een {valuation.marketTrends.averagePriceChange > 0 ? 'stijgende' : 'dalende'} trend van {Math.abs(valuation.marketTrends.averagePriceChange).toFixed(1)}% ten opzichte van vorig jaar.
-              </p>
-              <p className="text-gray-700">
-                Woningen vergelijkbaar met die van jou verkopen gemiddeld binnen {valuation.marketTrends.averageDaysOnMarket} dagen.
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                Gebaseerd op {valuation.marketTrends.totalSales} verkopen in periode {valuation.marketTrends.period}
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </motion.div>
