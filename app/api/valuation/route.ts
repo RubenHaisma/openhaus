@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Property not found' }, { status: 404 })
     }
     const valuation = await calculateValuation(propertyData)
+    console.log('DEBUG Valuation API response:', JSON.stringify(valuation, null, 2))
     return NextResponse.json({ valuation })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })

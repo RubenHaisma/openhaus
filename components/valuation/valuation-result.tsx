@@ -166,6 +166,74 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Show WOZ waardes for all years if available */}
+            {valuation.wozValues && valuation.wozValues.length > 0 && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">WOZ-waardes per jaar</h4>
+                <table className="w-full text-sm text-left">
+                  <thead>
+                    <tr>
+                      <th className="pr-4 py-1 text-gray-600">Peildatum</th>
+                      <th className="py-1 text-gray-600">WOZ-waarde</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {valuation.wozValues.map((row, idx) => (
+                      <tr key={idx}>
+                        <td className="pr-4 py-1">{row.date}</td>
+                        <td className="py-1">{row.value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {/* Show other WOZ details if available */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {valuation.bouwjaar && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-900">Bouwjaar</span>
+                  <span className="text-gray-700">{valuation.bouwjaar}</span>
+                </div>
+              )}
+              {valuation.grondOppervlakte && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-900">Grondoppervlakte</span>
+                  <span className="text-gray-700">{valuation.grondOppervlakte}</span>
+                </div>
+              )}
+              {valuation.oppervlakte && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-900">Oppervlakte</span>
+                  <span className="text-gray-700">{valuation.oppervlakte}</span>
+                </div>
+              )}
+              {valuation.gebruiksdoel && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-900">Gebruiksdoel</span>
+                  <span className="text-gray-700">{valuation.gebruiksdoel}</span>
+                </div>
+              )}
+              {valuation.identificatie && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-900">Identificatie</span>
+                  <span className="text-gray-700">{valuation.identificatie}</span>
+                </div>
+              )}
+              {valuation.adresseerbaarObject && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-900">Adresseerbaar object</span>
+                  <span className="text-gray-700">{valuation.adresseerbaarObject}</span>
+                </div>
+              )}
+              {valuation.nummeraanduiding && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-900">Nummeraanduiding</span>
+                  <span className="text-gray-700">{valuation.nummeraanduiding}</span>
+                </div>
+              )}
+            </div>
+            {/* Existing factors */}
             {factors.map((factor, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>

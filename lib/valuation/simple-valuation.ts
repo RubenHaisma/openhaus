@@ -16,6 +16,15 @@ export interface SimplePropertyData {
     lat: number
     lng: number
   }
+  // New WOZ fields
+  grondOppervlakte?: string
+  bouwjaar?: string
+  gebruiksdoel?: string
+  oppervlakte?: string
+  identificatie?: string
+  adresseerbaarObject?: string
+  nummeraanduiding?: string
+  wozValues?: Array<{ date: string, value: string }>
 }
 
 export interface SimpleValuation {
@@ -68,7 +77,16 @@ export class SimpleValuationEngine {
         wozValue: wozData.wozValue,
         constructionYear: additionalData?.constructionYear,
         energyLabel: additionalData?.energyLabel,
-        coordinates: additionalData?.coordinates
+        coordinates: additionalData?.coordinates,
+        // Pass through new WOZ fields
+        grondOppervlakte: wozData.grondOppervlakte,
+        bouwjaar: wozData.bouwjaar,
+        gebruiksdoel: wozData.gebruiksdoel,
+        oppervlakte: wozData.oppervlakte,
+        identificatie: wozData.identificatie,
+        adresseerbaarObject: wozData.adresseerbaarObject,
+        nummeraanduiding: wozData.nummeraanduiding,
+        wozValues: wozData.wozValues
       }
       
       // Cache property data for 1 hour

@@ -157,7 +157,14 @@ export class WOZScraper {
 
       // Extract WOZ data from the results page
       const wozData = await page.evaluate(() => {
-        // Try new table-based selector first
+        // WOZ values for all years
+        const wozRows = Array.from(document.querySelectorAll('.woz-table .waarden-row')).map(row => {
+          const date = row.querySelector('.wozwaarde-datum')?.textContent?.trim() || ''
+          const value = row.querySelector('.wozwaarde-waarde')?.textContent?.trim() || ''
+          return { date, value }
+        })
+
+        // Main value (most recent)
         const waardeCell = document.querySelector('.woz-table .waarden-row:first-child .wozwaarde-waarde')
         const datumCell = document.querySelector('.woz-table .waarden-row:first-child .wozwaarde-datum')
         let wozValueText = waardeCell ? waardeCell.textContent || '' : ''
@@ -204,13 +211,30 @@ export class WOZScraper {
         const typeElement = document.querySelector('.objecttype, .object-type, .type, .property-type')
         const surfaceElement = document.querySelector('.oppervlakte, .surface-area, .m2, .area')
 
+        // New fields
+        const grondOppervlakte = document.querySelector('#kenmerk-grondoppervlakte')?.textContent?.trim() || ''
+        const bouwjaar = document.querySelector('#kenmerk-bouwjaar')?.textContent?.trim() || ''
+        const gebruiksdoel = document.querySelector('#kenmerk-gebruiksdoel')?.textContent?.trim() || ''
+        const oppervlakte = document.querySelector('#kenmerk-oppervlakte')?.textContent?.trim() || ''
+        const identificatie = document.querySelector('#kenmerk-wozobjectnummer')?.textContent?.trim() || ''
+        const adresseerbaarObject = document.querySelector('#link-adresseerbaarobjectid')?.textContent?.trim() || ''
+        const nummeraanduiding = document.querySelector('#link-nummeraanduidingid')?.textContent?.trim() || ''
+
         return {
           wozValueText: wozValueText.trim(),
           address: addressElement?.textContent?.trim() || '',
           year: year.trim(),
           objectType: typeElement?.textContent?.trim() || '',
           surfaceArea: surfaceElement?.textContent?.trim() || '',
-          fullPageText: document.body.textContent || ''
+          fullPageText: document.body.textContent || '',
+          wozValues: wozRows,
+          grondOppervlakte,
+          bouwjaar,
+          gebruiksdoel,
+          oppervlakte,
+          identificatie,
+          adresseerbaarObject,
+          nummeraanduiding
         }
       })
 

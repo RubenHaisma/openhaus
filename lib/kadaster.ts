@@ -16,6 +16,15 @@ export interface KadasterProperty {
     lat: number
     lng: number
   }
+  // New WOZ fields
+  grondOppervlakte?: string
+  bouwjaar?: string
+  gebruiksdoel?: string
+  oppervlakte?: string
+  identificatie?: string
+  adresseerbaarObject?: string
+  nummeraanduiding?: string
+  wozValues?: Array<{ date: string, value: string }>
 }
 
 export interface PropertyValuation {
@@ -26,6 +35,15 @@ export interface PropertyValuation {
   factors: ValuationFactor[]
   lastUpdated: string
   dataSource: string
+  // New WOZ fields
+  grondOppervlakte?: string
+  bouwjaar?: string
+  gebruiksdoel?: string
+  oppervlakte?: string
+  identificatie?: string
+  adresseerbaarObject?: string
+  nummeraanduiding?: string
+  wozValues?: Array<{ date: string, value: string }>
 }
 
 export interface ValuationFactor {
@@ -61,7 +79,16 @@ export async function getPropertyData(address: string, postalCode: string): Prom
       squareMeters: propertyData.squareMeters || 120,
       energyLabel: propertyData.energyLabel || 'C',
       wozValue: propertyData.wozValue,
-      coordinates: propertyData.coordinates
+      coordinates: propertyData.coordinates,
+      // Pass through new WOZ fields
+      grondOppervlakte: propertyData.grondOppervlakte,
+      bouwjaar: propertyData.bouwjaar,
+      gebruiksdoel: propertyData.gebruiksdoel,
+      oppervlakte: propertyData.oppervlakte,
+      identificatie: propertyData.identificatie,
+      adresseerbaarObject: propertyData.adresseerbaarObject,
+      nummeraanduiding: propertyData.nummeraanduiding,
+      wozValues: propertyData.wozValues
     }
     
     // Cache for 2 hours
@@ -112,7 +139,16 @@ export async function calculateValuation(propertyData: KadasterProperty): Promis
       marketMultiplier: valuation.marketMultiplier,
       factors: valuation.factors,
       lastUpdated: valuation.lastUpdated,
-      dataSource: valuation.dataSource
+      dataSource: valuation.dataSource,
+      // Pass through new WOZ fields
+      grondOppervlakte: propertyData.grondOppervlakte,
+      bouwjaar: propertyData.bouwjaar,
+      gebruiksdoel: propertyData.gebruiksdoel,
+      oppervlakte: propertyData.oppervlakte,
+      identificatie: propertyData.identificatie,
+      adresseerbaarObject: propertyData.adresseerbaarObject,
+      nummeraanduiding: propertyData.nummeraanduiding,
+      wozValues: propertyData.wozValues
     }
     
     // Cache for 30 minutes
