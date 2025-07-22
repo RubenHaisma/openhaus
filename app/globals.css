@@ -272,6 +272,12 @@
   .opendoor-input {
     @apply w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200;
   }
+
+  .elegant-hero {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 25%, #f1f5f9 50%, #ffffff 75%, #f8fafc 100%);
+    position: relative;
+    overflow: hidden;
+  }
 }
 
 @layer utilities {

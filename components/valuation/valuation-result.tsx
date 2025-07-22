@@ -13,9 +13,10 @@ interface ValuationResultProps {
   postalCode: string
   valuation: PropertyValuation
   onSellRequest?: () => void
+  valuationId?: string
 }
 
-export function ValuationResult({ address, postalCode, valuation, onSellRequest }: ValuationResultProps) {
+export function ValuationResult({ address, postalCode, valuation, onSellRequest, valuationId }: ValuationResultProps) {
   const { estimatedValue, confidenceScore, wozValue, marketMultiplier, factors } = valuation
   
   const formatPrice = (price: number) => {
@@ -112,6 +113,18 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
               <Home className="w-5 h-5 mr-2" />
               Verkoop je huis via OpenHaus
             </Button>
+          )}
+          
+          {valuationId && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-blue-800 text-sm">
+                💡 <strong>Tip:</strong> Deel deze link om je taxatie te bewaren: 
+                <br />
+                <code className="text-xs bg-white px-2 py-1 rounded mt-1 inline-block">
+                  {window.location.origin}/valuation/{valuationId}
+                </code>
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

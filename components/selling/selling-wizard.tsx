@@ -10,7 +10,14 @@ import { CheckCircle, Circle, ArrowRight, ArrowLeft, Home, Camera, Calendar, Fil
 interface SellingWizardProps {
   initialProperty?: {
     address: string
+    postalCode?: string
     estimatedValue: number
+    wozValue?: number
+    confidenceScore?: number
+    dataSource?: string
+    realTimeData?: any
+    marketTrends?: any
+    factors?: any[]
   }
 }
 
@@ -174,7 +181,10 @@ export function SellingWizard({ initialProperty }: SellingWizardProps) {
                 Ons directe bod voor je woning
               </h2>
               <p className="text-gray-600">
-                Gebaseerd op huidige marktcondities en woningkenmerken
+                {initialProperty?.dataSource ? 
+                  `Gebaseerd op ${initialProperty.dataSource}` : 
+                  'Gebaseerd op huidige marktcondities en woningkenmerken'
+                }
               </p>
             </div>
 
@@ -220,6 +230,20 @@ export function SellingWizard({ initialProperty }: SellingWizardProps) {
                   </div>
                 )}
               </CardContent>
+              
+              {initialProperty?.realTimeData && (
+                <div className="mt-6 p-3 bg-green-50 rounded-lg">
+                  <div className="text-xs text-green-600 font-medium mb-1">Actuele gegevens gebruikt</div>
+                  <div className="text-xs text-green-800">
+                    Bron: {initialProperty.dataSource}
+                    <br />
+                    Bijgewerkt: {new Date(initialProperty.realTimeData.lastUpdated).toLocaleString('nl-NL')}
+                    {initialProperty.wozValue && (
+                      <><br />WOZ-waarde: €{initialProperty.wozValue.toLocaleString()}</>
+                    )}
+                  </div>
+                </div>
+              )}
             </Card>
 
             <Card className="p-6">

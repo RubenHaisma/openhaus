@@ -632,7 +632,7 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-primary px-10 py-4 rounded-lg text-xl font-bold"
+                  className="border-2 border-white text-red-500 hover:bg-white hover:text-primary px-10 py-4 rounded-lg text-xl font-bold"
                 >
                   Bekijk woningen
                 </Button>

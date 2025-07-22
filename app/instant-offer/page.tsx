@@ -108,27 +108,41 @@ export default function InstantOfferPage() {
   const calculateOffer = async () => {
     setLoading(true)
     try {
-      // Get REAL property data using WOZ scraping + EP Online
-      const realPropertyData = await getPropertyData(propertyData.address!, propertyData.postalCode!)
-
-      if (!realPropertyData) {
-        throw new Error('Kan geen actuele woninggegevens ophalen via WOZ en EP Online')
-      }
-
-      // Calculate REAL valuation using scraped data
-      const valuation = await calculateValuation(realPropertyData)
+      // Get REAL property data using our API
+      const response = await fetch('/api/valuation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          address: propertyData.address, 
+          postalCode: propertyData.postalCode 
+        }),
+      })
       
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to get property valuation')
+      }
+      
+      const data = await response.json()
+      const valuation = data.valuation
+
       if (valuation.confidenceScore < 0.6) {
         throw new Error('Onvoldoende gegevens voor betrouwbare waardering. Probeer een ander adres.')
       }
 
-      // Calculate REAL buying costs using current tax rates
-      const buyingCosts = await dutchTaxCalculator.calculateTotalBuyingCosts(
-        valuation.estimatedValue,
-        valuation.estimatedValue * 0.8, // Assume 80% financing
-        undefined, // No buyer age provided
-        false // Not first home
-      )
+      // Store the valuation and get its ID
+      const valuationResponse = await fetch('/api/valuations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          address: propertyData.address, 
+          postalCode: propertyData.postalCode,
+          valuation
+        }),
+      })
+      
+      const valuationData = await valuationResponse.json()
+      const valuationId = valuationData.id
     
       const marketValue = valuation.estimatedValue
       
@@ -158,10 +172,10 @@ export default function InstantOfferPage() {
         offerValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         fees: {
           inspection: 750, // Real inspection cost
-          legal: buyingCosts.notaryFees,
-          transfer: buyingCosts.transferTax,
-          total: buyingCosts.total + 750,
-          breakdown: buyingCosts.breakdown
+          legal: 1500, // Estimated notary fees
+          transfer: Math.round(marketValue * 0.02), // 2% transfer tax
+          total: 750 + 1500 + Math.round(marketValue * 0.02),
+          breakdown: []
         },
         timeline: {
           inspection: valuation.marketTrends.averageDaysOnMarket < 30 ? '2-3 werkdagen' : '3-5 werkdagen',
@@ -181,11 +195,13 @@ export default function InstantOfferPage() {
         instantOffer,
         confidenceScore: valuation.confidenceScore,
         dataSource: valuation.dataSource,
-        wozValue: realPropertyData.wozValue,
-        energyLabel: realPropertyData.energyLabel
+        wozValue: valuation.wozValue,
+        valuationId
       })
       
       setOfferResult(result)
+      // Store valuation ID for potential redirect to sell page
+      sessionStorage.setItem('lastValuationId', valuationId)
       setStep(5)
     } catch (error) {
       console.error('Offer calculation error:', error)
@@ -531,6 +547,14 @@ export default function InstantOfferPage() {
                 <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-xl font-bold">
                   Accepteer dit bod
                 </Button>
+                
+                <div className="mt-4 p-3 bg-green-100 rounded-lg">
+                  <p className="text-green-800 text-sm">
+                    💡 <strong>Tip:</strong> Dit bod is gebaseerd op actuele WOZ-gegevens en marktdata.
+                    <br />
+                    Bron: {offerResult.realTimeData.valuationSource}
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
