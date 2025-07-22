@@ -46,7 +46,19 @@ function SellingPageContent() {
           dataSource: data.valuation.dataSource,
           realTimeData: data.valuation.realTimeData,
           marketTrends: data.valuation.marketTrends,
-          factors: data.valuation.factors
+          factors: data.valuation.factors,
+          propertyType: data.valuation.propertyType,
+          constructionYear: data.valuation.constructionYear,
+          squareMeters: data.valuation.squareMeters,
+          energyLabel: data.valuation.energyLabel,
+          grondOppervlakte: data.valuation.grondOppervlakte,
+          bouwjaar: data.valuation.bouwjaar,
+          gebruiksdoel: data.valuation.gebruiksdoel,
+          oppervlakte: data.valuation.oppervlakte,
+          identificatie: data.valuation.identificatie,
+          adresseerbaarObject: data.valuation.adresseerbaarObject,
+          nummeraanduiding: data.valuation.nummeraanduiding,
+          wozValues: data.valuation.wozValues
         })
       } catch (error) {
         console.error('Failed to load real property data:', error)

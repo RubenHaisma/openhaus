@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Circle, ArrowRight, ArrowLeft, Home, Camera, Calendar, FileText, CreditCard } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 
 interface SellingWizardProps {
   initialProperty?: {
@@ -18,6 +20,12 @@ interface SellingWizardProps {
     realTimeData?: any
     marketTrends?: any
     factors?: any[]
+    propertyType?: string
+    squareMeters?: number
+    oppervlakte?: number
+    constructionYear?: number
+    bouwjaar?: number
+    energyLabel?: string
   }
 }
 
@@ -32,6 +40,15 @@ interface WizardStep {
 export function SellingWizard({ initialProperty }: SellingWizardProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [offerAccepted, setOfferAccepted] = useState(false)
+
+  // Add local state for user-editable fields
+  const [rooms, setRooms] = useState('')
+  const [maintenance, setMaintenance] = useState('')
+  const [garden, setGarden] = useState('')
+  const [parking, setParking] = useState('')
+
+  // Validation for required fields
+  const detailsValid = true // You can set required fields here if needed
 
   const steps: WizardStep[] = [
     {
@@ -122,21 +139,28 @@ export function SellingWizard({ initialProperty }: SellingWizardProps) {
               <Card className="p-4">
                 <h3 className="font-medium mb-3">Basisinformatie</h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Type:</span>
-                    <span className="font-medium">Eengezinswoning</span>
+                    <span className="font-medium">{initialProperty?.propertyType || '-'}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Kamers:</span>
-                    <span className="font-medium">5 kamers</span>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="Aantal kamers"
+                      value={rooms}
+                      onChange={e => setRooms(e.target.value)}
+                      className="w-24 text-right"
+                    />
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Oppervlakte:</span>
-                    <span className="font-medium">120 m²</span>
+                    <span className="font-medium">{initialProperty?.squareMeters ? `${initialProperty.squareMeters} m²` : (initialProperty?.oppervlakte || '-')}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Bouwjaar:</span>
-                    <span className="font-medium">1985</span>
+                    <span className="font-medium">{initialProperty?.constructionYear || initialProperty?.bouwjaar || '-'}</span>
                   </div>
                 </div>
               </Card>
@@ -144,21 +168,41 @@ export function SellingWizard({ initialProperty }: SellingWizardProps) {
               <Card className="p-4">
                 <h3 className="font-medium mb-3">Staat van de woning</h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Energielabel:</span>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">B</Badge>
+                    <Badge variant="outline" className="bg-green-50 text-green-700">{initialProperty?.energyLabel || '-'}</Badge>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Onderhoud:</span>
-                    <span className="font-medium">Goed</span>
+                    <Select value={maintenance} onValueChange={setMaintenance}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Kies..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Goed">Goed</SelectItem>
+                        <SelectItem value="Redelijk">Redelijk</SelectItem>
+                        <SelectItem value="Matig">Matig</SelectItem>
+                        <SelectItem value="Slecht">Slecht</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Tuin:</span>
-                    <span className="font-medium">Achtertuin 50 m²</span>
+                    <Input
+                      placeholder="Bijv. Achtertuin 50 m²"
+                      value={garden}
+                      onChange={e => setGarden(e.target.value)}
+                      className="w-32 text-right"
+                    />
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-gray-600">Parkeren:</span>
-                    <span className="font-medium">Oprit + garage</span>
+                    <Input
+                      placeholder="Bijv. Oprit + garage"
+                      value={parking}
+                      onChange={e => setParking(e.target.value)}
+                      className="w-32 text-right"
+                    />
                   </div>
                 </div>
               </Card>
@@ -346,7 +390,7 @@ export function SellingWizard({ initialProperty }: SellingWizardProps) {
         
         <Button
           onClick={nextStep}
-          disabled={currentStep === steps.length - 1 || (currentStep === 1 && !offerAccepted)}
+          disabled={currentStep === steps.length - 1 || (currentStep === 1 && !offerAccepted) || (currentStep === 0 && (!rooms || !maintenance))}
           className="bg-blue-600 hover:bg-blue-700 px-6"
         >
           Volgende

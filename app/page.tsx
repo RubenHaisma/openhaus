@@ -31,6 +31,7 @@ import Image from 'next/image'
 
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 // Fetch real featured properties from API
 async function fetchFeaturedProperties() {
@@ -42,10 +43,8 @@ async function fetchFeaturedProperties() {
 }
 
 export default function HomePage() {
-  const [valuation, setValuation] = useState<PropertyValuation | null>(null)
-  const [searchedAddress, setSearchedAddress] = useState<string>('')
-  const [searchedPostalCode, setSearchedPostalCode] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
   const [featuredProperties, setFeaturedProperties] = useState([])
 
   const { data: featuredData } = useQuery({
@@ -70,9 +69,8 @@ export default function HomePage() {
       })
       const data = await res.json()
       if (res.ok) {
-        setValuation(data.valuation)
-        setSearchedAddress(address)
-        setSearchedPostalCode(postalCode)
+        // Redirect to /sell with all relevant data as query params
+        router.push(`/sell?address=${encodeURIComponent(address)}&postal=${encodeURIComponent(postalCode)}&value=${encodeURIComponent(data.valuation.estimatedValue)}`)
       } else {
         alert(`Fout bij het ophalen van woninggegevens: ${data.error}`)
       }
@@ -83,23 +81,7 @@ export default function HomePage() {
     }
   }
 
-  const handleSellRequest = () => {
-    window.location.href = `/sell?address=${encodeURIComponent(searchedAddress)}&postal=${encodeURIComponent(searchedPostalCode)}&value=${valuation?.estimatedValue}`
-  }
-
-  if (valuation) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <ValuationResult
-          address={searchedAddress}
-          postalCode={searchedPostalCode}
-          valuation={valuation}
-          onSellRequest={handleSellRequest}
-        />
-      </div>
-    )
-  }
-
+  // Remove valuation/result display logic and just show the AddressInput as before
   return (
     <div className="bg-white">
       {/* Hero Section - OpenDoor Style */}

@@ -60,6 +60,10 @@ export interface PropertyValuation {
   adresseerbaarObject?: string
   nummeraanduiding?: string
   wozValues?: Array<{ date: string, value: string }>
+  energyLabel?: string // <-- add this field
+  propertyType?: string
+  constructionYear?: number
+  squareMeters?: number
 }
 
 export interface ValuationFactor {
@@ -183,7 +187,7 @@ export async function getPropertyData(address: string, postalCode: string): Prom
     return kadasterProperty
   } catch (error) {
     Logger.error('Real property data retrieval failed', error as Error, { address, postalCode })
-    throw new Error(`Failed to retrieve property data: ${error.message}`)
+    throw new Error(`Failed to retrieve property data: ${(error as Error).message}`)
   }
 }
 
@@ -280,7 +284,11 @@ export async function calculateValuation(propertyData: KadasterProperty): Promis
       identificatie: propertyData.identificatie,
       adresseerbaarObject: propertyData.adresseerbaarObject,
       nummeraanduiding: propertyData.nummeraanduiding,
-      wozValues: propertyData.wozValues
+      wozValues: propertyData.wozValues,
+      energyLabel: propertyData.energyLabel,
+      propertyType: propertyData.propertyType,
+      constructionYear: propertyData.constructionYear,
+      squareMeters: propertyData.squareMeters
     }
     
     // Cache for 30 minutes
@@ -296,8 +304,8 @@ export async function calculateValuation(propertyData: KadasterProperty): Promis
     
     return propertyValuation
   } catch (error) {
-    Logger.error('Real valuation calculation failed', error as Error)
-    throw new Error(`Failed to calculate valuation: ${error.message}`)
+    Logger.error('Real valuation calculation failed', error as Error, { address: propertyData.address })
+    throw new Error(`Failed to calculate valuation: ${(error as Error).message}`)
   }
 }
 
