@@ -1,0 +1,27 @@
+{
+  "name": "OpenHaus - Direct je huis verkopen of kopen",
+  "short_name": "OpenHaus",
+  "description": "Ontvang een bod op je woning binnen enkele minuten. Regel je verkoop of aankoop volledig digitaal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "finance"],
+  "lang": "nl",
+  "dir": "ltr"
+}
