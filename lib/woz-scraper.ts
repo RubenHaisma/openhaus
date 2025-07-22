@@ -12,6 +12,15 @@ export interface WOZData {
   surfaceArea?: number
   scrapedAt: string
   sourceUrl: string
+  // Additional fields from WOZ scraping
+  grondOppervlakte?: string
+  bouwjaar?: string
+  gebruiksdoel?: string
+  oppervlakte?: string
+  identificatie?: string
+  adresseerbaarObject?: string
+  nummeraanduiding?: string
+  wozValues?: Array<{ date: string, value: string }>
 }
 
 export interface ScrapingResult {
@@ -104,7 +113,7 @@ export class WOZScraper {
       
       // Optimize page for speed
       await page.setRequestInterception(true)
-      page.on('request', (req) => {
+      page.on('request', (req: any) => {
         // Block unnecessary resources for faster loading
         if (req.resourceType() === 'stylesheet' || 
             req.resourceType() === 'font' ||
@@ -197,7 +206,7 @@ export class WOZScraper {
         // If no specific selector works, try to find any element containing "€" and numbers
         if (!wozValueText) {
           const allElements = document.querySelectorAll('*')
-          for (const element of allElements) {
+          for (const element of Array.from(allElements)) {
             const text = element.textContent || ''
             if (text.includes('€') && /\d{3,}/.test(text) && text.length < 100 && !text.includes('per')) {
               wozValueText = text
@@ -259,12 +268,21 @@ export class WOZScraper {
       const result: WOZData = {
         address,
         postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
-        wozValue: wozValue || fallbackValue!,
+        wozValue: wozValue || 0,
         referenceYear,
         objectType: wozData.objectType || 'Woning',
-        surfaceArea,
+        surfaceArea: surfaceArea || undefined,
         scrapedAt: new Date().toISOString(),
-        sourceUrl: this.baseUrl
+        sourceUrl: this.baseUrl,
+        // Include all additional WOZ fields
+        grondOppervlakte: wozData.grondOppervlakte,
+        bouwjaar: wozData.bouwjaar,
+        gebruiksdoel: wozData.gebruiksdoel,
+        oppervlakte: wozData.oppervlakte,
+        identificatie: wozData.identificatie,
+        adresseerbaarObject: wozData.adresseerbaarObject,
+        nummeraanduiding: wozData.nummeraanduiding,
+        wozValues: wozData.wozValues
       }
 
       // Cache the result in database
@@ -277,7 +295,8 @@ export class WOZScraper {
         address,
         postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
         wozValue: result.wozValue,
-        referenceYear
+        referenceYear,
+        hasAdditionalData: !!(result.bouwjaar || result.oppervlakte || result.grondOppervlakte)
       })
 
       return {
@@ -414,7 +433,16 @@ export class WOZScraper {
         objectType: data.objectType,
         surfaceArea: data.surfaceArea ? Number(data.surfaceArea) : undefined,
         scrapedAt: data.scrapedAt.toISOString(),
-        sourceUrl: data.sourceUrl
+        sourceUrl: data.sourceUrl,
+        // Include additional fields if they exist in database
+        grondOppervlakte: (data as any).grondOppervlakte,
+        bouwjaar: (data as any).bouwjaar,
+        gebruiksdoel: (data as any).gebruiksdoel,
+        oppervlakte: (data as any).oppervlakte,
+        identificatie: (data as any).identificatie,
+        adresseerbaarObject: (data as any).adresseerbaarObject,
+        nummeraanduiding: (data as any).nummeraanduiding,
+        wozValues: (data as any).wozValues
       }
     } catch (error) {
       Logger.error('Failed to retrieve cached WOZ data', error as Error)
@@ -438,7 +466,18 @@ export class WOZScraper {
           surfaceArea: data.surfaceArea,
           scrapedAt: new Date(data.scrapedAt),
           sourceUrl: data.sourceUrl,
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          // Store additional WOZ fields as JSON
+          metadata: {
+            grondOppervlakte: data.grondOppervlakte,
+            bouwjaar: data.bouwjaar,
+            gebruiksdoel: data.gebruiksdoel,
+            oppervlakte: data.oppervlakte,
+            identificatie: data.identificatie,
+            adresseerbaarObject: data.adresseerbaarObject,
+            nummeraanduiding: data.nummeraanduiding,
+            wozValues: data.wozValues
+          }
         },
         create: {
           address: data.address,
@@ -448,7 +487,18 @@ export class WOZScraper {
           objectType: data.objectType,
           surfaceArea: data.surfaceArea,
           scrapedAt: new Date(data.scrapedAt),
-          sourceUrl: data.sourceUrl
+          sourceUrl: data.sourceUrl,
+          // Store additional WOZ fields as JSON
+          metadata: {
+            grondOppervlakte: data.grondOppervlakte,
+            bouwjaar: data.bouwjaar,
+            gebruiksdoel: data.gebruiksdoel,
+            oppervlakte: data.oppervlakte,
+            identificatie: data.identificatie,
+            adresseerbaarObject: data.adresseerbaarObject,
+            nummeraanduiding: data.nummeraanduiding,
+            wozValues: data.wozValues
+          }
         }
         })
 

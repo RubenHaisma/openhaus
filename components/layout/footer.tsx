@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input'
 
 const navigation = {
   diensten: [
-    { name: 'Huis verkopen', href: '/verkopen' },
-    { name: 'Huis kopen', href: '/kopen' },
-    { name: 'Hypotheekadvies', href: '/financiering' },
+    { name: 'Huis verkopen', href: '/sell' },
+    { name: 'Huis kopen', href: '/buy' },
+    { name: 'Hypotheekadvies', href: '/finance' },
     { name: 'Gratis taxatie', href: '/taxatie' },
     { name: 'Marktplaats', href: '/marketplace' },
   ],

@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
         { 
           error: 'Real financial data service unavailable',
           message: error.message,
-          suggestion: 'Financial calculations require live data from NHG, DNB, and banks'
+          suggestion: 'Financial calculations require live 2025 data from NHG, DNB, and banks'
         },
         { status: 503 }
       )

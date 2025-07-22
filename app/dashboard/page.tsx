@@ -310,7 +310,7 @@ export default function DashboardPage() {
                       </Button>
                     </Link>
 
-                    <Link href="/kopen">
+                    <Link href="/buy">
                       <Button variant="outline" className="w-full justify-start h-auto p-4">
                         <div className="flex items-center space-x-3">
                           <MapPin className="w-6 h-6" />
@@ -322,7 +322,7 @@ export default function DashboardPage() {
                       </Button>
                     </Link>
 
-                    <Link href="/financiering">
+                    <Link href="/finance">
                       <Button variant="outline" className="w-full justify-start h-auto p-4">
                         <div className="flex items-center space-x-3">
                           <Euro className="w-6 h-6" />
@@ -417,7 +417,7 @@ export default function DashboardPage() {
           <TabsContent value="favorites" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Favoriete woningen</h2>
-              <Link href="/kopen">
+              <Link href="/buy">
                 <Button variant="outline">
                   Meer woningen zoeken
                 </Button>
@@ -468,7 +468,7 @@ export default function DashboardPage() {
                   <p className="text-gray-600 mb-6">
                     Je hebt nog geen woningen als favoriet gemarkeerd.
                   </p>
-                  <Link href="/kopen">
+                  <Link href="/buy">
                     <Button className="bg-primary hover:bg-primary/90">
                       Woningen zoeken
                     </Button>
@@ -481,7 +481,7 @@ export default function DashboardPage() {
           <TabsContent value="searches" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Opgeslagen zoekopdrachten</h2>
-              <Link href="/kopen">
+              <Link href="/buy">
                 <Button className="bg-primary hover:bg-primary/90">
                   <Plus className="w-4 h-4 mr-2" />
                   Nieuwe zoekopdracht

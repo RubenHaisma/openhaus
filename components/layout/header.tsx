@@ -10,9 +10,9 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navigation = [
-  { name: 'Verkopen', href: '/verkopen' },
-  { name: 'Kopen', href: '/kopen' },
-  { name: 'Financiering', href: '/financiering' },
+  { name: 'Verkopen', href: '/sell' },
+  { name: 'Kopen', href: '/buy' },
+  { name: 'Financiering', href: '/finance' },
   { name: 'Over ons', href: '/about' },
 ]
 

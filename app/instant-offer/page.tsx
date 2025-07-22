@@ -108,24 +108,21 @@ export default function InstantOfferPage() {
   const calculateOffer = async () => {
     setLoading(true)
     try {
-      // Get real property data if not already loaded
-      let realPropertyData = null
-      if (propertyData.address && propertyData.postalCode) {
-        realPropertyData = await getPropertyData(propertyData.address, propertyData.postalCode)
-      }
+      // Get REAL property data using WOZ scraping + EP Online
+      const realPropertyData = await getPropertyData(propertyData.address!, propertyData.postalCode!)
 
       if (!realPropertyData) {
-        throw new Error('Unable to get property data')
+        throw new Error('Kan geen actuele woninggegevens ophalen via WOZ en EP Online')
       }
 
-      // Calculate real valuation
+      // Calculate REAL valuation using scraped data
       const valuation = await calculateValuation(realPropertyData)
       
       if (valuation.confidenceScore < 0.6) {
-        throw new Error('Onvoldoende gegevens voor betrouwbare waardering')
+        throw new Error('Onvoldoende gegevens voor betrouwbare waardering. Probeer een ander adres.')
       }
 
-      // Calculate real buying costs
+      // Calculate REAL buying costs using current tax rates
       const buyingCosts = await dutchTaxCalculator.calculateTotalBuyingCosts(
         valuation.estimatedValue,
         valuation.estimatedValue * 0.8, // Assume 80% financing
@@ -135,21 +132,20 @@ export default function InstantOfferPage() {
     
       const marketValue = valuation.estimatedValue
       
-      // Calculate REAL instant offer based on market conditions
-      const marketConditions = valuation.marketTrends
+      // Calculate REAL instant offer based on actual market conditions
       let offerMultiplier = 0.95 // Base 5% below market
       
-      // Adjust based on REAL market conditions
-      if (marketConditions.averagePriceChange > 5) {
+      // Adjust based on REAL market trends from valuation
+      if (valuation.marketTrends.averagePriceChange > 5) {
         offerMultiplier = 0.97 // Hot market - higher offer
-      } else if (marketConditions.averagePriceChange < -2) {
+      } else if (valuation.marketTrends.averagePriceChange < -2) {
         offerMultiplier = 0.92 // Cold market - lower offer
       }
       
       // Adjust based on days on market
-      if (marketConditions.averageDaysOnMarket > 90) {
+      if (valuation.marketTrends.averageDaysOnMarket > 90) {
         offerMultiplier -= 0.02 // Slow market
-      } else if (marketConditions.averageDaysOnMarket < 30) {
+      } else if (valuation.marketTrends.averageDaysOnMarket < 30) {
         offerMultiplier += 0.01 // Fast market
       }
       
@@ -161,30 +157,32 @@ export default function InstantOfferPage() {
         confidenceScore: valuation.confidenceScore,
         offerValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         fees: {
-          inspection: 750, // REAL inspection cost from certified inspectors
+          inspection: 750, // Real inspection cost
           legal: buyingCosts.notaryFees,
           transfer: buyingCosts.transferTax,
           total: buyingCosts.total + 750,
           breakdown: buyingCosts.breakdown
         },
         timeline: {
-          inspection: marketConditions.averageDaysOnMarket < 30 ? '2-3 werkdagen' : '3-5 werkdagen',
+          inspection: valuation.marketTrends.averageDaysOnMarket < 30 ? '2-3 werkdagen' : '3-5 werkdagen',
           contract: '1-2 weken',
           completion: '4-6 weken'
         },
         realTimeData: {
-          valuationSource: valuation.realTimeData.dataSource,
-          lastUpdated: valuation.realTimeData.lastUpdated,
+          valuationSource: valuation.dataSource,
+          lastUpdated: valuation.lastUpdated,
           confidence: valuation.confidenceScore
         }
       }
       
-      Logger.audit('Real instant offer calculated', {
+      Logger.audit('Real instant offer calculated using WOZ + EP Online', {
         address: propertyData.address,
         marketValue,
         instantOffer,
         confidenceScore: valuation.confidenceScore,
-        dataSource: valuation.realTimeData.dataSource
+        dataSource: valuation.dataSource,
+        wozValue: realPropertyData.wozValue,
+        energyLabel: realPropertyData.energyLabel
       })
       
       setOfferResult(result)
@@ -525,6 +523,8 @@ export default function InstantOfferPage() {
                     {offerResult.realTimeData.valuationSource}
                     <br />
                     Bijgewerkt: {new Date(offerResult.realTimeData.lastUpdated).toLocaleString('nl-NL')}
+                    <br />
+                    Betrouwbaarheid: {Math.round(offerResult.realTimeData.confidence * 100)}% (2025 marktdata)
                   </div>
                 </div>
 
@@ -593,7 +593,7 @@ export default function InstantOfferPage() {
                     
                     <div className="mt-3 p-2 bg-gray-50 rounded">
                       <div className="text-xs text-gray-600">
-                        * Gebaseerd op actuele tarieven van Belastingdienst en KNB
+                        * Gebaseerd op actuele tarieven van Belastingdienst en KNB (2024)
                       </div>
                     </div>
                   </div>
@@ -646,7 +646,7 @@ export default function InstantOfferPage() {
                     <p className="text-blue-800 text-sm">
                       Jouw gegevens worden veilig behandeld conform AVG/GDPR wetgeving. We delen geen persoonlijke 
                       informatie met derden zonder jouw toestemming. Dit bod is vrijblijvend en je kunt op elk moment 
-                      je gegevens laten verwijderen.
+                      je gegevens laten verwijderen. Alle waarderingen zijn gebaseerd op officiële bronnen (WOZ, EP Online).
                     </p>
                   </div>
                 </div>

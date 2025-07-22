@@ -201,6 +201,7 @@ model WozCache {
   surfaceArea   Decimal? @map("surface_area")
   scrapedAt     DateTime @map("scraped_at")
   sourceUrl     String   @map("source_url")
+  metadata      Json?    @map("metadata") // Store additional WOZ fields
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

@@ -29,57 +29,36 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
-// Mock featured properties
-const featuredProperties = [
-  {
-    id: '1',
-    address: 'Keizersgracht 123',
-    city: 'Amsterdam',
-    asking_price: 875000,
-    bedrooms: 3,
-    bathrooms: 2,
-    square_meters: 120,
-    images: ['https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'],
-    status: 'AVAILABLE',
-    energy_label: 'B',
-    description: 'Karakteristieke grachtenpand in het hart van Amsterdam',
-    features: ['Tuin', 'Balkon', 'Garage'],
-  },
-  {
-    id: '2',
-    address: 'Lange Voorhout 45',
-    city: 'Den Haag',
-    asking_price: 650000,
-    bedrooms: 2,
-    bathrooms: 1,
-    square_meters: 85,
-    images: ['https://images.pexels.com/photos/280222/pexels-photo-280222.jpeg'],
-    status: 'AVAILABLE',
-    energy_label: 'C',
-    description: 'Modern appartement nabij het centrum',
-    features: ['Lift', 'Balkon'],
-  },
-  {
-    id: '3',
-    address: 'Erasmuslaan 78',
-    city: 'Rotterdam',
-    asking_price: 425000,
-    bedrooms: 4,
-    bathrooms: 2,
-    square_meters: 140,
-    images: ['https://images.pexels.com/photos/323772/pexels-photo-323772.jpeg'],
-    status: 'AVAILABLE',
-    energy_label: 'A',
-    description: 'Ruime eengezinswoning met tuin',
-    features: ['Tuin', 'Garage', 'Zonnepanelen'],
-  },
-]
+import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+
+// Fetch real featured properties from API
+async function fetchFeaturedProperties() {
+  const response = await fetch('/api/properties?limit=3&status=AVAILABLE&featured=true')
+  if (!response.ok) {
+    throw new Error('Failed to fetch featured properties')
+  }
+  return response.json()
+}
 
 export default function HomePage() {
   const [valuation, setValuation] = useState<PropertyValuation | null>(null)
   const [searchedAddress, setSearchedAddress] = useState<string>('')
   const [searchedPostalCode, setSearchedPostalCode] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const [featuredProperties, setFeaturedProperties] = useState([])
+
+  const { data: featuredData } = useQuery({
+    queryKey: ['featured-properties'],
+    queryFn: fetchFeaturedProperties,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  })
+
+  useEffect(() => {
+    if (featuredData?.properties) {
+      setFeaturedProperties(featuredData.properties)
+    }
+  }, [featuredData])
 
   const handleAddressSearch = async (address: string, postalCode: string) => {
     setLoading(true)
@@ -105,7 +84,7 @@ export default function HomePage() {
   }
 
   const handleSellRequest = () => {
-    window.location.href = `/verkopen?address=${encodeURIComponent(searchedAddress)}&postal=${encodeURIComponent(searchedPostalCode)}&value=${valuation?.estimatedValue}`
+    window.location.href = `/sell?address=${encodeURIComponent(searchedAddress)}&postal=${encodeURIComponent(searchedPostalCode)}&value=${valuation?.estimatedValue}`
   }
 
   if (valuation) {
@@ -487,7 +466,7 @@ export default function HomePage() {
                 Ontdek ons aanbod van zorgvuldig geselecteerde woningen
               </motion.p>
             </div>
-            <Link href="/kopen">
+            <Link href="/buy">
               <Button className="opendoor-button-secondary hidden sm:flex items-center space-x-2">
                 <span>Alle woningen</span>
                 <ArrowRight className="w-5 h-5" />
@@ -496,21 +475,45 @@ export default function HomePage() {
           </div>
 
           <div className="property-grid">
-            {featuredProperties.map((property, index) => (
+            {featuredProperties.length > 0 ? (
+              featuredProperties.map((property, index) => (
+                <motion.div
+                  key={property.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <PropertyCard property={property} />
+                </motion.div>
+              ))
+            ) : (
+              // Loading skeleton for featured properties
+              Array.from({ length: 3 }).map((_, index) => (
               <motion.div
-                key={property.id}
+                key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <PropertyCard property={property} />
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="animate-pulse">
+                    <div className="h-48 bg-gray-200"></div>
+                    <div className="p-6 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="text-center mt-16 sm:hidden">
-            <Link href="/kopen">
+            <Link href="/buy">
               <Button className="opendoor-button-primary">
                 Alle woningen bekijken
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -625,7 +628,7 @@ export default function HomePage() {
               >
                 Start gratis taxatie
               </Button>
-              <Link href="/kopen">
+              <Link href="/buy">
                 <Button 
                   size="lg" 
                   variant="outline" 
