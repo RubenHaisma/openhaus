@@ -82,6 +82,19 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
               {getConfidenceText(confidenceScore)}
             </span>
           </div>
+          
+          {valuation.realTimeData && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="text-xs text-blue-600 font-medium mb-1">Actuele marktgegevens</div>
+              <div className="text-xs text-blue-800">
+                Bronnen: {valuation.realTimeData.dataSource}
+                <br />
+                Bijgewerkt: {new Date(valuation.realTimeData.lastUpdated).toLocaleString('nl-NL')}
+                <br />
+                API versie: {valuation.realTimeData.apiVersion}
+              </div>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="text-center">
@@ -118,6 +131,7 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
                 <div>
                   <h4 className="font-medium text-gray-900">{factor.factor}</h4>
                   <p className="text-sm text-gray-600">{factor.description}</p>
+                  <p className="text-xs text-gray-500 mt-1">Bron: {factor.dataSource}</p>
                 </div>
                 <div className={`flex items-center space-x-2 ${factor.impact > 0 ? 'text-green-600' : factor.impact < 0 ? 'text-red-600' : 'text-gray-600'}`}>
                   {factor.impact > 0 ? (
@@ -190,10 +204,19 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest 
               <p className="text-sm text-gray-600">Huidige trends in jouw buurt</p>
             </div>
           </div>
-          <p className="text-gray-700">
-            De huizenmarkt in jouw gebied toont een stijgende trend van 8% ten opzichte van vorig jaar. 
-            Woningen vergelijkbaar met die van jou verkopen gemiddeld binnen 45 dagen.
-          </p>
+          {valuation.marketTrends && (
+            <div className="space-y-2">
+              <p className="text-gray-700">
+                De huizenmarkt in jouw gebied toont een {valuation.marketTrends.averagePriceChange > 0 ? 'stijgende' : 'dalende'} trend van {Math.abs(valuation.marketTrends.averagePriceChange).toFixed(1)}% ten opzichte van vorig jaar.
+              </p>
+              <p className="text-gray-700">
+                Woningen vergelijkbaar met die van jou verkopen gemiddeld binnen {valuation.marketTrends.averageDaysOnMarket} dagen.
+              </p>
+              <p className="text-xs text-gray-500 mt-2">
+                Gebaseerd op {valuation.marketTrends.totalSales} verkopen in periode {valuation.marketTrends.period}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>

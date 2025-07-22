@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, MapPin, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { realDataValidator } from '@/lib/real-data/validation'
 
 interface AddressInputProps {
   onSearch: (address: string, postalCode: string) => void
@@ -25,6 +26,7 @@ export function AddressInput({ onSearch, placeholder, className, loading }: Addr
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [validationError, setValidationError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
@@ -94,6 +96,18 @@ export function AddressInput({ onSearch, placeholder, className, loading }: Addr
       // Extract postal code from input if possible
       const postalCodeMatch = value.match(/\b\d{4}\s?[A-Z]{2}\b|\b[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}\b|\b\d{5}\b/)
       const postalCode = postalCodeMatch ? postalCodeMatch[0] : ''
+      
+      // Validate postal code format for real data
+      const validation = realDataValidator.validateCalculationInputs({
+        postalCode: postalCode.trim()
+      })
+      
+      if (!validation.valid) {
+        setValidationError(validation.errors[0])
+        return
+      }
+      
+      setValidationError('')
       onSearch(value, postalCode)
       setShowSuggestions(false)
     }
@@ -120,6 +134,7 @@ export function AddressInput({ onSearch, placeholder, className, loading }: Addr
             className
           )}
           disabled={loading}
+          maxLength={7}
         />
         
         <div className="absolute inset-y-0 right-0 flex items-center">
@@ -135,6 +150,16 @@ export function AddressInput({ onSearch, placeholder, className, loading }: Addr
             )}
           </Button>
         </div>
+      </div>
+
+      {validationError && (
+        <div className="mt-2 text-sm text-red-600">
+          {validationError}
+        </div>
+      )}
+      
+      <div className="mt-2 text-xs text-gray-500">
+        Gegevens worden opgehaald uit Kadaster, CBS en NVM databases
       </div>
 
       {/* Suggestions Dropdown */}

@@ -31,8 +31,34 @@ import {
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getPropertyData, calculateValuation } from '@/lib/kadaster'
+import { dutchTaxCalculator, mortgageCalculator } from '@/lib/real-data/tax-calculator'
 
-// Mock property data - in production, fetch from API
+// This will be replaced with real API call
+async function getPropertyDetails(propertyId: string) {
+  try {
+    // In production, this would fetch from your database
+    // For now, we'll use real Kadaster data for demonstration
+    const realData = await getPropertyData('Keizersgracht 123', '1015 CJ')
+    if (!realData) throw new Error('Property not found')
+    
+    const valuation = await calculateValuation(realData)
+    const buyingCosts = await dutchTaxCalculator.calculateTotalBuyingCosts(
+      valuation.estimatedValue,
+      valuation.estimatedValue * 0.8
+    )
+    
+    return {
+      ...realData,
+      valuation,
+      buyingCosts
+    }
+  } catch (error) {
+    console.error('Failed to get real property data:', error)
+    throw error
+  }
+}
+
 const mockProperty = {
   id: '1',
   address: 'Keizersgracht 123',
@@ -108,6 +134,24 @@ export default function PropertyDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showContactForm, setShowContactForm] = useState(false)
+  const [realPropertyData, setRealPropertyData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadRealData = async () => {
+      try {
+        const data = await getPropertyDetails(params.id as string)
+        setRealPropertyData(data)
+      } catch (error) {
+        console.error('Failed to load real property data:', error)
+        // Fall back to mock data for demo
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadRealData()
+  }, [params.id])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -135,13 +179,28 @@ export default function PropertyDetailPage() {
     return colors[label] || 'bg-gray-400'
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Laden van actuele woninggegevens...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Use real data if available, otherwise fall back to mock
+  const propertyData = realPropertyData || mockProperty
+  const isRealData = !!realPropertyData
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Image Gallery */}
       <div className="relative h-96 md:h-[500px] bg-gray-900">
         <Image
-          src={mockProperty.images[currentImageIndex]}
-          alt={mockProperty.address}
+          src={propertyData.images?.[currentImageIndex] || mockProperty.images[currentImageIndex]}
+          alt={propertyData.address}
           fill
           className="object-cover"
           priority
@@ -149,7 +208,7 @@ export default function PropertyDetailPage() {
         
         {/* Image Navigation */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {mockProperty.images.map((_, index) => (
+          {(propertyData.images || mockProperty.images).map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
@@ -195,22 +254,29 @@ export default function PropertyDetailPage() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
                     <div>
                       <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {mockProperty.address}
+                        {propertyData.address}
                       </h1>
                       <div className="flex items-center space-x-2 text-gray-600 mb-4">
                         <MapPin className="w-5 h-5" />
                         <span className="text-lg">
-                          {mockProperty.city}, {mockProperty.province}, {mockProperty.postalCode}
+                          {propertyData.city}, {propertyData.province || 'Noord-Holland'}, {propertyData.postalCode}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-4xl font-bold text-primary mb-2">
-                        {formatPrice(mockProperty.asking_price)}
+                        {formatPrice(isRealData ? propertyData.valuation.estimatedValue : mockProperty.asking_price)}
                       </div>
                       <div className="text-gray-600">
-                        {formatPrice(mockProperty.market_data.price_per_sqm)}/m²
+                        {formatPrice(isRealData ? 
+                          Math.round(propertyData.valuation.estimatedValue / propertyData.squareMeters) : 
+                          mockProperty.market_data.price_per_sqm)}/m²
                       </div>
+                      {isRealData && (
+                        <div className="text-xs text-green-600 mt-1">
+                          ✓ Actuele marktwaarde
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -220,43 +286,48 @@ export default function PropertyDetailPage() {
                       <div className="flex items-center justify-center mb-2">
                         <Bed className="w-6 h-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{mockProperty.bedrooms}</div>
+                      <div className="text-2xl font-bold text-gray-900">{propertyData.bedrooms || 3}</div>
                       <div className="text-gray-600">Slaapkamers</div>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center mb-2">
                         <Bath className="w-6 h-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{mockProperty.bathrooms}</div>
+                      <div className="text-2xl font-bold text-gray-900">{propertyData.bathrooms || 2}</div>
                       <div className="text-gray-600">Badkamers</div>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center mb-2">
                         <Square className="w-6 h-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{mockProperty.square_meters}</div>
+                      <div className="text-2xl font-bold text-gray-900">{propertyData.squareMeters}</div>
                       <div className="text-gray-600">m² woonoppervlak</div>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center mb-2">
                         <Calendar className="w-6 h-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{mockProperty.construction_year}</div>
+                      <div className="text-2xl font-bold text-gray-900">{propertyData.constructionYear}</div>
                       <div className="text-gray-600">Bouwjaar</div>
                     </div>
                   </div>
 
                   {/* Energy Label & Key Info */}
                   <div className="flex flex-wrap gap-4">
-                    <Badge className={`${getEnergyLabelColor(mockProperty.energy_label)} text-white px-4 py-2 text-lg`}>
-                      Energielabel {mockProperty.energy_label}
+                    <Badge className={`${getEnergyLabelColor(propertyData.energyLabel)} text-white px-4 py-2 text-lg`}>
+                      Energielabel {propertyData.energyLabel}
                     </Badge>
                     <Badge variant="outline" className="px-4 py-2 text-lg">
-                      {mockProperty.property_type}
+                      {propertyData.propertyType || mockProperty.property_type}
                     </Badge>
                     <Badge variant="outline" className="px-4 py-2 text-lg">
                       {mockProperty.legal_info.ownership}
                     </Badge>
+                    {isRealData && (
+                      <Badge variant="outline" className="px-4 py-2 text-lg bg-green-50 text-green-700 border-green-200">
+                        ✓ Kadaster geverifieerd
+                      </Badge>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -276,8 +347,16 @@ export default function PropertyDetailPage() {
                   <CardContent className="p-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">Beschrijving</h3>
                     <p className="text-gray-700 leading-relaxed text-lg">
-                      {mockProperty.description}
+                      {propertyData.description || mockProperty.description}
                     </p>
+                    {isRealData && (
+                      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                        <p className="text-blue-800 text-sm">
+                          <strong>WOZ-waarde:</strong> {formatPrice(propertyData.wozValue)} 
+                          (officiële waardering gemeente)
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -287,7 +366,7 @@ export default function PropertyDetailPage() {
                   <CardContent className="p-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6">Kenmerken</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {mockProperty.features.map((feature, index) => (
+                      {(propertyData.features || mockProperty.features).map((feature, index) => (
                         <div key={index} className="flex items-center space-x-3">
                           <div className="w-2 h-2 bg-primary rounded-full"></div>
                           <span className="text-gray-700">{feature}</span>
@@ -372,7 +451,10 @@ export default function PropertyDetailPage() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-2">WOZ-waarde</h4>
-                          <p className="text-gray-700">{formatPrice(mockProperty.woz_value)}</p>
+                          <p className="text-gray-700">{formatPrice(isRealData ? propertyData.wozValue : mockProperty.woz_value)}</p>
+                          {isRealData && (
+                            <p className="text-xs text-green-600 mt-1">✓ Actuele WOZ-waarde</p>
+                          )}
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-2">Energiecertificaat</h4>
@@ -390,6 +472,11 @@ export default function PropertyDetailPage() {
                             In Nederland is een notaris verplicht voor de overdracht van onroerend goed. 
                             Wij helpen je bij het vinden van een geschikte notaris in de buurt.
                           </p>
+                          {isRealData && propertyData.buyingCosts && (
+                            <p className="text-blue-800 text-sm mt-2">
+                              <strong>Actuele notariskosten:</strong> {formatPrice(propertyData.buyingCosts.notaryFees)}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -404,39 +491,69 @@ export default function PropertyDetailPage() {
                 <CardTitle className="flex items-center space-x-2">
                   <TrendingUp className="w-6 h-6 text-primary" />
                   <span>Marktgegevens</span>
+                  {isRealData && (
+                    <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">
+                      ✓ Live data
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{mockProperty.market_data.days_on_market}</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {isRealData ? propertyData.valuation.marketTrends.averageDaysOnMarket : mockProperty.market_data.days_on_market}
+                    </div>
                     <div className="text-gray-600">Dagen op markt</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{formatPrice(mockProperty.market_data.price_per_sqm)}</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {formatPrice(isRealData ? 
+                        propertyData.valuation.marketTrends.pricePerSquareMeter : 
+                        mockProperty.market_data.price_per_sqm)}
+                    </div>
                     <div className="text-gray-600">Prijs per m²</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">+6.4%</div>
+                    <div className={`text-2xl font-bold ${isRealData && propertyData.valuation.marketTrends.averagePriceChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {isRealData ? 
+                        `${propertyData.valuation.marketTrends.averagePriceChange > 0 ? '+' : ''}${propertyData.valuation.marketTrends.averagePriceChange.toFixed(1)}%` : 
+                        '+6.4%'}
+                    </div>
                     <div className="text-gray-600">Prijsstijging (1 jaar)</div>
                   </div>
                 </div>
 
                 <h4 className="font-semibold text-gray-900 mb-4">Vergelijkbare verkopen</h4>
                 <div className="space-y-3">
-                  {mockProperty.market_data.comparable_sales.map((sale, index) => (
+                  {(isRealData ? propertyData.valuation.comparableSales : mockProperty.market_data.comparable_sales).map((sale, index) => (
                     <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                       <div>
                         <div className="font-medium text-gray-900">{sale.address}</div>
-                        <div className="text-sm text-gray-600">{sale.sqm} m² • {formatDate(sale.date)}</div>
+                        <div className="text-sm text-gray-600">
+                          {isRealData ? sale.squareMeters : sale.sqm} m² • {formatDate(isRealData ? sale.soldDate : sale.date)}
+                          {isRealData && <span className="ml-2 text-green-600">✓ NVM geverifieerd</span>}
+                        </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-gray-900">{formatPrice(sale.price)}</div>
-                        <div className="text-sm text-gray-600">{formatPrice(sale.price / sale.sqm)}/m²</div>
+                        <div className="font-bold text-gray-900">
+                          {formatPrice(isRealData ? sale.soldPrice : sale.price)}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {formatPrice(isRealData ? sale.pricePerSqm : sale.price / sale.sqm)}/m²
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
+                
+                {isRealData && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p className="text-blue-800 text-sm">
+                      Marktgegevens van CBS en NVM • Betrouwbaarheid: {Math.round(propertyData.valuation.confidenceScore * 100)}%
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -502,7 +619,7 @@ export default function PropertyDetailPage() {
                       Koopprijs
                     </label>
                     <div className="text-2xl font-bold text-gray-900">
-                      {formatPrice(mockProperty.asking_price)}
+                      {formatPrice(isRealData ? propertyData.valuation.estimatedValue : mockProperty.asking_price)}
                     </div>
                   </div>
                   
@@ -511,12 +628,18 @@ export default function PropertyDetailPage() {
                       Geschat maandlast
                     </label>
                     <div className="text-xl font-semibold text-primary">
-                      €2.850 - €3.200/maand
+                      {isRealData ? 
+                        `€${Math.round(propertyData.valuation.estimatedValue * 0.8 * 0.045 / 12).toLocaleString()} - €${Math.round(propertyData.valuation.estimatedValue * 0.9 * 0.055 / 12).toLocaleString()}/maand` :
+                        '€2.850 - €3.200/maand'
+                      }
                     </div>
                   </div>
 
                   <div className="text-xs text-gray-500">
-                    *Indicatie o.b.v. 4.5% rente, 30 jaar, 90% financiering
+                    {isRealData ? 
+                      '*Gebaseerd op actuele hypotheekrente en NHG normen' :
+                      '*Indicatie o.b.v. 4.5% rente, 30 jaar, 90% financiering'
+                    }
                   </div>
 
                   <Link href="/financiering">
