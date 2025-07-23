@@ -241,3 +241,16 @@
 {"address":"Kampweg 10.","askingPrice":"806916","audit":true,"level":"info","message":"AUDIT: Property created","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T13:38:05.045Z","userId":"cmdeovifi0000bt2qqdqlj8x7","wozValue":672000}
 {"address":"Kampweg 10.","askingPrice":"806916","audit":true,"level":"info","message":"AUDIT: Property created","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T13:38:05.046Z","userId":"cmdeovifi0000bt2qqdqlj8x7"}
 {"count":1,"level":"info","message":"User properties retrieved","service":"openhaus-api","timestamp":"2025-07-23T13:44:32.707Z","userId":"cmdeovifi0000bt2qqdqlj8x7"}
+{"level":"warn","message":"Property not found in database","propertyId":"mock-property-id","service":"openhaus-api","timestamp":"2025-07-23T21:25:23.675Z"}
+{"level":"warn","message":"Property not found in database","propertyId":"mock-property-id","service":"openhaus-api","timestamp":"2025-07-23T21:25:23.709Z"}
+{"level":"warn","message":"Property not found in database","propertyId":"mock-property-id","service":"openhaus-api","timestamp":"2025-07-23T21:25:45.059Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:26:46.124Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:26:46.180Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:27:36.569Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:28:55.899Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:29:07.859Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:29:18.490Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:29:18.548Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:29:38.045Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:29:38.099Z"}
+{"address":"Kampweg 10.","hasRealData":true,"level":"info","message":"Property retrieved from database","propertyId":"cmdg0du860001bt1v4iorpdjt","service":"openhaus-api","timestamp":"2025-07-23T21:30:20.158Z"}

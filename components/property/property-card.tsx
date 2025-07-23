@@ -213,14 +213,14 @@ export function PropertyCard({
             </div>
             
             <div className="flex flex-col space-y-2">
-              <Link href={`/properties/${property.id}`}>
+              <Link href={`/huis-te-koop/${property.city.toLowerCase()}/${property.id}`}>
                 <Button variant="outline" className="opendoor-button-secondary text-sm px-4 py-2">
                   <Eye className="w-4 h-4 mr-1" />
                   <span>Bekijk</span>
                 </Button>
               </Link>
               
-              <Link href={`/properties/${property.id}/offer`}>
+              <Link href={`/huis-te-koop/${property.city.toLowerCase()}/${property.id}/offer`}>
                 <Button className="opendoor-button-primary text-sm px-4 py-2">
                   Contact opnemen
                 </Button>

@@ -55,10 +55,8 @@ export default function SEOPropertyDetailPage() {
 
   // Extract property ID from the URL slug
   const extractPropertyId = (propertySlug: string): string | null => {
-    // Property slug format: address-bedrooms-kamers-price-euro
-    // We need to find the property by matching address and city
-    // For now, return a mock ID - in production, you'd query the database
-    return 'mock-property-id'
+    // If propertySlug is just the ID, return it directly
+    return propertySlug || null;
   }
 
   useEffect(() => {
@@ -293,7 +291,9 @@ export default function SEOPropertyDetailPage() {
                         <div className="flex items-center space-x-2 text-gray-600 mb-4">
                           <MapPin className="w-5 h-5" />
                           <span className="text-lg">
-                            {propertyData.city}, {propertyData.province}, {propertyData.postalCode}
+                            {propertyData.city}
+                            {propertyData.province && propertyData.province.toLowerCase() !== propertyData.city.toLowerCase() ? `, ${propertyData.province}` : ''}
+                            , Nederland{propertyData.postalCode ? `, ${propertyData.postalCode}` : ''}
                           </span>
                         </div>
                       </div>
@@ -488,7 +488,7 @@ export default function SEOPropertyDetailPage() {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Contact Card */}
-              <Card className="sticky top-8">
+              <Card className="top-8">
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
