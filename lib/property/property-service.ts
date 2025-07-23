@@ -353,6 +353,8 @@ export class PropertyService {
 
   async getProperty(propertyId: string): Promise<Property | null> {
     try {
+      console.log('PropertyService: Fetching property with ID:', propertyId)
+      
       const property = await prisma.property.findUnique({
         where: { id: propertyId },
         include: {
@@ -366,8 +368,20 @@ export class PropertyService {
         }
       })
 
+      console.log('PropertyService: Database query result:', property ? 'Found' : 'Not found')
+      
+      if (property) {
+        console.log('PropertyService: Property details:', {
+          id: property.id,
+          address: property.address,
+          city: property.city,
+          askingPrice: property.askingPrice
+        })
+      }
+
       return property
     } catch (error) {
+      console.error('PropertyService: Database error:', error)
       Logger.error('Failed to get property', error as Error, { propertyId })
       return null
     }

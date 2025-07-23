@@ -45,11 +45,15 @@ export default function MakeOfferPage() {
   useEffect(() => {
     const loadProperty = async () => {
       try {
+        console.log('Loading property for offer page:', params.id)
         const response = await fetch(`/api/properties/${params.id}`)
         if (response.ok) {
           const data = await response.json()
+          console.log('Property loaded for offer:', data)
           setProperty(data)
           setOfferData(prev => ({ ...prev, amount: data.askingPrice.toString() }))
+        } else {
+          console.error('Failed to load property:', response.status)
         }
       } catch (error) {
         console.error('Failed to load property:', error)
@@ -382,7 +386,7 @@ export default function MakeOfferPage() {
                     <div className="text-gray-600">Badkamers</div>
                   </div>
                   <div>
-                    <div className="font-bold text-gray-900">{property.squareMeters}</div>
+                    <div className="font-bold text-gray-900">{Number(property.squareMeters)}</div>
                     <div className="text-gray-600">m²</div>
                   </div>
                 </div>

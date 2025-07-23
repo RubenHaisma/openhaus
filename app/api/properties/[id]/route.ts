@@ -28,7 +28,10 @@ export async function GET(request: NextRequest) {
   try {
     const id = request.nextUrl.pathname.split("/").pop()!
     
+    console.log('API: Fetching property with ID:', id)
+    
     if (!id || id === 'undefined' || id === 'null') {
+      console.error('API: Invalid property ID provided:', id)
       return NextResponse.json(
         { error: 'Invalid property ID' },
         { status: 400 }
@@ -36,7 +39,9 @@ export async function GET(request: NextRequest) {
     }
     
     // Fetch property from the database
-    const property = await propertyService.getProperty(id)
+    const property = await propertyService.getProperty(id) as import("@prisma/client").Property & { user?: { id: string; name: string; email: string } };
+    console.log('API: Property service returned:', property ? 'Property found' : 'Property not found')
+    
     if (!property) {
       Logger.warn('Property not found in database', { propertyId: id })
       return NextResponse.json(
@@ -45,13 +50,38 @@ export async function GET(request: NextRequest) {
       )
     }
     
+    // Ensure all required fields are present
+    const propertyResponse = {
+      id: property.id,
+      address: property.address,
+      postalCode: property.postalCode,
+      city: property.city,
+      province: property.province,
+      propertyType: property.propertyType,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      squareMeters: Number(property.squareMeters),
+      constructionYear: property.constructionYear,
+      askingPrice: Number(property.askingPrice),
+      estimatedValue: Number(property.estimatedValue),
+      status: property.status,
+      images: property.images || [],
+      description: property.description,
+      features: property.features || [],
+      energyLabel: property.energyLabel,
+      createdAt: property.createdAt,
+      updatedAt: property.updatedAt,
+      userId: property.userId,
+      user: property.user 
+    }
+    
     Logger.info('Property retrieved from database', { 
       propertyId: id, 
-      address: property.address,
-      hasRealData: !!(property.address && property.askingPrice)
+      address: propertyResponse.address,
+      hasRealData: !!(propertyResponse.address && propertyResponse.askingPrice)
     })
     
-    return NextResponse.json(property)
+    return NextResponse.json(propertyResponse)
   } catch (error) {
     Logger.error('Property retrieval failed', error as Error, {
       propertyId: request.nextUrl.pathname.split("/").pop(),

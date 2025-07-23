@@ -433,14 +433,29 @@ export default function PropertyDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <span>Marktgegevens</span>
+                  <span>Marktgegevens {propertyData.city}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-gray-600">
-                    Marktgegevens worden geladen van onze database...
-                  </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {formatPrice(Math.round(propertyData.askingPrice / propertyData.squareMeters))}
+                    </div>
+                    <div className="text-sm text-gray-600">Prijs per m²</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {propertyData.energyLabel}
+                    </div>
+                    <div className="text-sm text-gray-600">Energielabel</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {propertyData.constructionYear}
+                    </div>
+                    <div className="text-sm text-gray-600">Bouwjaar</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -481,8 +496,8 @@ export default function PropertyDetailPage() {
                 <Separator className="my-6" />
                 <div className="text-center">
                   <div className="text-sm text-gray-600 mb-2">Makelaar</div>
-                  <div className="font-semibold text-gray-900">OpenHaus Amsterdam</div>
-                  <div className="text-sm text-gray-600">NVM Makelaar</div>
+                  <div className="font-semibold text-gray-900">OpenHaus</div>
+                  <div className="text-sm text-gray-600">Particuliere verkoop platform</div>
                 </div>
               </CardContent>
             </Card>
