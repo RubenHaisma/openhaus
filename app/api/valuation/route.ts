@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPropertyData, calculateValuation } from '@/lib/kadaster'
+import { propertyService } from '@/lib/property/property-service'
 import { Logger } from '@/lib/monitoring/logger'
 import { cacheService } from '@/lib/cache/redis'
 import { z } from 'zod'
@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
     }
     // After validation, these are guaranteed to be strings
     const { address: validAddress, postalCode: validPostalCode } = validation.data
-    const propertyData = await getPropertyData(validAddress, validPostalCode)
+    const propertyData = await propertyService.getPropertyData(validAddress, validPostalCode)
     if (!propertyData) {
       return NextResponse.json({ error: 'Property not found' }, { status: 404 })
     }
-    const valuation = await calculateValuation(propertyData)
+    const valuation = await propertyService.calculateValuation(propertyData)
     console.log('DEBUG Valuation API response:', JSON.stringify(valuation, null, 2))
     return NextResponse.json({ valuation })
   } catch (error: any) {

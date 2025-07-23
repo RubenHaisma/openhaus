@@ -26,7 +26,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AddressInput } from '@/components/ui/address-input'
-import { getPropertyData, calculateValuation } from '@/lib/kadaster'
+import { propertyService } from '@/lib/property/property-service'
 import { dutchTaxCalculator } from '@/lib/real-data/tax-calculator'
 import { Logger } from '@/lib/monitoring/logger'
 
@@ -81,20 +81,20 @@ export default function InstantOfferPage() {
     setLoading(true)
     try {
       // Get real property data from Kadaster
-      const realPropertyData = await getPropertyData(address, postalCode)
-      if (!realPropertyData) {
-        throw new Error('Property not found in Kadaster database')
+      const propertyData = await propertyService.getPropertyData(address, postalCode)
+      if (!propertyData) {
+        throw new Error('Property not found')
       }
 
     setPropertyData(prev => ({ ...prev, address, postalCode }))
     // Auto-populate some data based on address (mock)
     setPropertyData(prev => ({
       ...prev,
-        city: realPropertyData.city,
-        propertyType: realPropertyData.propertyType,
-        constructionYear: realPropertyData.constructionYear,
-        energyLabel: realPropertyData.energyLabel,
-        squareMeters: realPropertyData.squareMeters
+        city: propertyData.city,
+        propertyType: propertyData.propertyType,
+        constructionYear: propertyData.constructionYear,
+        energyLabel: propertyData.energyLabel,
+        squareMeters: propertyData.squareMeters
     }))
     setStep(2)
     } catch (error) {

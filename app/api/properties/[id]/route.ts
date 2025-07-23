@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { inventoryManager } from '@/lib/marketplace/inventory'
-import { authService } from '@/lib/security/auth'
+import { propertyService } from '@/lib/property/property-service'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { Logger } from '@/lib/monitoring/logger'
 import { z } from 'zod'
 
@@ -27,7 +28,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const property = await inventoryManager.getProperty(params.id)
+    const property = await propertyService.getProperty(params.id)
     
     if (!property) {
       return NextResponse.json(
@@ -55,42 +56,35 @@ export async function PUT(
 ) {
   try {
     // Authenticate user
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const token = authHeader.substring(7)
-    const user = await authService.verifyToken(token)
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     const body = await request.json()
     const validatedData = updatePropertySchema.parse(body)
 
-    // Update property
-    const updateData: any = {}
-    if (validatedData.address) updateData.address = validatedData.address
-    if (validatedData.postalCode) updateData.postalCode = validatedData.postalCode
-    if (validatedData.city) updateData.city = validatedData.city
-    if (validatedData.province) updateData.province = validatedData.province
-    if (validatedData.propertyType) updateData.propertyType = validatedData.propertyType
-    if (validatedData.bedrooms !== undefined) updateData.bedrooms = validatedData.bedrooms
-    if (validatedData.bathrooms !== undefined) updateData.bathrooms = validatedData.bathrooms
-    if (validatedData.squareMeters) updateData.squareMeters = validatedData.squareMeters
-    if (validatedData.constructionYear) updateData.constructionYear = validatedData.constructionYear
-    if (validatedData.askingPrice) updateData.askingPrice = validatedData.askingPrice
-    if (validatedData.energyLabel) updateData.energyLabel = validatedData.energyLabel
-    if (validatedData.features) updateData.features = validatedData.features
-    if (validatedData.images) updateData.images = validatedData.images
-    if (validatedData.description) updateData.description = validatedData.description
-    if (validatedData.status) updateData.status = validatedData.status
+    // Get current property to check ownership
+    const currentProperty = await propertyService.getProperty(params.id)
+    if (!currentProperty || currentProperty.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Property not found or unauthorized' }, { status: 404 })
+    }
 
-    const property = await inventoryManager.updateProperty(params.id, updateData)
+    // Update property in database
+    const updateData: any = {}
+    Object.keys(validatedData).forEach(key => {
+      if (validatedData[key] !== undefined) {
+        updateData[key] = validatedData[key]
+      }
+    })
+
+    const property = await prisma.property.update({
+      where: { id: params.id },
+      data: updateData
+    })
 
     Logger.audit('Property updated', {
-      userId: user.id,
+      userId: session.user.id,
       propertyId: property.id,
       changes: Object.keys(updateData),
     })
@@ -121,21 +115,24 @@ export async function DELETE(
 ) {
   try {
     // Authenticate user
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const token = authHeader.substring(7)
-    const user = await authService.verifyToken(token)
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    // Get current property to check ownership
+    const currentProperty = await propertyService.getProperty(params.id)
+    if (!currentProperty || currentProperty.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Property not found or unauthorized' }, { status: 404 })
     }
 
-    await inventoryManager.deleteProperty(params.id)
+    // Delete property
+    await prisma.property.delete({
+      where: { id: params.id }
+    })
 
     Logger.audit('Property deleted', {
-      userId: user.id,
+      userId: session.user.id,
       propertyId: params.id,
     })
 

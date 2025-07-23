@@ -14,13 +14,13 @@ interface Property {
   id: string
   address: string
   city: string
-  asking_price: number
+  askingPrice: number
   bedrooms: number
   bathrooms: number
-  square_meters: number
+  squareMeters: number
   images: string[]
   status: 'AVAILABLE' | 'SOLD' | 'PENDING'
-  energy_label: string
+  energyLabel: string
   description: string
   features: string[]
 }
@@ -133,10 +133,10 @@ export function PropertyCard({
           <Badge 
             className={cn(
               "absolute bottom-3 left-3 text-white font-bold px-3 py-1",
-              getEnergyLabelColor(property.energy_label)
+              getEnergyLabelColor(property.energyLabel)
             )}
           >
-            {property.energy_label}
+            {property.energyLabel}
           </Badge>
 
           {/* Status Badge */}
@@ -179,7 +179,7 @@ export function PropertyCard({
             </div>
             <div className="flex items-center space-x-1">
               <Square className="w-5 h-5" />
-              <span className="font-medium">{property.square_meters} m²</span>
+              <span className="font-medium">{property.squareMeters} m²</span>
             </div>
           </div>
 
@@ -205,10 +205,10 @@ export function PropertyCard({
           <div className="flex items-center justify-between">
             <div>
               <div className="text-3xl font-bold text-gray-900">
-                {formatPrice(property.asking_price)}
+                {formatPrice(property.askingPrice)}
               </div>
               <div className="text-gray-600">
-                {formatPrice(Math.round(property.asking_price / property.square_meters))}/m²
+                {formatPrice(Math.round(property.askingPrice / property.squareMeters))}/m²
               </div>
             </div>
             

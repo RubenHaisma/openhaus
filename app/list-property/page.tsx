@@ -37,8 +37,8 @@ function ListPropertyPageContent() {
       setError(null)
       
       try {
-        // Get REAL property data using WOZ scraper directly
-        const response = await fetch('/api/woz/scrape', {
+        // Get REAL property data using our property service
+        const response = await fetch('/api/valuation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ address, postalCode }),
@@ -48,24 +48,27 @@ function ListPropertyPageContent() {
           throw new Error('Failed to get real property data')
         }
         
-        const result = await response.json()
-        const data = result.data
+        const data = await response.json()
+        const valuation = data.valuation
+        
         setRealPropertyData({
           address,
           postalCode,
-          estimatedValue: data.wozValue || providedValue || 450000,
-          wozValue: data.wozValue,
-          propertyType: data.objectType,
-          squareMeters: data.surfaceArea,
-          oppervlakte: data.oppervlakte,
-          bouwjaar: data.bouwjaar,
-          identificatie: data.identificatie,
-          nummeraanduiding: data.nummeraanduiding,
-          grondOppervlakte: data.grondOppervlakte,
-          gebruiksdoel: data.gebruiksdoel,
-          adresseerbaarObject: data.adresseerbaarObject,
-          wozValues: data.wozValues,
-          dataSource: 'WOZ Direct',
+          estimatedValue: valuation.estimatedValue,
+          wozValue: valuation.wozValue,
+          propertyType: valuation.propertyType,
+          squareMeters: valuation.squareMeters,
+          constructionYear: valuation.constructionYear,
+          energyLabel: valuation.energyLabel,
+          oppervlakte: valuation.oppervlakte,
+          bouwjaar: valuation.bouwjaar,
+          identificatie: valuation.identificatie,
+          nummeraanduiding: valuation.nummeraanduiding,
+          grondOppervlakte: valuation.grondOppervlakte,
+          gebruiksdoel: valuation.gebruiksdoel,
+          adresseerbaarObject: valuation.adresseerbaarObject,
+          wozValues: valuation.wozValues,
+          dataSource: valuation.dataSource,
         })
       } catch (error) {
         console.error('Failed to load real property data:', error)

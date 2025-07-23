@@ -31,33 +31,34 @@ import {
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getPropertyData, calculateValuation } from '@/lib/kadaster'
+import { propertyService } from '@/lib/property/property-service'
 import { dutchTaxCalculator, mortgageCalculator } from '@/lib/real-data/tax-calculator'
 
 // Get real property details using our real data sources
 async function getPropertyDetails(propertyId: string) {
   try {
     // First try to get property from database
-    const response = await fetch(`/api/properties/${propertyId}`)
-    if (!response.ok) {
-      throw new Error('Property not found in database')
+    const property = await propertyService.getProperty(propertyId)
+    if (!property) {
+      throw new Error('Property not found')
     }
     
-    const propertyFromDB = await response.json()
+    // Get fresh property data and valuation
+    const propertyData = await propertyService.getPropertyData(property.address, property.postalCode)
+    if (!propertyData) {
+      // Use property data from database as fallback
+      return property
+    }
     
-    // Get real WOZ and energy data for this property
-    const realData = await getPropertyData(propertyFromDB.address, propertyFromDB.postalCode)
-    if (!realData) throw new Error('Could not get real property data')
-    
-    const valuation = await calculateValuation(realData)
+    const valuation = await propertyService.calculateValuation(propertyData)
     const buyingCosts = await dutchTaxCalculator.calculateTotalBuyingCosts(
       valuation.estimatedValue,
       valuation.estimatedValue * 0.8
     )
     
     return {
-      ...propertyFromDB,
-      realData,
+      ...property,
+      propertyData,
       valuation,
       buyingCosts
     }
@@ -148,7 +149,7 @@ export default function PropertyDetailPage() {
     )
   }
 
-  const isRealData = !!(propertyData.realData && propertyData.valuation)
+  const isRealData = !!(propertyData.propertyData && propertyData.valuation)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -256,26 +257,26 @@ export default function PropertyDetailPage() {
                       <div className="flex items-center justify-center mb-2">
                         <Square className="w-6 h-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{isRealData ? propertyData.realData.squareMeters : propertyData.square_meters}</div>
+                      <div className="text-2xl font-bold text-gray-900">{Number(propertyData.squareMeters)}</div>
                       <div className="text-gray-600">m² woonoppervlak</div>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center mb-2">
                         <Calendar className="w-6 h-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900">{isRealData ? propertyData.realData.constructionYear : propertyData.construction_year}</div>
+                      <div className="text-2xl font-bold text-gray-900">{propertyData.constructionYear}</div>
                       <div className="text-gray-600">Bouwjaar</div>
                     </div>
                   </div>
 
                   {/* Energy Label & Key Info */}
                   <div className="flex flex-wrap gap-4">
-                    <Badge className={`${getEnergyLabelColor(isRealData ? propertyData.realData.energyLabel : propertyData.energy_label)} text-white px-4 py-2 text-lg`}>
-                      Energielabel {isRealData ? propertyData.realData.energyLabel : propertyData.energy_label}
+                    <Badge className={`${getEnergyLabelColor(propertyData.energyLabel)} text-white px-4 py-2 text-lg`}>
+                      Energielabel {propertyData.energyLabel}
                       {isRealData && <span className="ml-1 text-xs">✓ EP Online</span>}
                     </Badge>
                     <Badge variant="outline" className="px-4 py-2 text-lg">
-                      {isRealData ? propertyData.realData.propertyType : propertyData.property_type}
+                      {propertyData.propertyType || 'Woning'}
                     </Badge>
                     <Badge variant="outline" className="px-4 py-2 text-lg">
                       Eigendom
@@ -371,7 +372,7 @@ export default function PropertyDetailPage() {
                       </div>
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-3">Voorzieningen</h4>
-                        <div className="space-y-2">
+                        <p className="text-gray-700">{formatPrice(isRealData ? propertyData.valuation.wozValue : Number(propertyData.estimatedValue))}</p>
                           <div className="flex justify-between">
                             <span>Scholen</span>
                             <span className="font-semibold">Niet beschikbaar</span>
@@ -454,12 +455,12 @@ export default function PropertyDetailPage() {
                 </Card>
               </TabsContent>
             </Tabs>
-
+                    {formatPrice(isRealData ? propertyData.valuation.estimatedValue : Number(propertyData.askingPrice))}
             {/* Market Data */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="w-6 h-6 text-primary" />
+                      Math.round(propertyData.valuation.estimatedValue / Number(propertyData.squareMeters)) : 
+                      Math.round(Number(propertyData.askingPrice) / Number(propertyData.squareMeters)))}/m²
                   <span>Marktgegevens</span>
                   {isRealData && (
                     <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">
@@ -479,8 +480,8 @@ export default function PropertyDetailPage() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
                       {formatPrice(isRealData ? 
-                        propertyData.valuation.marketTrends.pricePerSquareMeter : 
-                        Math.round(propertyData.asking_price / propertyData.square_meters))}
+                        propertyData.valuation.estimatedValue : 
+                        Number(propertyData.askingPrice))}
                     </div>
                     <div className="text-gray-600">Prijs per m²</div>
                   </div>
@@ -605,7 +606,7 @@ export default function PropertyDetailPage() {
                     <div className="text-xl font-semibold text-primary">
                       {isRealData ? 
                         `€${Math.round(propertyData.valuation.estimatedValue * 0.8 * 0.045 / 12).toLocaleString()} - €${Math.round(propertyData.valuation.estimatedValue * 0.9 * 0.055 / 12).toLocaleString()}/maand` :
-                        `€${Math.round(propertyData.asking_price * 0.8 * 0.045 / 12).toLocaleString()} - €${Math.round(propertyData.asking_price * 0.9 * 0.055 / 12).toLocaleString()}/maand`
+                        `€${Math.round(Number(propertyData.askingPrice) * 0.8 * 0.045 / 12).toLocaleString()} - €${Math.round(Number(propertyData.askingPrice) * 0.9 * 0.055 / 12).toLocaleString()}/maand`
                       }
                     </div>
                   </div>

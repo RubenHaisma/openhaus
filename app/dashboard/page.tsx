@@ -190,6 +190,39 @@ export default function DashboardPage() {
     return () => clearTimeout(timer)
   }, [])
 
+  // Load user's properties
+  useEffect(() => {
+    const loadUserProperties = async () => {
+      if (!session?.user?.id) return
+      
+      try {
+        const response = await fetch(`/api/users/${session.user.id}/properties`)
+        if (response.ok) {
+          const data = await response.json()
+          // Update mock data with real properties
+          mockDashboardData.properties = data.properties.map((prop: any) => ({
+            id: prop.id,
+            address: prop.address,
+            status: prop.status,
+            askingPrice: Number(prop.askingPrice),
+            views: Math.floor(Math.random() * 200) + 50, // Mock views for now
+            favorites: Math.floor(Math.random() * 30) + 5, // Mock favorites for now
+            daysOnMarket: Math.floor((Date.now() - new Date(prop.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+            images: prop.images || [],
+            bedrooms: prop.bedrooms,
+            bathrooms: prop.bathrooms,
+            squareMeters: Number(prop.squareMeters),
+            energyLabel: prop.energyLabel,
+            createdAt: prop.createdAt
+          }))
+        }
+      } catch (error) {
+        console.error('Failed to load user properties:', error)
+      }
+    }
+    
+    loadUserProperties()
+  }, [session])
   // Authentication check
   useEffect(() => {
     if (status === 'loading') return

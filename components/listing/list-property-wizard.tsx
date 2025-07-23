@@ -136,8 +136,6 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
       const propertyData = {
         address: initialProperty?.address,
         postalCode: initialProperty?.postalCode,
-        city: extractCityFromPostalCode(initialProperty?.postalCode || ''),
-        province: 'Noord-Holland', // Default, could be determined from postal code
         propertyType: initialProperty?.propertyType || 'HOUSE',
         bedrooms: parseInt(listingData.bedrooms),
         bathrooms: parseInt(listingData.bathrooms),
@@ -147,35 +145,30 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
         energyLabel: initialProperty?.energyLabel || 'C',
         features: listingData.features,
         images: listingData.images.map(img => img.url),
-        description: listingData.description,
-        status: 'AVAILABLE',
-        estimatedValue: initialProperty?.estimatedValue || parseInt(listingData.askingPrice),
-        confidenceScore: initialProperty?.confidenceScore || 0.8,
-        userId: session.user.id
+        description: listingData.description
       }
 
       const response = await fetch('/api/properties', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.accessToken}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(propertyData)
       })
 
       if (response.ok) {
         const property = await response.json()
         setPropertyListed(true)
+        setPropertyId(property.id)
         // Redirect to property page after a delay
         setTimeout(() => {
           router.push(`/properties/${property.id}`)
         }, 3000)
       } else {
-        throw new Error('Failed to create property listing')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create property listing')
       }
     } catch (error) {
       console.error('Failed to publish property:', error)
-      alert('Er is een fout opgetreden bij het publiceren van je advertentie.')
+      alert(`Er is een fout opgetreden bij het publiceren van je advertentie: ${error.message}`)
     }
   }
 
@@ -476,7 +469,7 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
                   <MapPin className="w-6 h-6 text-gray-600" />
                   <div>
                     <div className="font-semibold text-gray-900">{initialProperty?.address}</div>
-                    <div className="text-gray-600">{extractCityFromPostalCode(initialProperty?.postalCode || '')}, {initialProperty?.postalCode}</div>
+                    <div className="text-gray-600">{initialProperty?.city || 'Nederland'}, {initialProperty?.postalCode}</div>
                   </div>
                 </div>
 

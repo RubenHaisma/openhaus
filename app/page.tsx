@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { AddressInput } from '@/components/ui/address-input'
 import { ValuationResult } from '@/components/valuation/valuation-result'
 import { PropertyCard } from '@/components/property/property-card'
-import type { PropertyValuation } from '@/lib/kadaster'
+import { propertyService } from '@/lib/property/property-service'
 import { 
   Home, 
   TrendingUp, 
@@ -36,7 +36,7 @@ import { useRouter } from 'next/navigation'
 
 // Fetch real featured properties from API
 async function fetchFeaturedProperties() {
-  const response = await fetch('/api/properties?limit=3&status=AVAILABLE&featured=true')
+  const response = await fetch('/api/properties?limit=3')
   if (!response.ok) {
     throw new Error('Failed to fetch featured properties')
   }
@@ -467,7 +467,7 @@ export default function HomePage() {
 
           <div className="property-grid">
             {featuredProperties.length > 0 ? (
-              featuredProperties.map((property, index) => (
+              featuredProperties.properties?.map((property, index) => (
                 <motion.div
                   key={property.id}
                   initial={{ opacity: 0, y: 30 }}

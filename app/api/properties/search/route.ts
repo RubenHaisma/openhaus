@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { inventoryManager } from '@/lib/marketplace/inventory'
+import { propertyService } from '@/lib/property/property-service'
 import { cacheService } from '@/lib/cache/redis'
 import { Logger } from '@/lib/monitoring/logger'
 import { z } from 'zod'
@@ -60,30 +60,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Perform search
-    const results = await inventoryManager.searchProperties(
-      {
-        city: filters.city,
-        propertyType: filters.propertyType,
-        minPrice: filters.minPrice,
-        maxPrice: filters.maxPrice,
-        minBedrooms: filters.minBedrooms,
-        maxBedrooms: filters.maxBedrooms,
-        minBathrooms: filters.minBathrooms,
-        maxBathrooms: filters.maxBathrooms,
-        minSquareMeters: filters.minSquareMeters,
-        maxSquareMeters: filters.maxSquareMeters,
-        energyLabel: filters.energyLabel,
-        features: filters.features,
-        status: 'available',
-      },
-      {
-        query: filters.query,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-        limit: filters.limit,
-        offset: filters.offset,
-      }
-    )
+    const results = await propertyService.searchProperties({
+      city: filters.city,
+      propertyType: filters.propertyType as any,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      minBedrooms: filters.minBedrooms,
+      maxBedrooms: filters.maxBedrooms,
+      status: 'AVAILABLE',
+      limit: filters.limit,
+      offset: filters.offset,
+    })
 
     // Cache results for 10 minutes
     await cacheService.cacheSearchResults(cacheKey, results, 600)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { inventoryManager } from '@/lib/marketplace/inventory'
+import { propertyService } from '@/lib/property/property-service'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { Logger } from '@/lib/monitoring/logger'
@@ -36,25 +36,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createPropertySchema.parse(body)
 
-    // Create property
-    const property = await inventoryManager.createProperty({
-      address: validatedData.address,
-      postal_code: validatedData.postalCode,
-      city: validatedData.city,
-      province: validatedData.province,
-      property_type: validatedData.propertyType,
+    // Get property data from WOZ scraper and EP Online
+    const propertyData = await propertyService.getPropertyData(validatedData.address, validatedData.postalCode)
+    if (!propertyData) {
+      return NextResponse.json({ error: 'Could not retrieve property data' }, { status: 400 })
+    }
+
+    // Create property with real data
+    const property = await propertyService.createProperty(session.user.id, propertyData, {
+      askingPrice: validatedData.askingPrice,
       bedrooms: validatedData.bedrooms,
       bathrooms: validatedData.bathrooms,
-      square_meters: validatedData.squareMeters.toString(),
-      construction_year: validatedData.constructionYear,
-      asking_price: validatedData.askingPrice.toString(),
-      energy_label: validatedData.energyLabel || 'C',
-      features: validatedData.features,
-      images: validatedData.images,
       description: validatedData.description,
-      status: 'AVAILABLE',
-      estimated_value: validatedData.askingPrice.toString(), // Would be calculated
-      confidence_score: '0.8', // Would be calculated
+      features: validatedData.features,
+      images: validatedData.images
     })
 
     Logger.audit('Property created', {
@@ -88,12 +83,13 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    const properties = await inventoryManager.searchProperties(
-      { status: 'AVAILABLE' },
-      { limit, offset }
-    )
+    const result = await propertyService.searchProperties({
+      status: 'AVAILABLE',
+      limit,
+      offset
+    })
 
-    return NextResponse.json(properties)
+    return NextResponse.json(result)
   } catch (error) {
     Logger.error('Properties retrieval failed', error as Error)
     return NextResponse.json(

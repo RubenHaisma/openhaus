@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ListPropertyWizard } from '@/components/listing/list-property-wizard'
-import { getPropertyData, calculateValuation } from '@/lib/kadaster'
+import { propertyService } from '@/lib/property/property-service'
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertCircle } from 'lucide-react'
 
@@ -26,39 +26,35 @@ function ListPropertyPageContent() {
       
       try {
         // Get REAL property data using WOZ scraping + EP Online
-        const response = await fetch('/api/valuation', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address, postalCode }),
-        })
-        
-        if (!response.ok) {
-          throw new Error('Failed to get real property data')
+        const propertyData = await propertyService.getPropertyData(address, postalCode)
+        if (!propertyData) {
+          throw new Error('Property data not available')
         }
-        
-        const data = await response.json()
+
+        const valuation = await propertyService.calculateValuation(propertyData)
+
         setRealPropertyData({
           address,
           postalCode,
-          estimatedValue: data.valuation.estimatedValue,
-          wozValue: data.valuation.wozValue,
-          confidenceScore: data.valuation.confidenceScore,
-          dataSource: data.valuation.dataSource,
-          realTimeData: data.valuation.realTimeData,
-          marketTrends: data.valuation.marketTrends,
-          factors: data.valuation.factors,
-          propertyType: data.valuation.propertyType,
-          constructionYear: data.valuation.constructionYear,
-          squareMeters: data.valuation.squareMeters,
-          energyLabel: data.valuation.energyLabel,
-          grondOppervlakte: data.valuation.grondOppervlakte,
-          bouwjaar: data.valuation.bouwjaar,
-          gebruiksdoel: data.valuation.gebruiksdoel,
-          oppervlakte: data.valuation.oppervlakte,
-          identificatie: data.valuation.identificatie,
-          adresseerbaarObject: data.valuation.adresseerbaarObject,
-          nummeraanduiding: data.valuation.nummeraanduiding,
-          wozValues: data.valuation.wozValues
+          estimatedValue: valuation.estimatedValue,
+          wozValue: valuation.wozValue,
+          confidenceScore: valuation.confidenceScore,
+          dataSource: valuation.dataSource,
+          realTimeData: valuation.realTimeData,
+          marketTrends: valuation.marketTrends,
+          factors: valuation.factors,
+          propertyType: propertyData.propertyType,
+          constructionYear: propertyData.constructionYear,
+          squareMeters: propertyData.squareMeters,
+          energyLabel: propertyData.energyLabel,
+          grondOppervlakte: propertyData.grondOppervlakte,
+          bouwjaar: propertyData.bouwjaar,
+          gebruiksdoel: propertyData.gebruiksdoel,
+          oppervlakte: propertyData.oppervlakte,
+          identificatie: propertyData.identificatie,
+          adresseerbaarObject: propertyData.adresseerbaarObject,
+          nummeraanduiding: propertyData.nummeraanduiding,
+          wozValues: propertyData.wozValues
         })
       } catch (error) {
         console.error('Failed to load real property data:', error)
