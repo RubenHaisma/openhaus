@@ -61,13 +61,21 @@ export default function HomePage() {
   const handleAddressSearch = async (address: string, postalCode: string) => {
     setLoading(true)
     try {
+      // Get REAL property valuation - NO MOCK DATA
       const res = await fetch('/api/valuation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address, postalCode }),
       })
-      const data = await res.json()
+      
       if (res.ok) {
+        const data = await res.json()
+        
+        // Validate that we received real valuation data
+        if (!data.valuation || !data.valuation.estimatedValue) {
+          throw new Error('Invalid valuation data received')
+        }
+        
         if (!session) {
           // Store the search data and redirect to sign in
           sessionStorage.setItem('pendingSearch', JSON.stringify({ address, postalCode, value: data.valuation.estimatedValue }))
@@ -77,10 +85,12 @@ export default function HomePage() {
         // Redirect to list-property with valuation data
         router.push(`/list-property?address=${encodeURIComponent(address)}&postal=${encodeURIComponent(postalCode)}&value=${encodeURIComponent(data.valuation.estimatedValue)}`)
       } else {
-        alert(`Fout bij het ophalen van woninggegevens: ${data.error}`)
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Valuation failed')
       }
     } catch (error: any) {
-      alert(`Fout bij het ophalen van woninggegevens: ${error.message}`)
+      console.error('Address search failed:', error)
+      alert(`Fout bij het ophalen van woninggegevens: ${error.message}. Controleer het adres en probeer het opnieuw.`)
     } finally {
       setLoading(false)
     }

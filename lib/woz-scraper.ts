@@ -89,7 +89,7 @@ export class WOZScraper {
         }
       }
 
-      // First check if we have cached data
+      // Check database cache
       const cachedWOZData = await this.getCachedWOZData(address, postalCode)
       if (cachedWOZData) {
         Logger.info('WOZ data retrieved from cache', { address, postalCode: postalCode.replace(/\s/g, '').toUpperCase() })
@@ -102,11 +102,13 @@ export class WOZScraper {
         }
       }
 
-      // Initialize browser if needed
+      // NO CACHED DATA - MUST SCRAPE REAL WOZ DATA
+      Logger.info('No cached WOZ data found - starting real scraping from wozwaardeloket.nl', { address, postalCode })
+      
       await this.initBrowser()
       
       if (!this.browser) {
-        throw new Error('Failed to initialize browser')
+        throw new Error('Failed to initialize browser for WOZ scraping')
       }
 
       const page = await this.browser.newPage()
@@ -137,11 +139,14 @@ export class WOZScraper {
         timeout: 15000 
       })
 
+      Logger.info('Successfully loaded wozwaardeloket.nl', { address, postalCode })
+
       // Wait for the new search input to load
       await page.waitForSelector('#ggcSearchInput', { timeout: 10000 })
 
       // Type the full address (e.g., "Kampweg 10, 3769DG") into the search input
       const fullAddress = `${address}, ${postalCode.replace(/\s/g, '').toUpperCase()}`
+      Logger.info('Searching for address on WOZ website', { fullAddress })
       await page.type('#ggcSearchInput', fullAddress)
 
       // Wait for the suggestion list to appear and have at least one suggestion
@@ -166,6 +171,7 @@ export class WOZScraper {
 
       // Extract WOZ data from the results page
       const wozData = await page.evaluate(() => {
+        console.log('Extracting WOZ data from page...')
         // WOZ values for all years
         const wozRows = Array.from(document.querySelectorAll('.woz-table .waarden-row')).map(row => {
           const date = row.querySelector('.wozwaarde-datum')?.textContent?.trim() || ''
@@ -252,11 +258,13 @@ export class WOZScraper {
       // Parse the WOZ value
       const wozValue = this.parseWOZValue(wozData.wozValueText)
       if (!wozValue) {
-        // Try to extract from full page text as fallback
-        const fallbackValue = this.parseWOZValue(wozData.fullPageText)
-        if (!fallbackValue) {
-          throw new Error(`Could not extract WOZ value from page. Found text: ${wozData.wozValueText}`)
-        }
+        Logger.error('Failed to parse WOZ value', new Error('No WOZ value found'), { 
+          address, 
+          postalCode, 
+          extractedText: wozData.wozValueText,
+          fullPageLength: wozData.fullPageText?.length || 0
+        })
+        throw new Error(`Could not extract WOZ value from wozwaardeloket.nl. Found text: "${wozData.wozValueText}". Please check if the address is correct.`)
       }
 
       // Parse reference year
@@ -311,14 +319,14 @@ export class WOZScraper {
       }
 
     } catch (error) {
-      Logger.error('WOZ scraping failed', error as Error, {
+      Logger.error('REAL WOZ scraping failed - NO FALLBACK TO MOCK DATA', error as Error, {
         address,
         postalCode
       })
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown scraping error'
+        error: `WOZ scraping failed: ${error instanceof Error ? error.message : 'Unknown scraping error'}. Please verify the address exists in the WOZ database.`
       }
     }
   }

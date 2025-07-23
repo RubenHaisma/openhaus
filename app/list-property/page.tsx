@@ -50,7 +50,7 @@ function ListPropertyPageContent() {
       setError(null)
       
       try {
-        // Get REAL property data using our property service
+        // Get REAL property data using our property service - NO FALLBACKS TO MOCK DATA
         const response = await fetch('/api/valuation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -58,20 +58,8 @@ function ListPropertyPageContent() {
         })
         
         if (!response.ok) {
-          // For demo, use mock data if API fails
-          setRealPropertyData({
-            address,
-            postalCode,
-            estimatedValue: providedValue || 450000,
-            wozValue: (providedValue || 450000) * 0.85,
-            propertyType: 'Eengezinswoning',
-            squareMeters: 100,
-            constructionYear: 1980,
-            energyLabel: 'C',
-            dataSource: 'Demo data'
-          })
-          setLoading(false)
-          return
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to get property data')
         }
         
         const data = await response.json()
@@ -98,14 +86,8 @@ function ListPropertyPageContent() {
         })
       } catch (error) {
         console.error('Failed to load real property data:', error)
-        setError('Kon geen actuele woninggegevens ophalen. Probeer het opnieuw.')
-        // Fallback to provided value
-        setRealPropertyData({
-          address,
-          postalCode,
-          estimatedValue: providedValue || 450000,
-          dataSource: 'Fallback data'
-        })
+        setError(`Kon geen actuele woninggegevens ophalen: ${error instanceof Error ? error.message : 'Onbekende fout'}. Controleer het adres en probeer het opnieuw.`)
+        setRealPropertyData(null)
       } finally {
         setLoading(false)
       }

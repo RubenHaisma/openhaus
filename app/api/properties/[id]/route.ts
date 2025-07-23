@@ -27,18 +27,34 @@ const updatePropertySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const id = request.nextUrl.pathname.split("/").pop()!
+    
+    if (!id || id === 'undefined' || id === 'null') {
+      return NextResponse.json(
+        { error: 'Invalid property ID' },
+        { status: 400 }
+      )
+    }
+    
     // Fetch property from the database
     const property = await propertyService.getProperty(id)
     if (!property) {
+      Logger.warn('Property not found in database', { propertyId: id })
       return NextResponse.json(
-        { error: 'Property not found' },
+        { error: 'Property not found in database' },
         { status: 404 }
       )
     }
+    
+    Logger.info('Property retrieved from database', { 
+      propertyId: id, 
+      address: property.address,
+      hasRealData: !!(property.address && property.askingPrice)
+    })
+    
     return NextResponse.json(property)
   } catch (error) {
     Logger.error('Property retrieval failed', error as Error, {
-      // propertyId: context.params.id,
+      propertyId: request.nextUrl.pathname.split("/").pop(),
     })
     return NextResponse.json(
       { error: 'Property retrieval failed' },

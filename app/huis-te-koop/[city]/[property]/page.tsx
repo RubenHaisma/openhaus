@@ -40,6 +40,10 @@ export default function SEOPropertyDetailPage() {
   const city = typeof params.city === 'string' ? params.city : Array.isArray(params.city) ? params.city[0] : '';
   const property = typeof params.property === 'string' ? params.property : Array.isArray(params.property) ? params.property[0] : '';
 
+  // Extract address from property slug (assumes address is first part, separated by '-')
+  const addressName = property.split('-')[0];
+  const cityName = city;
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showContactForm, setShowContactForm] = useState(false)
@@ -60,47 +64,47 @@ export default function SEOPropertyDetailPage() {
   useEffect(() => {
     const loadProperty = async () => {
       try {
-        // In production, you'd extract the property ID from the slug
-        // and query your database to find the matching property
-        const propertyId = extractPropertyId(property)
+        // Extract the property ID from the URL slug and query the REAL database
+        let propertyId = extractPropertyId(property)
         
         if (!propertyId) {
-          setError('Property not found')
+          // Try to find property by address and city in database
+          const searchResponse = await fetch(`/api/properties/search?city=${encodeURIComponent(cityName)}&limit=100`)
+          if (searchResponse.ok) {
+            const searchData = await searchResponse.json()
+            const matchingProperty = searchData.properties?.find((p: any) => 
+              p.address.toLowerCase().includes(addressName.toLowerCase()) ||
+              addressName.toLowerCase().includes(p.address.toLowerCase())
+            )
+            if (matchingProperty) {
+              propertyId = matchingProperty.id
+            }
+          }
+        }
+        
+        if (!propertyId) {
+          setError('Property not found in database')
           setLoading(false)
           return
         }
 
-        // Mock property data based on URL parameters
-        const cityName = SEOUrlGenerator.unslugify(city)
-        const mockProperty = {
-          id: propertyId,
-          address: 'Keizersgracht 123',
-          city: cityName,
-          postalCode: '1015CJ',
-          province: 'Noord-Holland',
-          propertyType: 'Eengezinswoning',
-          bedrooms: 3,
-          bathrooms: 2,
-          squareMeters: 120,
-          constructionYear: 1980,
-          askingPrice: 675000,
-          energyLabel: 'B',
-          status: 'AVAILABLE',
-          images: ['https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'],
-          description: `Prachtige woning in het hart van ${cityName}. Deze karakteristieke woning biedt alle moderne gemakken in een historische setting.`,
-          features: ['Tuin', 'Balkon', 'Garage', 'Monumentaal pand'],
-          createdAt: new Date().toISOString(),
-          user: {
-            id: 'owner-id',
-            name: 'Eigenaar',
-            email: 'owner@example.com'
-          }
+        // Get REAL property data from database
+        const response = await fetch(`/api/properties/${propertyId}`)
+        if (!response.ok) {
+          throw new Error('Property not found in database')
+        }
+        
+        const realProperty = await response.json()
+        
+        // Validate that we have real data
+        if (!realProperty || !realProperty.address || !realProperty.askingPrice) {
+          throw new Error('Invalid property data - missing required fields')
         }
 
-        setPropertyData(mockProperty)
+        setPropertyData(realProperty)
       } catch (error) {
         console.error('Failed to load property:', error)
-        setError('Failed to load property')
+        setError(`Failed to load property: ${error instanceof Error ? error.message : 'Unknown error'}`)
       } finally {
         setLoading(false)
       }

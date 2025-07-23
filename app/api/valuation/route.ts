@@ -42,38 +42,14 @@ export async function POST(req: NextRequest) {
       const valuation = await propertyService.calculateValuation(propertyData)
       return NextResponse.json({ valuation })
     } catch (error) {
-      // For demo purposes, return mock data if real data fails
-      const mockValuation = {
-        estimatedValue: 450000,
-        confidenceScore: 0.85,
-        wozValue: 380000,
-        marketMultiplier: 1.18,
-        factors: [
-          { factor: 'Locatie', impact: 5.2, description: 'Gewilde buurt' },
-          { factor: 'Energielabel', impact: 2.1, description: 'Label C - gemiddeld' },
-          { factor: 'Bouwjaar', impact: -1.5, description: 'Ouder pand' }
-        ],
-        lastUpdated: new Date().toISOString(),
-        dataSource: 'Demo data (Mock WOZ + Market Analysis)',
-        marketTrends: {
-          averageDaysOnMarket: 35,
-          averagePriceChange: 6.2,
-          pricePerSquareMeter: 4500
+      Logger.error('Property valuation failed', error as Error, { address: validAddress, postalCode: validPostalCode })
+      return NextResponse.json(
+        { 
+          error: `Valuation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          details: 'Unable to retrieve WOZ data or energy label. Please check the address and postal code.'
         },
-        comparableSales: [
-          { address: 'Vergelijkbare woning 1', soldPrice: 435000, soldDate: '2024-12-15', squareMeters: 100, pricePerSqm: 4350 },
-          { address: 'Vergelijkbare woning 2', soldPrice: 465000, soldDate: '2024-11-28', squareMeters: 105, pricePerSqm: 4429 }
-        ],
-        realTimeData: {
-          dataSource: 'Demo Market Data',
-          lastUpdated: new Date().toISOString()
-        },
-        propertyType: 'Eengezinswoning',
-        squareMeters: 100,
-        constructionYear: 1980,
-        energyLabel: 'C'
-      }
-      return NextResponse.json({ valuation: mockValuation })
+        { status: 500 }
+      )
     }
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
