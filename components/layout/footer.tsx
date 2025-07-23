@@ -91,10 +91,6 @@ export function Footer() {
             {/* Contact Info */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-primary flex-shrink-0" />
-                <span className="text-gray-900 text-lg">020 123 4567</span>
-              </div>
-              <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-primary flex-shrink-0" />
                 <span className="text-gray-900 text-lg">info@openhaus.nl</span>
               </div>

@@ -37,7 +37,6 @@ export default function MakeOfferPage() {
     message: '',
     buyerName: '',
     buyerEmail: '',
-    buyerPhone: '',
     financingConfirmed: false,
     viewingRequested: false,
     conditions: [] as string[]
@@ -269,17 +268,6 @@ export default function MakeOfferPage() {
                       type="email"
                       value={offerData.buyerEmail}
                       onChange={(e) => setOfferData(prev => ({ ...prev, buyerEmail: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="buyerPhone">Telefoonnummer</Label>
-                    <Input
-                      id="buyerPhone"
-                      type="tel"
-                      value={offerData.buyerPhone}
-                      onChange={(e) => setOfferData(prev => ({ ...prev, buyerPhone: e.target.value }))}
                       required
                     />
                   </div>

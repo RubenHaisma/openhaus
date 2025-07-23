@@ -415,29 +415,7 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
                       checked={listingData.contactPreference === 'email'}
                       onChange={e => setListingData(prev => ({ ...prev, contactPreference: e.target.value }))}
                     />
-                    <Label htmlFor="email">Via email (aanbevolen)</Label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      id="phone"
-                      name="contactPreference"
-                      value="phone"
-                      checked={listingData.contactPreference === 'phone'}
-                      onChange={e => setListingData(prev => ({ ...prev, contactPreference: e.target.value }))}
-                    />
-                    <Label htmlFor="phone">Via telefoon</Label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      id="both"
-                      name="contactPreference"
-                      value="both"
-                      checked={listingData.contactPreference === 'both'}
-                      onChange={e => setListingData(prev => ({ ...prev, contactPreference: e.target.value }))}
-                    />
-                    <Label htmlFor="both">Email en telefoon</Label>
+                    <Label htmlFor="email">Via email</Label>
                   </div>
                 </div>
               </Card>
@@ -529,10 +507,7 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
 
                 <div>
                   <div className="text-sm text-gray-600 mb-2">Contact</div>
-                  <p className="text-gray-900">
-                    {listingData.contactPreference === 'email' ? 'Via email' :
-                     listingData.contactPreference === 'phone' ? 'Via telefoon' : 'Email en telefoon'}
-                  </p>
+                  <p className="text-gray-900">Via email</p>
                 </div>
               </div>
             </Card>

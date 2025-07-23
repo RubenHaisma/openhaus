@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
-  Phone, 
   Mail, 
   MapPin, 
   Clock, 
@@ -25,7 +24,6 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
     subject: '',
     message: '',
     category: ''
@@ -45,14 +43,6 @@ export default function ContactPage() {
   }
 
   const contactMethods = [
-    {
-      icon: Phone,
-      title: 'Telefoon',
-      value: '020 123 4567',
-      description: 'Ma-Vr 9:00-18:00, Za 10:00-16:00',
-      action: 'Bel nu',
-      href: 'tel:+31201234567'
-    },
     {
       icon: Mail,
       title: 'Email',
@@ -250,16 +240,6 @@ export default function ContactPage() {
                         required
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="phone">Telefoonnummer</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    />
                   </div>
 
                   <div>

@@ -79,11 +79,6 @@ export function Header() {
 
           {/* Desktop Auth & CTA */}
           <div className="hidden md:flex items-center space-x-6">
-            <Button variant="ghost" size="lg" className="text-gray-600 hover:text-primary text-lg font-medium">
-              <Phone className="mr-2 h-5 w-5" />
-              <span className="hidden lg:inline">020 123 4567</span>
-              <span className="lg:hidden">Bel ons</span>
-            </Button>
             
             {session ? (
               <DropdownMenu>

@@ -53,7 +53,6 @@ export function StructuredData({ type, data }: StructuredDataProps) {
             "@type": "RealEstateAgent",
             "name": "OpenHaus",
             "url": baseUrl,
-            "telephone": "+31-20-123-4567",
             "email": "info@openhaus.nl"
           }
         }
@@ -67,7 +66,6 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           "url": baseUrl,
           "logo": `${baseUrl}/logo.png`,
           "image": `${baseUrl}/og-image.jpg`,
-          "telephone": "+31-20-123-4567",
           "email": "info@openhaus.nl",
           "address": {
             "@type": "PostalAddress",

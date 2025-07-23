@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         We verzamelen verschillende soorten gegevens om onze diensten te kunnen leveren:
         
         **Persoonlijke identificatiegegevens:**
-        • Naam, emailadres, telefoonnummer
+        • Naam, emailadres
         • Adresgegevens
         • Geboortedatum (indien relevant voor dienstverlening)
         
@@ -232,7 +232,6 @@ export default function PrivacyPage() {
         
         **Privacy Officer:**
         Email: privacy@openhaus.nl
-        Telefoon: 020 123 4567
         
         **Postadres:**
         OpenHaus B.V.

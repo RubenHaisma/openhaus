@@ -123,21 +123,18 @@ export default function PressPage() {
       name: 'Sarah van der Berg',
       role: 'CEO & Oprichter',
       email: 'sarah@openhaus.nl',
-      phone: '+31 6 1234 5678',
       bio: 'Voormalig vastgoedmakelaar met 15 jaar ervaring. Oprichter van OpenHaus in 2020.'
     },
     {
       name: 'Mark Janssen',
       role: 'CTO',
       email: 'mark@openhaus.nl',
-      phone: '+31 6 2345 6789',
       bio: 'Tech expert gespecialiseerd in PropTech en AI-oplossingen voor vastgoed.'
     },
     {
       name: 'Lisa de Vries',
       role: 'Head of Communications',
       email: 'press@openhaus.nl',
-      phone: '+31 6 3456 7890',
       bio: 'Verantwoordelijk voor alle externe communicatie en media relaties.'
     }
   ]
@@ -388,12 +385,6 @@ export default function PressPage() {
                       >
                         {contact.email}
                       </a>
-                      <a 
-                        href={`tel:${contact.phone}`}
-                        className="block text-gray-600 text-sm"
-                      >
-                        {contact.phone}
-                      </a>
                     </div>
                   </CardContent>
                 </Card>
@@ -446,13 +437,6 @@ export default function PressPage() {
                 >
                   <Mail className="w-5 h-5 mr-2" />
                   press@openhaus.nl
-                </a>
-                <a 
-                  href="tel:+31634567890"
-                  className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white hover:bg-white hover:text-primary rounded-lg text-lg font-bold transition-colors"
-                >
-                  <Phone className="w-5 h-5 mr-2" />
-                  +31 6 3456 7890
                 </a>
               </div>
               <p className="text-sm opacity-75 mt-4">
