@@ -12,7 +12,6 @@ import { Home, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Suspense } from 'react'
-import SignInSuspenseWrapper from "./_suspense-wrapper";
 
 export default function SignInPage() {
   const router = useRouter()
@@ -54,7 +53,7 @@ export default function SignInPage() {
   }
 
   return (
-    <SignInSuspenseWrapper>
+    <Suspense fallback={null}>
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -171,6 +170,6 @@ export default function SignInPage() {
           </Card>
         </motion.div>
       </div>
-    </SignInSuspenseWrapper>
+    </Suspense>
   )
 }
