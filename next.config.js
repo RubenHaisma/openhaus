@@ -24,7 +24,7 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    domains: ['images.pexels.com', 'via.placeholder.com'],
+    domains: ['images.pexels.com', 'via.placeholder.com', 'pub-275edbc3a5f04d919fc235d2b654481b.r2.dev'],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },

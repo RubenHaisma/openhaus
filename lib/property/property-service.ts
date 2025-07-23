@@ -90,6 +90,12 @@ export class PropertyService {
 
       const wozData = wozResult.data
 
+      // Debug log for surface area extraction
+      Logger.info('WOZ surface area debug', {
+        wozOppervlakte: wozData.oppervlakte,
+        wozSurfaceArea: wozData.surfaceArea
+      })
+
       // Get energy label from EP Online API
       const energyLabel = await this.getEnergyLabel(address, postalCode)
 
@@ -97,8 +103,19 @@ export class PropertyService {
       const constructionYear = wozData.bouwjaar ? parseInt(wozData.bouwjaar) : 
                               (wozData.referenceYear ? wozData.referenceYear - 20 : new Date().getFullYear() - 30)
       
-      const squareMeters = wozData.oppervlakte ? parseFloat(wozData.oppervlakte.replace(/[^\d.,]/g, '').replace(',', '.')) :
-                          (wozData.surfaceArea || 100) // Fallback to WOZ surface area
+      let squareMeters: number | undefined = undefined;
+      if (wozData.oppervlakte) {
+        const parsed = parseFloat(wozData.oppervlakte.replace(/[^\d.,]/g, '').replace(',', '.'));
+        if (!isNaN(parsed) && parsed > 10 && parsed < 1000) {
+          squareMeters = parsed;
+        }
+      }
+      if (!squareMeters && wozData.surfaceArea && wozData.surfaceArea > 10 && wozData.surfaceArea < 10000) {
+        squareMeters = wozData.surfaceArea;
+      }
+      if (!squareMeters) {
+        squareMeters = 100;
+      }
 
       const propertyData: PropertyData = {
         address: wozData.address,

@@ -49,6 +49,7 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
   const [currentStep, setCurrentStep] = useState(0)
   const [propertyListed, setPropertyListed] = useState(false)
   const [propertyId, setPropertyId] = useState<string | null>(null)
+  const [descriptionError, setDescriptionError] = useState<string | null>(null)
 
   // Property listing data
   const [listingData, setListingData] = useState({
@@ -113,6 +114,14 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
   }
 
   const nextStep = () => {
+    if (currentStep === 1) {
+      if (!listingData.description || listingData.description.length < 10) {
+        setDescriptionError('Beschrijving moet minimaal 10 tekens zijn.')
+        return
+      } else {
+        setDescriptionError(null)
+      }
+    }
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
       steps[currentStep].completed = true
@@ -126,6 +135,12 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
   }
 
   const handlePublish = async () => {
+    if (!listingData.description || listingData.description.length < 10) {
+      setDescriptionError('Beschrijving moet minimaal 10 tekens zijn.')
+      return
+    } else {
+      setDescriptionError(null)
+    }
     try {
       if (!session?.user) {
         router.push('/auth/signin')
@@ -168,7 +183,8 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
       }
     } catch (error) {
       console.error('Failed to publish property:', error)
-      alert(`Er is een fout opgetreden bij het publiceren van je advertentie: ${error.message}`)
+      const errMsg = (error instanceof Error) ? error.message : String(error)
+      alert(`Er is een fout opgetreden bij het publiceren van je advertentie: ${errMsg}`)
     }
   }
 
@@ -316,6 +332,9 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
                   <p className="text-sm text-gray-500 mt-1">
                     Tip: Vermeld bijzonderheden zoals recent onderhoud, unieke kenmerken, of voordelen van de locatie.
                   </p>
+                  {descriptionError && (
+                    <p className="text-sm text-red-600 mt-2">{descriptionError}</p>
+                  )}
                 </div>
               </Card>
 
@@ -469,7 +488,7 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
                   <MapPin className="w-6 h-6 text-gray-600" />
                   <div>
                     <div className="font-semibold text-gray-900">{initialProperty?.address}</div>
-                    <div className="text-gray-600">{initialProperty?.city || 'Nederland'}, {initialProperty?.postalCode}</div>
+                    <div className="text-gray-600">{initialProperty?.postalCode}</div>
                   </div>
                 </div>
 
@@ -618,7 +637,7 @@ export function ListPropertyWizard({ initialProperty }: ListPropertyWizardProps)
             disabled={
               currentStep === steps.length - 1 || 
               (currentStep === 0 && (!listingData.bedrooms || !listingData.bathrooms)) ||
-              (currentStep === 1 && (!listingData.askingPrice || !listingData.description)) ||
+              (currentStep === 1 && (!listingData.askingPrice || !listingData.description || listingData.description.length < 10)) ||
               (currentStep === 2 && listingData.images.length === 0)
             }
             className="bg-blue-600 hover:bg-blue-700 px-6"

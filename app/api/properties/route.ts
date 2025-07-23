@@ -9,9 +9,6 @@ import { z } from 'zod'
 const createPropertySchema = z.object({
   address: z.string().min(1, 'Address is required'),
   postalCode: z.string().min(1, 'Postal code is required'),
-  city: z.string().min(1, 'City is required'),
-  province: z.string().min(1, 'Province is required'),
-  propertyType: z.nativeEnum(PropertyType),
   bedrooms: z.number().min(0),
   bathrooms: z.number().min(0),
   squareMeters: z.number().min(1),
@@ -56,7 +53,7 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       propertyId: property.id,
       address: property.address,
-      askingPrice: property.asking_price,
+      askingPrice: property.askingPrice,
     })
 
     return NextResponse.json(property)

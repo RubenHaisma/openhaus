@@ -262,8 +262,14 @@ export class WOZScraper {
       // Parse reference year
       const referenceYear = this.parseYear(wozData.year) || new Date().getFullYear() - 1
 
-      // Parse surface area if available
-      const surfaceArea = this.parseSurfaceArea(wozData.surfaceArea)
+      // Parse surface area: prioritize 'oppervlakte' from Kenmerken, fallback to generic selector
+      let surfaceArea: number | null = null;
+      if (wozData.oppervlakte) {
+        surfaceArea = this.parseSurfaceArea(wozData.oppervlakte);
+      }
+      if (!surfaceArea && wozData.surfaceArea) {
+        surfaceArea = this.parseSurfaceArea(wozData.surfaceArea);
+      }
 
       const result: WOZData = {
         address,
