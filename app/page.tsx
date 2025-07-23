@@ -7,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { AddressInput } from '@/components/ui/address-input'
 import { ValuationResult } from '@/components/valuation/valuation-result'
 import { PropertyCard } from '@/components/property/property-card'
-import { propertyService } from '@/lib/property/property-service'
 import { 
   Home, 
   TrendingUp, 

@@ -29,6 +29,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Explicitly cast propertyDetails to expected type
+    const propertyDetails = valuation.propertyDetails as {
+      wozValue?: number
+      factors?: any[]
+      marketTrends?: any
+      bouwjaar?: string
+      oppervlakte?: string
+    } | undefined
+
     // Reconstruct the full valuation object from database data
     const fullValuation = {
       id: valuation.id,
@@ -39,12 +48,12 @@ export async function GET(request: NextRequest) {
       valuation: {
         estimatedValue: Number(valuation.estimatedValue),
         confidenceScore: Number(valuation.confidenceScore),
-        wozValue: valuation.propertyDetails?.wozValue || Number(valuation.estimatedValue) * 0.85,
+        wozValue: propertyDetails?.wozValue || Number(valuation.estimatedValue) * 0.85,
         marketMultiplier: 1.18,
-        factors: valuation.propertyDetails?.factors || [],
+        factors: propertyDetails?.factors || [],
         lastUpdated: valuation.createdAt.toISOString(),
         dataSource: 'WOZ Scraping + EP Online + Market Analysis',
-        marketTrends: valuation.propertyDetails?.marketTrends || {
+        marketTrends: propertyDetails?.marketTrends || {
           averageDaysOnMarket: 35,
           averagePriceChange: 6.2,
           pricePerSquareMeter: Math.round(Number(valuation.estimatedValue) / 100)
@@ -54,8 +63,8 @@ export async function GET(request: NextRequest) {
           dataSource: 'Live WOZ + EP Online + Market Data',
           lastUpdated: valuation.createdAt.toISOString()
         },
-        bouwjaar: valuation.propertyDetails?.bouwjaar || '1980',
-        oppervlakte: valuation.propertyDetails?.oppervlakte || '100 m²'
+        bouwjaar: propertyDetails?.bouwjaar || '1980',
+        oppervlakte: propertyDetails?.oppervlakte || '100 m²'
       }
     }
 
