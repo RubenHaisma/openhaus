@@ -42,7 +42,7 @@ export default function DashboardPage() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  // Calculate real stats from user properties
+  // Calculate stats from real user properties
   const stats = {
     totalViews: userProperties?.properties?.reduce((sum: number, p: any) => sum + (p.views || 0), 0) || 0,
     totalFavorites: userProperties?.properties?.reduce((sum: number, p: any) => sum + (p.favorites || 0), 0) || 0,

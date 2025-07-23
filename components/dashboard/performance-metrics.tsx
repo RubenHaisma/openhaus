@@ -28,10 +28,69 @@ interface PerformanceData {
 }
 
 interface PerformanceMetricsProps {
-  data: PerformanceData
+  userId: string
 }
 
-export function PerformanceMetrics({ data }: PerformanceMetricsProps) {
+export function PerformanceMetrics({ userId }: PerformanceMetricsProps) {
+  const [data, setData] = useState<PerformanceData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch real performance data from API
+  useEffect(() => {
+    const fetchPerformanceData = async () => {
+      try {
+        const response = await fetch(`/api/users/${userId}/performance`)
+        if (response.ok) {
+          const performanceData = await response.json()
+          setData(performanceData)
+        }
+      } catch (error) {
+        console.error('Failed to fetch performance data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (userId) {
+      fetchPerformanceData()
+    }
+  }, [userId])
+
+  if (loading) {
+    return (
+      <Card className="shadow-lg border-0">
+        <CardHeader>
+          <CardTitle>Prestatie indicatoren</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-3">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-2 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return (
+      <Card className="shadow-lg border-0">
+        <CardHeader>
+          <CardTitle>Prestatie indicatoren</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <p className="text-gray-500">Geen prestatie data beschikbaar</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const metrics = [
     {
       label: 'Conversie ratio',

@@ -39,17 +39,40 @@ interface Property {
 }
 
 interface PropertyTableProps {
-  properties: Property[]
+  userId: string
   onEdit: (id: string) => void
   onDelete: (id: string) => void
   onView: (id: string) => void
 }
 
-export function PropertyTable({ properties, onEdit, onDelete, onView }: PropertyTableProps) {
+export function PropertyTable({ userId, onEdit, onDelete, onView }: PropertyTableProps) {
+  const [properties, setProperties] = useState<Property[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'price' | 'views'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null)
+
+  // Fetch real properties from API
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await fetch(`/api/users/${userId}/properties`)
+        if (response.ok) {
+          const data = await response.json()
+          setProperties(data.properties || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch properties:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (userId) {
+      fetchProperties()
+    }
+  }, [userId])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -167,7 +190,12 @@ export function PropertyTable({ properties, onEdit, onDelete, onView }: Property
       </CardHeader>
 
       <CardContent className="p-0">
-        {sortedProperties.length === 0 ? (
+        {loading ? (
+          <div className="p-12 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Laden van woningen...</p>
+          </div>
+        ) : sortedProperties.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-gray-400" />

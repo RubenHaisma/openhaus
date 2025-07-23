@@ -23,8 +23,6 @@ import {
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
-// Remove mockProperties
-
 export default function BuyPage() {
   const [searchResults, setSearchResults] = useState<any>(null)
   const [favorites, setFavorites] = useState<string[]>([])
@@ -32,12 +30,12 @@ export default function BuyPage() {
   const [loading, setLoading] = useState(false)
   const [properties, setProperties] = useState<any[]>([])
 
-  // Fetch properties from API on mount
+  // Fetch real properties from database
   useEffect(() => {
     const fetchProperties = async () => {
       setLoading(true)
       try {
-        const res = await fetch('/api/properties?limit=30')
+        const res = await fetch('/api/properties?limit=30&status=AVAILABLE')
         const data = await res.json()
         setProperties(data.properties || [])
       } catch (e) {
@@ -89,6 +87,7 @@ export default function BuyPage() {
   const [cityStats, setCityStats] = useState<any[]>([])
   const [cityStatsLoading, setCityStatsLoading] = useState(true)
 
+  // Fetch real city statistics from database
   useEffect(() => {
     const fetchCityStats = async () => {
       setCityStatsLoading(true)

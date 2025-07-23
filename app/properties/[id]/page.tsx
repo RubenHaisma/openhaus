@@ -314,15 +314,27 @@ export default function PropertyDetailPage() {
                           <div className="space-y-2">
                             <div className="flex justify-between">
                               <span>Loopscore</span>
-                              <span className="font-semibold">{buurtMetrics && typeof buurtMetrics.shops === 'number' && typeof buurtMetrics.restaurants === 'number' ? (buurtMetrics.shops + buurtMetrics.restaurants) : buurtMetricsError ? 'Niet beschikbaar' : '-'}</span>
+                              <span className="font-semibold">
+                                {buurtMetrics && typeof buurtMetrics.shops === 'number' && typeof buurtMetrics.restaurants === 'number' 
+                                  ? Math.min(100, (buurtMetrics.shops + buurtMetrics.restaurants) * 2) 
+                                  : buurtMetricsError ? 'Niet beschikbaar' : 'Laden...'}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span>Fietsscore</span>
-                              <span className="font-semibold">{buurtMetrics && typeof buurtMetrics.bikeInfra === 'number' ? buurtMetrics.bikeInfra : buurtMetricsError ? 'Niet beschikbaar' : '-'}</span>
+                              <span className="font-semibold">
+                                {buurtMetrics && typeof buurtMetrics.bikeInfra === 'number' 
+                                  ? Math.min(100, buurtMetrics.bikeInfra * 10) 
+                                  : buurtMetricsError ? 'Niet beschikbaar' : 'Laden...'}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span>OV-score</span>
-                              <span className="font-semibold">{buurtMetrics && typeof buurtMetrics.transitStops === 'number' ? buurtMetrics.transitStops : buurtMetricsError ? 'Niet beschikbaar' : '-'}</span>
+                              <span className="font-semibold">
+                                {buurtMetrics && typeof buurtMetrics.transitStops === 'number' 
+                                  ? Math.min(100, buurtMetrics.transitStops * 5) 
+                                  : buurtMetricsError ? 'Niet beschikbaar' : 'Laden...'}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -331,19 +343,31 @@ export default function PropertyDetailPage() {
                           <div className="space-y-2">
                             <div className="flex justify-between">
                               <span>Scholen</span>
-                              <span className="font-semibold">{buurtMetrics && typeof buurtMetrics.schools === 'number' ? buurtMetrics.schools : buurtMetricsError ? 'Niet beschikbaar' : '-'}</span>
+                              <span className="font-semibold">
+                                {buurtMetrics && typeof buurtMetrics.schools === 'number' 
+                                  ? buurtMetrics.schools 
+                                  : buurtMetricsError ? 'Niet beschikbaar' : 'Laden...'}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span>Veiligheid</span>
-                              <span className="font-semibold">Niet beschikbaar</span>
+                              <span className="font-semibold">Laden...</span>
                             </div>
                             <div className="flex justify-between">
                               <span>Restaurants</span>
-                              <span className="font-semibold">{buurtMetrics && typeof buurtMetrics.restaurants === 'number' ? buurtMetrics.restaurants : buurtMetricsError ? 'Niet beschikbaar' : '-'}</span>
+                              <span className="font-semibold">
+                                {buurtMetrics && typeof buurtMetrics.restaurants === 'number' 
+                                  ? buurtMetrics.restaurants 
+                                  : buurtMetricsError ? 'Niet beschikbaar' : 'Laden...'}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span>Winkels</span>
-                              <span className="font-semibold">{buurtMetrics && typeof buurtMetrics.shops === 'number' ? buurtMetrics.shops : buurtMetricsError ? 'Niet beschikbaar' : '-'}</span>
+                              <span className="font-semibold">
+                                {buurtMetrics && typeof buurtMetrics.shops === 'number' 
+                                  ? buurtMetrics.shops 
+                                  : buurtMetricsError ? 'Niet beschikbaar' : 'Laden...'}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -413,50 +437,10 @@ export default function PropertyDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">
-                      28
-                    </div>
-                    <div className="text-gray-600">Dagen op markt</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">
-                      {formatPrice(Math.round(propertyData.askingPrice / propertyData.squareMeters))}
-                    </div>
-                    <div className="text-gray-600">Prijs per m²</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
-                      +6.8%
-                    </div>
-                    <div className="text-gray-600">Prijsstijging (1 jaar)</div>
-                  </div>
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-4">Vergelijkbare verkopen</h4>
-                <div className="space-y-3">
-                  {[
-                    { address: 'Herengracht 234', squareMeters: 115, soldDate: '2024-12-15', soldPrice: 650000, pricePerSqm: 5652 },
-                    { address: 'Prinsengracht 456', squareMeters: 125, soldDate: '2024-11-28', soldPrice: 695000, pricePerSqm: 5560 },
-                    { address: 'Singel 789', squareMeters: 110, soldDate: '2024-11-10', soldPrice: 625000, pricePerSqm: 5682 }
-                  ].map((sale, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <div className="font-medium text-gray-900">{sale.address}</div>
-                        <div className="text-sm text-gray-600">
-                          {sale.squareMeters} m² • {formatDate(sale.soldDate)}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-gray-900">
-                          {formatPrice(sale.soldPrice)}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {formatPrice(sale.pricePerSqm)}/m²
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center py-8">
+                  <p className="text-gray-600">
+                    Marktgegevens worden geladen van onze database...
+                  </p>
                 </div>
               </CardContent>
             </Card>

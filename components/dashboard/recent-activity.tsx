@@ -26,10 +26,34 @@ interface ActivityItem {
 }
 
 interface RecentActivityProps {
-  activities: ActivityItem[]
+  userId: string
 }
 
-export function RecentActivity({ activities }: RecentActivityProps) {
+export function RecentActivity({ userId }: RecentActivityProps) {
+  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch real activity data from API
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const response = await fetch(`/api/users/${userId}/activities`)
+        if (response.ok) {
+          const data = await response.json()
+          setActivities(data.activities || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch activities:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (userId) {
+      fetchActivities()
+    }
+  }, [userId])
+
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp)
     const now = new Date()
@@ -66,7 +90,12 @@ export function RecentActivity({ activities }: RecentActivityProps) {
       </CardHeader>
 
       <CardContent className="p-0">
-        {activities.length === 0 ? (
+        {loading ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+            <p className="text-gray-600">Laden van activiteit...</p>
+          </div>
+        ) : activities.length === 0 ? (
           <div className="p-8 text-center">
             <Activity className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">

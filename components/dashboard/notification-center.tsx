@@ -31,12 +31,34 @@ interface Notification {
 }
 
 interface NotificationCenterProps {
-  notifications: Notification[]
+  userId: string
 }
 
-export function NotificationCenter({ notifications }: NotificationCenterProps) {
+export function NotificationCenter({ userId }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [notificationList, setNotificationList] = useState(notifications)
+  const [notificationList, setNotificationList] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch real notifications from API
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch(`/api/users/${userId}/notifications`)
+        if (response.ok) {
+          const data = await response.json()
+          setNotificationList(data.notifications || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (userId) {
+      fetchNotifications()
+    }
+  }, [userId])
 
   const unreadCount = notificationList.filter(n => !n.read).length
 
@@ -139,7 +161,16 @@ export function NotificationCenter({ notifications }: NotificationCenterProps) {
           <CardContent className="p-0">
             <ScrollArea className="h-96">
               <AnimatePresence>
-                {notificationList.length === 0 ? (
+                {loading ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-8 text-center"
+                  >
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+                    <p className="text-gray-600">Laden van notificaties...</p>
+                  </motion.div>
+                ) : notificationList.length === 0 ? (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

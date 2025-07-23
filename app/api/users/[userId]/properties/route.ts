@@ -21,36 +21,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // For demo purposes, return mock user properties
-    const mockUserProperties = [
-      {
-        id: '1',
-        address: 'Keizersgracht 123',
-        city: 'Amsterdam',
-        askingPrice: 675000,
-        bedrooms: 3,
-        bathrooms: 2,
-        squareMeters: 120,
-        images: ['https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'],
-        status: 'AVAILABLE',
-        energyLabel: 'B',
-        description: 'Prachtige grachtenpand in het hart van Amsterdam.',
-        features: ['Tuin', 'Balkon', 'Garage'],
-        createdAt: new Date().toISOString(),
-        userId: userId
-      }
-    ]
+    // Get real user properties from database
+    const userProperties = await propertyService.getUserProperties(userId)
 
     Logger.info('User properties retrieved', {
       userId: userId,
-      count: mockUserProperties.length
+      count: userProperties.length
     })
 
-    // Add calculated fields for dashboard
-    const propertiesWithStats = mockUserProperties.map(property => ({
+    // Add calculated fields for dashboard (views, favorites would come from analytics)
+    const propertiesWithStats = userProperties.map(property => ({
       ...property,
-      views: Math.floor(Math.random() * 200) + 50, // TODO: Implement real view tracking
-      favorites: Math.floor(Math.random() * 30) + 5, // TODO: Implement real favorite tracking
+      views: 0, // TODO: Implement real view tracking from analytics
+      favorites: 0, // TODO: Implement real favorite tracking from database
     }))
 
     return NextResponse.json({ properties: propertiesWithStats })

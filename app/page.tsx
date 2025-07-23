@@ -33,15 +33,7 @@ import Image from 'next/image'
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-
-// Fetch real featured properties from API
-async function fetchFeaturedProperties() {
-  const response = await fetch('/api/properties?limit=3')
-  if (!response.ok) {
-    throw new Error('Failed to fetch featured properties')
-  }
-  return response.json()
-}
+import { propertyService } from '@/lib/property/property-service'
 
 export default function HomePage() {
   const { data: session } = useSession()
@@ -51,7 +43,13 @@ export default function HomePage() {
 
   const { data: featuredData } = useQuery({
     queryKey: ['featured-properties'],
-    queryFn: fetchFeaturedProperties,
+    queryFn: async () => {
+      const response = await fetch('/api/properties?limit=3&status=AVAILABLE')
+      if (!response.ok) {
+        throw new Error('Failed to fetch featured properties')
+      }
+      return response.json()
+    },
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
 

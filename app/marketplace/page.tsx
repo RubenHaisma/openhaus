@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PropertySearch } from '@/components/marketplace/property-search'
 import { PropertyGrid } from '@/components/marketplace/property-grid'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,8 @@ import { TrendingUp, MapPin, Home, Users, Star } from 'lucide-react'
 export default function MarketplacePage() {
   const [searchResults, setSearchResults] = useState<any>(null)
   const [favorites, setFavorites] = useState<string[]>([])
+  const [marketStats, setMarketStats] = useState<any>(null)
+  const [popularLocations, setPopularLocations] = useState<any[]>([])
 
   const handleSearchResults = (results: any) => {
     setSearchResults(results)
@@ -24,45 +26,60 @@ export default function MarketplacePage() {
     )
   }
 
-  const marketStats = [
-    {
-      label: 'Actieve woningen',
-      value: '2,847',
-      change: '+12%',
-      icon: Home,
-      color: 'text-blue-600'
-    },
-    {
-      label: 'Gemiddelde prijs',
-      value: '€485.000',
-      change: '+8%',
-      icon: TrendingUp,
-      color: 'text-green-600'
-    },
-    {
-      label: 'Verkocht deze maand',
-      value: '1,234',
-      change: '+15%',
-      icon: Users,
-      color: 'text-purple-600'
-    },
-    {
-      label: 'Gemiddelde tijd op markt',
-      value: '28 dagen',
-      change: '-5%',
-      icon: Star,
-      color: 'text-orange-600'
+  // Fetch real market statistics
+  useEffect(() => {
+    const fetchMarketStats = async () => {
+      try {
+        const [statsRes, locationsRes] = await Promise.all([
+          fetch('/api/properties/market-stats'),
+          fetch('/api/properties/city-stats?cities=Amsterdam,Rotterdam,Den Haag,Utrecht,Eindhoven,Groningen')
+        ])
+        
+        if (statsRes.ok) {
+          const stats = await statsRes.json()
+          setMarketStats([
+            {
+              label: 'Actieve woningen',
+              value: stats.activeListings?.toLocaleString() || '0',
+              change: `+${stats.growthRate || 0}%`,
+              icon: Home,
+              color: 'text-blue-600'
+            },
+            {
+              label: 'Gemiddelde prijs',
+              value: formatPrice(stats.averagePrice || 0),
+              change: `+${stats.priceGrowth || 0}%`,
+              icon: TrendingUp,
+              color: 'text-green-600'
+            },
+            {
+              label: 'Verkocht deze maand',
+              value: stats.soldThisMonth?.toLocaleString() || '0',
+              change: `+${stats.salesGrowth || 0}%`,
+              icon: Users,
+              color: 'text-purple-600'
+            },
+            {
+              label: 'Gemiddelde tijd op markt',
+              value: `${stats.averageDaysOnMarket || 0} dagen`,
+              change: `${stats.timeChange || 0}%`,
+              icon: Star,
+              color: 'text-orange-600'
+            }
+          ])
+        }
+        
+        if (locationsRes.ok) {
+          const locations = await locationsRes.json()
+          setPopularLocations(locations)
+        }
+      } catch (error) {
+        console.error('Failed to fetch market data:', error)
+      }
     }
-  ]
-
-  const popularLocations = [
-    { name: 'Amsterdam', count: 847, avgPrice: 675000 },
-    { name: 'Rotterdam', count: 523, avgPrice: 385000 },
-    { name: 'Den Haag', count: 412, avgPrice: 485000 },
-    { name: 'Utrecht', count: 389, avgPrice: 525000 },
-    { name: 'Eindhoven', count: 267, avgPrice: 365000 },
-    { name: 'Groningen', count: 198, avgPrice: 285000 }
-  ]
+    
+    fetchMarketStats()
+  }, [])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('nl-NL', {
@@ -87,7 +104,7 @@ export default function MarketplacePage() {
 
       {/* Market Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {marketStats.map((stat, index) => (
+        {marketStats?.map((stat: any, index: number) => (
           <Card key={index}>
             <CardContent className="p-6">
               <div className="flex flex-col gap-2">
@@ -122,13 +139,13 @@ export default function MarketplacePage() {
                   <div className="flex items-center space-x-3">
                     <MapPin className="w-5 h-5 text-gray-400" />
                     <div>
-                      <h3 className="font-medium text-gray-900">{location.name}</h3>
+                      <h3 className="font-medium text-gray-900">{location.city}</h3>
                       <p className="text-sm text-gray-600">{location.count} woningen</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-gray-900">
-                      {formatPrice(location.avgPrice)}
+                      {formatPrice(location.avgPrice || 0)}
                     </p>
                     <p className="text-sm text-gray-600">gemiddeld</p>
                   </div>

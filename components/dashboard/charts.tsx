@@ -19,46 +19,40 @@ interface ChartData {
 
 interface DashboardChartsProps {
   timeRange: string
+  userId: string
 }
 
-export function DashboardCharts({ timeRange }: DashboardChartsProps) {
+export function DashboardCharts({ timeRange, userId }: DashboardChartsProps) {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line')
   const [isLoading, setIsLoading] = useState(false)
+  const [chartData, setChartData] = useState<ChartData | null>(null)
 
-  // Mock data generation based on time range
-  const generateChartData = (range: string): ChartData => {
-    const getLabels = () => {
-      switch (range) {
-        case '7d':
-          return ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']
-        case '30d':
-          return Array.from({ length: 30 }, (_, i) => `${i + 1}`)
-        case '90d':
-          return ['Jan', 'Feb', 'Mar']
-        case '1y':
-          return ['Q1', 'Q2', 'Q3', 'Q4']
-        default:
-          return ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']
+  // Fetch real analytics data from API
+  const fetchChartData = async (range: string): Promise<ChartData> => {
+    try {
+      const response = await fetch(`/api/users/${userId}/analytics?timeRange=${range}`)
+      if (response.ok) {
+        const data = await response.json()
+        return data.chartData
       }
+    } catch (error) {
+      console.error('Failed to fetch chart data:', error)
     }
-
-    const labels = getLabels()
-    const viewsData = labels.map(() => Math.floor(Math.random() * 100) + 50)
-    const inquiriesData = labels.map(() => Math.floor(Math.random() * 20) + 5)
-
+    
+    // Fallback to empty data
     return {
-      labels,
+      labels: [],
       datasets: [
         {
           label: 'Weergaven',
-          data: viewsData,
+          data: [],
           borderColor: 'rgb(59, 130, 246)',
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           tension: 0.4
         },
         {
           label: 'Interesse',
-          data: inquiriesData,
+          data: [],
           borderColor: 'rgb(16, 185, 129)',
           backgroundColor: 'rgba(16, 185, 129, 0.1)',
           tension: 0.4
@@ -67,19 +61,25 @@ export function DashboardCharts({ timeRange }: DashboardChartsProps) {
     }
   }
 
-  const [chartData, setChartData] = useState(generateChartData(timeRange))
-
   useEffect(() => {
     setIsLoading(true)
-    const timer = setTimeout(() => {
-      setChartData(generateChartData(timeRange))
+    
+    fetchChartData(timeRange).then(data => {
+      setChartData(data)
       setIsLoading(false)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [timeRange])
+    })
+  }, [timeRange, userId])
 
   // Simple SVG chart implementation
   const renderLineChart = () => {
+    if (!chartData || chartData.datasets[0].data.length === 0) {
+      return (
+        <div className="relative w-full h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 flex items-center justify-center">
+          <p className="text-gray-500">Geen data beschikbaar</p>
+        </div>
+      )
+    }
+    
     const data = chartData.datasets[0].data
     const maxValue = Math.max(...data)
     const width = 400
@@ -164,6 +164,14 @@ export function DashboardCharts({ timeRange }: DashboardChartsProps) {
   }
 
   const renderBarChart = () => {
+    if (!chartData || chartData.datasets[0].data.length === 0) {
+      return (
+        <div className="space-y-3 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl flex items-center justify-center h-64">
+          <p className="text-gray-500">Geen data beschikbaar</p>
+        </div>
+      )
+    }
+    
     const data = chartData.datasets[0].data
     const maxValue = Math.max(...data)
 
@@ -193,6 +201,22 @@ export function DashboardCharts({ timeRange }: DashboardChartsProps) {
           </motion.div>
         ))}
       </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <Card className="col-span-1 shadow-lg border-0 overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardTitle>Prestatie overzicht</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
