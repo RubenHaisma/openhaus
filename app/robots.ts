@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
           '/temp/',
           '*.json',
           '/search?*', // Prevent indexing of search result pages with parameters
+          '/properties/*', // Redirect old property URLs
         ],
       },
       {
@@ -27,6 +28,18 @@ export default function robots(): MetadataRoute.Robots {
           '/dashboard/',
           '/admin/',
           '/private/',
+          '/properties/*', // Redirect old property URLs
+        ],
+      },
+      {
+        userAgent: 'Bingbot',
+        allow: '/',
+        disallow: [
+          '/api/',
+          '/dashboard/',
+          '/admin/',
+          '/private/',
+          '/properties/*',
         ],
       },
     ],

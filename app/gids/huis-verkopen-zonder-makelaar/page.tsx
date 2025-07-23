@@ -423,14 +423,6 @@ export default function SellingGuide() {
                       Plaats je woning
                     </Button>
                   </Link>
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
-                    className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-3 text-lg font-bold"
-                  >
-                    <Phone className="w-5 h-5 mr-2" />
-                    020 123 4567
-                  </Button>
                 </div>
               </CardContent>
             </Card>

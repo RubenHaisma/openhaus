@@ -220,7 +220,7 @@ export function PropertyCard({
                 </Button>
               </Link>
               
-              <Link href={`/properties/${property.id}/offer`}>
+              <Link href={`/huis-te-koop/${property.city.toLowerCase()}/${property.address.toLowerCase().replace(/\s+/g, '-')}-${property.bedrooms}-kamers-${Math.round(property.askingPrice/1000)}k-euro/contact`}>
                 <Button className="opendoor-button-primary text-sm px-4 py-2">
                   Contact opnemen
                 </Button>

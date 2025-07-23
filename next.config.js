@@ -83,6 +83,49 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      // Redirect old property URLs to new SEO-friendly URLs
+      {
+        source: '/properties/:id',
+        destination: '/huis-te-koop/amsterdam/:id', // Default to Amsterdam, will be handled by middleware
+        permanent: true,
+      },
+      // Redirect old city URLs
+      {
+        source: '/woningen/:city',
+        destination: '/huizen-te-koop/:city',
+        permanent: true,
+      },
+    ]
+  },
+
+  // Rewrites for SEO-friendly URLs
+  async rewrites() {
+    return [
+      // Property detail pages
+      {
+        source: '/huis-te-koop/:city/:property',
+        destination: '/huis-te-koop/:city/:property',
+      },
+      // City property listings
+      {
+        source: '/huizen-te-koop/:city',
+        destination: '/huizen-te-koop/:city',
+      },
+      // Price range pages
+      {
+        source: '/huizen-te-koop/:city/:priceRange',
+        destination: '/huizen-te-koop/:city/:priceRange',
+      },
+      // Apartment listings
+      {
+        source: '/appartementen-te-koop/:city',
+        destination: '/appartementen-te-koop/:city',
+      },
+      // Valuation pages
+      {
+        source: '/woningtaxatie/:city/:address',
+        destination: '/woningtaxatie/:city/:address',
+      },
     ]
   },
 }

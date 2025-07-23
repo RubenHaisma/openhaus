@@ -9,7 +9,11 @@ export const primaryKeywords = {
       'makelaarskosten besparen',
       'particuliere verkoop woning',
       'huis verkopen direct',
-      'woning verkopen zonder commissie'
+      'woning verkopen zonder commissie',
+      'huis verkopen amsterdam',
+      'huis verkopen rotterdam',
+      'huis verkopen utrecht',
+      'huis verkopen den haag'
     ],
     
     // High-volume buying keywords
@@ -18,7 +22,13 @@ export const primaryKeywords = {
       'woning kopen zonder makelaar',
       'huis kopen direct van eigenaar',
       'particuliere verkoop kopen',
-      'huis kopen zonder commissie'
+      'huis kopen zonder commissie',
+      'huizen te koop amsterdam',
+      'huizen te koop rotterdam',
+      'huizen te koop utrecht',
+      'huizen te koop den haag',
+      'appartementen te koop amsterdam',
+      'appartementen te koop rotterdam'
     ],
     
     // Valuation keywords
@@ -28,7 +38,10 @@ export const primaryKeywords = {
       'waarde woning berekenen',
       'gratis woningwaardering',
       'woz waarde opzoeken',
-      'huis schatten waarde'
+      'huis schatten waarde',
+      'woningtaxatie amsterdam',
+      'woningtaxatie rotterdam',
+      'woningtaxatie utrecht'
     ],
     
     // Mortgage keywords
@@ -47,7 +60,14 @@ export const primaryKeywords = {
       'huis verkopen utrecht',
       'woning kopen den haag',
       'huis verkopen eindhoven',
-      'particuliere verkoop amsterdam'
+      'particuliere verkoop amsterdam',
+      'huizen te koop amsterdam centrum',
+      'huizen te koop amsterdam jordaan',
+      'huizen te koop rotterdam centrum',
+      'appartementen te koop amsterdam',
+      'appartementen te koop rotterdam',
+      'woningtaxatie amsterdam gratis',
+      'huis verkopen amsterdam zonder makelaar'
     ]
   }
   
@@ -59,7 +79,11 @@ export const primaryKeywords = {
       'hoe verkoop je een huis zonder makelaar',
       'huis verkopen zelf stappen',
       'particuliere verkoop woning nederland',
-      'huis verkopen zonder makelaarskosten 2024'
+      'huis verkopen zonder makelaarskosten 2025',
+      'huis verkopen amsterdam jordaan',
+      'huis verkopen rotterdam centrum',
+      'appartement verkopen amsterdam',
+      'rijtjeshuis verkopen utrecht'
     ],
     
     buying: [
@@ -67,7 +91,11 @@ export const primaryKeywords = {
       'woning kopen zonder makelaar rotterdam',
       'particuliere verkoop huizen nederland',
       'huis kopen direct van eigenaar',
-      'voordelen huis kopen zonder makelaar'
+      'voordelen huis kopen zonder makelaar',
+      'huizen te koop amsterdam onder 500000',
+      'appartementen te koop amsterdam centrum',
+      'huizen te koop rotterdam kralingen',
+      'woningen te koop utrecht wittevrouwen'
     ],
     
     process: [
@@ -76,6 +104,20 @@ export const primaryKeywords = {
       'koopovereenkomst zonder makelaar',
       'bezichtiging organiseren zelf',
       'onderhandelen huis verkopen tips'
+    ],
+
+    // New location-specific long tail keywords
+    locationSpecific: [
+      'huizen te koop amsterdam onder 600000 euro',
+      'appartementen te koop amsterdam jordaan',
+      'huizen te koop rotterdam hillegersberg',
+      'woningtaxatie amsterdam gratis online',
+      'huis verkopen den haag scheveningen',
+      'rijtjeshuizen te koop utrecht lombok',
+      'eengezinswoningen te koop eindhoven',
+      'huizen te koop groningen centrum',
+      'appartementen te koop rotterdam centrum',
+      'woningen te koop haarlem centrum'
     ]
   }
   

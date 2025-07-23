@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navigation = [
-  { name: 'Verkopen', href: '/list-property' },
+  { name: 'Verkopen', href: '/huis-verkopen/amsterdam' },
   { name: 'Kopen', href: '/buy' },
   { name: 'Financiering', href: '/finance' },
   { name: 'Over ons', href: '/about' },
