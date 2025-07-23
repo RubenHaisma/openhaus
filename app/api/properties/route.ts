@@ -80,17 +80,46 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    const result = await propertyService.searchProperties({
+    // Use propertyService to fetch real properties from the database
+    const { properties, total } = await propertyService.searchProperties({
       status: 'AVAILABLE',
       limit,
-      offset
+      offset,
     })
+
+    const result = {
+      properties,
+      total
+    }
 
     return NextResponse.json(result)
   } catch (error) {
     Logger.error('Properties retrieval failed', error as Error)
     return NextResponse.json(
       { error: 'Properties retrieval failed' },
+      { status: 500 }
+    )
+  }
+}
+
+// New endpoint: /api/properties/city-stats?cities=Amsterdam,Rotterdam,...
+export async function GET_cityStats(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const citiesParam = searchParams.get('cities')
+    if (!citiesParam) {
+      return NextResponse.json({ error: 'Missing cities parameter' }, { status: 400 })
+    }
+    const cities = citiesParam.split(',').map(c => c.trim()).filter(Boolean)
+    if (cities.length === 0) {
+      return NextResponse.json({ error: 'No cities provided' }, { status: 400 })
+    }
+    const stats = await propertyService.getCityStats(cities)
+    return NextResponse.json(stats)
+  } catch (error) {
+    Logger.error('City stats retrieval failed', error as Error)
+    return NextResponse.json(
+      { error: 'City stats retrieval failed' },
       { status: 500 }
     )
   }

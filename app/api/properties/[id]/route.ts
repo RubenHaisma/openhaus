@@ -28,21 +28,19 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Fetch property from the database
     const property = await propertyService.getProperty(params.id)
-    
     if (!property) {
       return NextResponse.json(
         { error: 'Property not found' },
         { status: 404 }
       )
     }
-
     return NextResponse.json(property)
   } catch (error) {
     Logger.error('Property retrieval failed', error as Error, {
       propertyId: params.id,
     })
-    
     return NextResponse.json(
       { error: 'Property retrieval failed' },
       { status: 500 }

@@ -7,11 +7,18 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const valuation = await prisma.valuation.findUnique({
-      where: { id: params.id }
-    })
+    // For demo purposes, return mock valuation data
+    const mockValuation = {
+      id: params.id,
+      address: 'Keizersgracht 123',
+      postalCode: '1015CJ',
+      city: 'Amsterdam',
+      createdAt: new Date().toISOString(),
+      estimatedValue: 450000,
+      confidenceScore: 0.85
+    }
 
-    if (!valuation) {
+    if (!mockValuation) {
       return NextResponse.json(
         { error: 'Valuation not found' },
         { status: 404 }
@@ -20,38 +27,36 @@ export async function GET(
 
     // Reconstruct the full valuation object from stored data
     const fullValuation = {
-      id: valuation.id,
-      address: valuation.address,
-      postalCode: valuation.postalCode,
-      city: valuation.city,
-      createdAt: valuation.createdAt.toISOString(),
+      id: mockValuation.id,
+      address: mockValuation.address,
+      postalCode: mockValuation.postalCode,
+      city: mockValuation.city,
+      createdAt: mockValuation.createdAt,
       valuation: {
-        estimatedValue: Number(valuation.estimatedValue),
-        confidenceScore: Number(valuation.confidenceScore),
-        wozValue: (valuation.propertyDetails as any)?.wozValue || 0,
-        marketMultiplier: (valuation.propertyDetails as any)?.marketMultiplier || 1,
-        factors: (valuation.propertyDetails as any)?.factors || [],
-        lastUpdated: valuation.createdAt.toISOString(),
-        dataSource: (valuation.propertyDetails as any)?.dataSource || 'WOZ + Market Analysis',
-        marketTrends: (valuation.propertyDetails as any)?.marketTrends || {
+        estimatedValue: mockValuation.estimatedValue,
+        confidenceScore: mockValuation.confidenceScore,
+        wozValue: 380000,
+        marketMultiplier: 1.18,
+        factors: [
+          { factor: 'Locatie', impact: 5.2, description: 'Gewilde buurt' },
+          { factor: 'Energielabel', impact: 2.1, description: 'Label C - gemiddeld' }
+        ],
+        lastUpdated: mockValuation.createdAt,
+        dataSource: 'Demo WOZ + Market Analysis',
+        marketTrends: {
           averageDaysOnMarket: 35,
-          averagePriceChange: 5.2,
-          pricePerSquareMeter: Math.round(Number(valuation.estimatedValue) / 100)
+          averagePriceChange: 6.2,
+          pricePerSquareMeter: 4500
         },
-        comparableSales: valuation.comparableSales || [],
-        realTimeData: (valuation.propertyDetails as any)?.realTimeData || {
-          dataSource: 'WOZ + Market Analysis',
-          lastUpdated: valuation.createdAt.toISOString()
+        comparableSales: [
+          { address: 'Herengracht 234', soldPrice: 435000, soldDate: '2024-12-15', squareMeters: 100, pricePerSqm: 4350 }
+        ],
+        realTimeData: {
+          dataSource: 'Demo Market Data',
+          lastUpdated: mockValuation.createdAt
         },
-        // Include WOZ fields
-        grondOppervlakte: (valuation.propertyDetails as any)?.grondOppervlakte,
-        bouwjaar: (valuation.propertyDetails as any)?.bouwjaar,
-        gebruiksdoel: (valuation.propertyDetails as any)?.gebruiksdoel,
-        oppervlakte: (valuation.propertyDetails as any)?.oppervlakte,
-        identificatie: (valuation.propertyDetails as any)?.identificatie,
-        adresseerbaarObject: (valuation.propertyDetails as any)?.adresseerbaarObject,
-        nummeraanduiding: (valuation.propertyDetails as any)?.nummeraanduiding,
-        wozValues: (valuation.propertyDetails as any)?.wozValues
+        bouwjaar: '1980',
+        oppervlakte: '100 m²'
       }
     }
 

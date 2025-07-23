@@ -20,15 +20,33 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const properties = await propertyService.getUserProperties(params.userId)
+    // For demo purposes, return mock user properties
+    const mockUserProperties = [
+      {
+        id: '1',
+        address: 'Keizersgracht 123',
+        city: 'Amsterdam',
+        askingPrice: 675000,
+        bedrooms: 3,
+        bathrooms: 2,
+        squareMeters: 120,
+        images: ['https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'],
+        status: 'AVAILABLE',
+        energyLabel: 'B',
+        description: 'Prachtige grachtenpand in het hart van Amsterdam.',
+        features: ['Tuin', 'Balkon', 'Garage'],
+        createdAt: new Date().toISOString(),
+        userId: params.userId
+      }
+    ]
 
     Logger.info('User properties retrieved', {
       userId: params.userId,
-      count: properties.length
+      count: mockUserProperties.length
     })
 
     // Add calculated fields for dashboard
-    const propertiesWithStats = properties.map(property => ({
+    const propertiesWithStats = mockUserProperties.map(property => ({
       ...property,
       views: Math.floor(Math.random() * 200) + 50, // TODO: Implement real view tracking
       favorites: Math.floor(Math.random() * 30) + 5, // TODO: Implement real favorite tracking

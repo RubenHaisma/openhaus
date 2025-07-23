@@ -49,20 +49,10 @@ export async function GET(request: NextRequest) {
       offset: searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0,
     })
 
-    // Create cache key from search parameters
-    const cacheKey = JSON.stringify(filters)
-    
-    // Try to get cached results
-    const cachedResults = await cacheService.getCachedSearchResults(cacheKey)
-    if (cachedResults) {
-      Logger.info('Property search cache hit', { filters })
-      return NextResponse.json(cachedResults)
-    }
-
-    // Perform search
-    const results = await propertyService.searchProperties({
+    // Use propertyService to fetch real properties from the database
+    const { properties, total } = await propertyService.searchProperties({
       city: filters.city,
-      propertyType: filters.propertyType as any,
+      propertyType: filters.propertyType,
       minPrice: filters.minPrice,
       maxPrice: filters.maxPrice,
       minBedrooms: filters.minBedrooms,
@@ -72,8 +62,13 @@ export async function GET(request: NextRequest) {
       offset: filters.offset,
     })
 
+    const results = {
+      properties,
+      total
+    }
+
     // Cache results for 10 minutes
-    await cacheService.cacheSearchResults(cacheKey, results, 600)
+    // await cacheService.cacheSearchResults(cacheKey, results, 600)
 
     Logger.info('Property search performed', {
       filters,

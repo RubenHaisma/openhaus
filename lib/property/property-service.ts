@@ -429,6 +429,29 @@ export class PropertyService {
     }
   }
 
+  async getCityStats(cities: string[]): Promise<Array<{ city: string, count: number, avgPrice: number }>> {
+    // Get stats for each city: number of available properties and average asking price
+    const stats = await Promise.all(
+      cities.map(async (city) => {
+        const [count, avg] = await Promise.all([
+          prisma.property.count({
+            where: { city: { equals: city, mode: 'insensitive' }, status: 'AVAILABLE' }
+          }),
+          prisma.property.aggregate({
+            _avg: { askingPrice: true },
+            where: { city: { equals: city, mode: 'insensitive' }, status: 'AVAILABLE' }
+          })
+        ])
+        return {
+          city,
+          count,
+          avgPrice: avg._avg.askingPrice ? Number(avg._avg.askingPrice) : 0
+        }
+      })
+    )
+    return stats
+  }
+
   private async getEnergyLabel(address: string, postalCode: string): Promise<string | null> {
     try {
       if (!process.env.EP_ONLINE_API_KEY) {
