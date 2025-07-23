@@ -8,7 +8,7 @@ const navigation = {
     { name: 'Huis verkopen', href: '/list-property' },
     { name: 'Huis kopen', href: '/buy' },
     { name: 'Hypotheekadvies', href: '/finance' },
-    { name: 'Gratis taxatie', href: '/instant-offer' },
+    { name: 'Gratis taxatie', href: '/list-property' },
     { name: 'Marktplaats', href: '/marketplace' },
   ],
   bedrijf: [
