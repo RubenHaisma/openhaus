@@ -1,6 +1,6 @@
 "use client"
 
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals'
+import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals'
 
 function sendToAnalytics(metric: any) {
   // Send to your analytics service
@@ -32,9 +32,9 @@ function sendToAnalytics(metric: any) {
 }
 
 export function reportWebVitals() {
-  getCLS(sendToAnalytics)
-  getFID(sendToAnalytics)
-  getFCP(sendToAnalytics)
-  getLCP(sendToAnalytics)
-  getTTFB(sendToAnalytics)
+  onCLS(sendToAnalytics)
+  onFID(sendToAnalytics)
+  onFCP(sendToAnalytics)
+  onLCP(sendToAnalytics)
+  onTTFB(sendToAnalytics)
 }

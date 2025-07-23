@@ -466,7 +466,7 @@ export default function HomePage() {
 
           <div className="property-grid">
             {featuredProperties.length > 0 ? (
-              featuredProperties.properties?.map((property, index) => (
+              featuredProperties.map((property: any, index: number) => (
                 <motion.div
                   key={property.id}
                   initial={{ opacity: 0, y: 30 }}

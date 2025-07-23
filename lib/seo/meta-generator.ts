@@ -7,7 +7,7 @@ interface SEOData {
   image?: string
   canonical?: string
   noIndex?: boolean
-  type?: 'website' | 'article' | 'product'
+  type?: 'website' | 'article'
 }
 
 export function generateMetadata(data: SEOData): Metadata {
@@ -68,7 +68,7 @@ export function generatePropertyMetadata(property: any): Metadata {
       'zonder makelaar'
     ],
     image: property.images?.[0],
-    type: 'product'
+    type: 'website'
   })
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { offerManager } from '@/lib/marketplace/offers'
 import { authService } from '@/lib/security/auth'
 import { Logger } from '@/lib/monitoring/logger'
+import { propertyService } from '@/lib/property/property-service'
 import { z } from 'zod'
 
 const createOfferSchema = z.object({
@@ -38,8 +39,7 @@ export async function POST(request: NextRequest) {
     const validatedData = createOfferSchema.parse(body)
 
     // Get property to determine seller
-    const { inventoryManager } = await import('@/lib/marketplace/inventory')
-    const property = await inventoryManager.getProperty(validatedData.propertyId)
+    const property = await propertyService.getProperty(validatedData.propertyId)
     if (!property) {
       return NextResponse.json({ error: 'Property not found' }, { status: 404 })
     }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     Logger.audit('Offer created', {
       userId: user.id,
       offerId: offer.id,
-      propertyId: offer.property_id,
+      propertyId: offer.propertyId,
       amount: offer.amount,
       currency: offer.currency,
     })
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
       )
     }
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
       )
     }

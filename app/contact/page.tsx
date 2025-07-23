@@ -20,13 +20,6 @@ import {
   Briefcase
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Contact | OpenHaus - Neem contact met ons op',
-  description: 'Neem contact op met OpenHaus voor vragen over vastgoed, ondersteuning of partnerships. We helpen je graag verder met persoonlijke service.',
-  keywords: ['contact openhaus', 'klantenservice', 'vastgoed vragen', 'ondersteuning', 'telefoon', 'email']
-}
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({

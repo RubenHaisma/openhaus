@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer'
+import puppeteer, { Browser } from 'puppeteer'
 import { prisma } from '@/lib/prisma'
 import { Logger } from '@/lib/monitoring/logger'
 import { cacheService } from '@/lib/cache/redis'
@@ -32,9 +32,9 @@ export interface ScrapingResult {
 
 export class WOZScraper {
   private baseUrl = 'https://www.wozwaardeloket.nl'
-  private browser: puppeteer.Browser | null = null
+  private browser: Browser | null = null
   private static instance: WOZScraper
-  private browserPromise: Promise<puppeteer.Browser> | null = null
+  private browserPromise: Promise<Browser> | null = null
 
   static getInstance(): WOZScraper {
     if (!WOZScraper.instance) {

@@ -19,11 +19,12 @@ import {
   ArrowLeft,
   CheckCircle,
   Info,
-  ExternalLink
+  ExternalLink,
+  Phone
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { PropertyValuation } from '@/lib/kadaster'
+import { PropertyValuation } from '@/lib/property/property-service'
 
 interface ValuationPageData {
   id: string
@@ -53,7 +54,7 @@ export default function ValuationPage() {
         setValuationData(data)
       } catch (error) {
         console.error('Failed to load valuation:', error)
-        setError(error.message)
+        setError(error instanceof Error ? error.message : 'Unknown error')
       } finally {
         setLoading(false)
       }

@@ -25,24 +25,21 @@ import {
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
-interface ValuationPageProps {
-  params: {
-    city: string
-    address: string
-  }
-}
+export default function SEOValuationPage() {
+  const params = useParams();
+  const city = typeof params.city === 'string' ? params.city : Array.isArray(params.city) ? params.city[0] : '';
+  const address = typeof params.address === 'string' ? params.address : Array.isArray(params.address) ? params.address[0] : '';
 
-export default function SEOValuationPage({ params }: ValuationPageProps) {
   const [valuationData, setValuationData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sharing, setSharing] = useState(false)
 
-  const cityName = params.city.split('-').map(word => 
+  const cityName = city.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 
-  const addressName = params.address.split('-').map(word => 
+  const addressName = address.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 
@@ -157,7 +154,7 @@ export default function SEOValuationPage({ params }: ValuationPageProps) {
 
   const handleSellRequest = () => {
     if (valuationData) {
-      const sellUrl = `/huis-verkopen/${params.city}?address=${encodeURIComponent(addressName)}&value=${valuationData.valuation.estimatedValue}`
+      const sellUrl = `/huis-verkopen/${city}?address=${encodeURIComponent(addressName)}&value=${valuationData.valuation.estimatedValue}`
       window.location.href = sellUrl
     }
   }
@@ -177,14 +174,14 @@ export default function SEOValuationPage({ params }: ValuationPageProps) {
     notFound()
   }
 
-  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/woningtaxatie/${params.city}/${params.address}`)
+  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/woningtaxatie/${city}/${address}`)
 
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "Service",
+    "@type": "RealEstateListing",
     "name": `Woningtaxatie ${addressName}, ${cityName}`,
     "description": `Gratis woningtaxatie voor ${addressName} in ${cityName}. Geschatte waarde: ${formatPrice(valuationData.valuation.estimatedValue)} gebaseerd op WOZ-gegevens en marktanalyse.`,
-    "url": `https://openhaus.nl/woningtaxatie/${params.city}/${params.address}`,
+    "url": `https://openhaus.nl/woningtaxatie/${city}/${address}`,
     "provider": {
       "@type": "Organization",
       "name": "OpenHaus",
@@ -198,7 +195,7 @@ export default function SEOValuationPage({ params }: ValuationPageProps) {
 
   return (
     <>
-      <StructuredData type="Service" data={structuredData} />
+      <StructuredData type="RealEstateListing" data={structuredData} />
       <StructuredData type="BreadcrumbList" data={{ items: breadcrumbs }} />
       
       <div className="min-h-screen bg-gray-50">
@@ -224,7 +221,7 @@ export default function SEOValuationPage({ params }: ValuationPageProps) {
             </nav>
 
             <div className="flex items-center justify-between mb-4">
-              <Link href={`/woningtaxatie/${params.city}`}>
+              <Link href={`/woningtaxatie/${city}`}>
                 <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Terug naar {cityName}
@@ -308,7 +305,7 @@ export default function SEOValuationPage({ params }: ValuationPageProps) {
 
           {/* Related Actions */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href={`/huis-verkopen/${params.city}`}>
+            <Link href={`/huis-verkopen/${city}`}>
               <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardContent className="p-6 text-center">
                   <Home className="w-8 h-8 text-primary mx-auto mb-3" />
@@ -322,7 +319,7 @@ export default function SEOValuationPage({ params }: ValuationPageProps) {
               </Card>
             </Link>
 
-            <Link href={`/huizen-te-koop/${params.city}`}>
+            <Link href={`/huizen-te-koop/${city}`}>
               <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardContent className="p-6 text-center">
                   <MapPin className="w-8 h-8 text-blue-600 mx-auto mb-3" />

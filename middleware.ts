@@ -1,4 +1,4 @@
-import { withAuth } from 'next-auth/middleware'
+import { NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -21,16 +21,13 @@ export function middleware(request: NextRequest) {
 
   // Auth middleware for protected routes
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/list-property')) {
-    return withAuth(
-      function middleware(req) {
-        return NextResponse.next()
-      },
-      {
-        callbacks: {
-          authorized: ({ token }) => !!token,
+    return withAuth(request as NextRequestWithAuth, {
+      callbacks: {
+        authorized: ({ token, req }) => {
+          return !!token
         },
-      }
-    )(request)
+      },
+    })
   }
 
   return NextResponse.next()

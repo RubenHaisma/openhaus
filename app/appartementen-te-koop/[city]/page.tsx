@@ -19,18 +19,15 @@ import {
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
-interface ApartmentPageProps {
-  params: {
-    city: string
-  }
-}
+export default function ApartmentCityPage() {
+  const params = useParams();
+  const cityParam = typeof params.city === 'string' ? params.city : Array.isArray(params.city) ? params.city[0] : '';
 
-export default function ApartmentCityPage({ params }: ApartmentPageProps) {
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState<string[]>([])
 
-  const cityName = params.city.split('-').map(word => 
+  const cityName = cityParam.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 
@@ -69,14 +66,14 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
     }).format(price)
   }
 
-  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/appartementen-te-koop/${params.city}`)
+  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/appartementen-te-koop/${cityParam}`)
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "name": `Appartementen te koop in ${cityName}`,
     "description": `Ontdek appartementen te koop in ${cityName}. Bekijk het actuele aanbod van particuliere verkopers zonder makelaarskosten. Van studio's tot penthouses.`,
-    "url": `https://openhaus.nl/appartementen-te-koop/${params.city}`,
+    "url": `https://openhaus.nl/appartementen-te-koop/${cityParam}`,
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": properties.length
@@ -85,7 +82,7 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
 
   return (
     <>
-      <StructuredData type="CollectionPage" data={structuredData} />
+      {/* Remove unsupported CollectionPage structured data */}
       <StructuredData type="BreadcrumbList" data={{ items: breadcrumbs }} />
       
       <div className="min-h-screen bg-gray-50">
@@ -154,7 +151,7 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link 
-                href={`/appartementen-te-koop/${params.city}/onder-300k-euro`}
+                href={`/appartementen-te-koop/${cityParam}/onder-300k-euro`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
               >
                 <div className="font-medium text-gray-900">Onder €300k</div>
@@ -162,7 +159,7 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
               </Link>
               
               <Link 
-                href={`/appartementen-te-koop/${params.city}/tussen-300k-500k-euro`}
+                href={`/appartementen-te-koop/${cityParam}/tussen-300k-500k-euro`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
               >
                 <div className="font-medium text-gray-900">€300k - €500k</div>
@@ -170,7 +167,7 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
               </Link>
               
               <Link 
-                href={`/appartementen-te-koop/${params.city}/tussen-500k-750k-euro`}
+                href={`/appartementen-te-koop/${cityParam}/tussen-500k-750k-euro`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
               >
                 <div className="font-medium text-gray-900">€500k - €750k</div>
@@ -178,7 +175,7 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
               </Link>
               
               <Link 
-                href={`/appartementen-te-koop/${params.city}/vanaf-750k-euro`}
+                href={`/appartementen-te-koop/${cityParam}/vanaf-750k-euro`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
               >
                 <div className="font-medium text-gray-900">Vanaf €750k</div>
@@ -219,7 +216,7 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
                     Er zijn momenteel geen appartementen beschikbaar in {cityName}.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href={`/huizen-te-koop/${params.city}`}>
+                    <Link href={`/huizen-te-koop/${cityParam}`}>
                       <Button>Alle woningtypes</Button>
                     </Link>
                     <Link href="/buy">
@@ -300,7 +297,7 @@ export default function ApartmentCityPage({ params }: ApartmentPageProps) {
                 Krijg een gratis taxatie van je appartement en plaats je advertentie zonder makelaarskosten
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href={`/huis-verkopen/${params.city}`}>
+                <Link href={`/huis-verkopen/${cityParam}`}>
                   <Button 
                     size="lg" 
                     className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 text-lg font-bold"

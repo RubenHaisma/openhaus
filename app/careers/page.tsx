@@ -16,17 +16,11 @@ import {
   Award,
   ArrowRight,
   Mail,
-  CheckCircle
+  CheckCircle,
+  Euro
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Carrières | OpenHaus - Werk bij de toekomst van vastgoed',
-  description: 'Sluit je aan bij OpenHaus en help mee aan de revolutie in vastgoed. Bekijk onze openstaande vacatures en ontdek waarom werken bij ons zo bijzonder is.',
-  keywords: ['carrières openhaus', 'vacatures', 'werken bij openhaus', 'proptech jobs', 'vastgoed banen']
-}
 
 export default function CareersPage() {
   const openPositions = [

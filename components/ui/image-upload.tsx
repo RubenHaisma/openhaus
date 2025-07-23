@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

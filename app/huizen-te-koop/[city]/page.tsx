@@ -147,15 +147,10 @@ const cityData: Record<string, any> = {
   }
 }
 
-interface CityPageProps {
-  params: {
-    city: string
-  }
-}
-
-export default function SEOCityPropertyPage({ params }: CityPageProps) {
-  const citySlug = params.city
-  const city = cityData[citySlug]
+export default function SEOCityPropertyPage() {
+  const params = useParams();
+  const citySlug = typeof params.city === 'string' ? params.city : Array.isArray(params.city) ? params.city[0] : '';
+  const city = cityData[citySlug];
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState<string[]>([])
@@ -205,27 +200,8 @@ export default function SEOCityPropertyPage({ params }: CityPageProps) {
 
   const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/huizen-te-koop/${citySlug}`)
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": `Huizen te koop in ${city.name}`,
-    "description": city.seoDescription,
-    "url": `https://openhaus.nl/huizen-te-koop/${citySlug}`,
-    "mainEntity": {
-      "@type": "ItemList",
-      "numberOfItems": properties.length,
-      "itemListElement": properties.map((property: any, index: number) => ({
-        "@type": "RealEstateListing",
-        "position": index + 1,
-        "name": property.address,
-        "url": SEOUrlGenerator.generatePropertyUrl(property)
-      }))
-    }
-  }
-
   return (
     <>
-      <StructuredData type="CollectionPage" data={structuredData} />
       <StructuredData type="BreadcrumbList" data={{ items: breadcrumbs }} />
       
       <div className="min-h-screen bg-gray-50">

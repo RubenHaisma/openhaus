@@ -16,11 +16,7 @@ import {
 import { motion } from 'framer-motion'
 import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Disclaimer | OpenHaus - Belangrijke informatie en beperkingen',
-  description: 'Lees onze disclaimer over het gebruik van OpenHaus, beperkingen van aansprakelijkheid en belangrijke informatie over vastgoedtransacties.',
-  keywords: ['disclaimer', 'aansprakelijkheid', 'vastgoed disclaimer', 'gebruiksvoorwaarden']
-}
+
 
 export default function DisclaimerPage() {
   const lastUpdated = "15 december 2024"

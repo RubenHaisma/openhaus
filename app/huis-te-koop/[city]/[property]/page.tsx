@@ -34,16 +34,12 @@ import {
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Metadata } from 'next'
 
-interface PropertyPageProps {
-  params: {
-    city: string
-    property: string
-  }
-}
+export default function SEOPropertyDetailPage() {
+  const params = useParams();
+  const city = typeof params.city === 'string' ? params.city : Array.isArray(params.city) ? params.city[0] : '';
+  const property = typeof params.property === 'string' ? params.property : Array.isArray(params.property) ? params.property[0] : '';
 
-export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showContactForm, setShowContactForm] = useState(false)
@@ -66,7 +62,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
       try {
         // In production, you'd extract the property ID from the slug
         // and query your database to find the matching property
-        const propertyId = extractPropertyId(params.property)
+        const propertyId = extractPropertyId(property)
         
         if (!propertyId) {
           setError('Property not found')
@@ -75,7 +71,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
         }
 
         // Mock property data based on URL parameters
-        const cityName = SEOUrlGenerator.unslugify(params.city)
+        const cityName = SEOUrlGenerator.unslugify(city)
         const mockProperty = {
           id: propertyId,
           address: 'Keizersgracht 123',
@@ -111,7 +107,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
     }
 
     loadProperty()
-  }, [params.city, params.property])
+  }, [city, property])
 
   // Load neighborhood metrics
   useEffect(() => {
@@ -179,7 +175,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
     "@type": "RealEstateListing",
     "name": `${propertyData.address}, ${propertyData.city}`,
     "description": propertyData.description,
-    "url": `https://openhaus.nl/huis-te-koop/${params.city}/${params.property}`,
+    "url": `https://openhaus.nl/huis-te-koop/${city}/${property}`,
     "image": propertyData.images,
     "price": {
       "@type": "PriceSpecification",
@@ -204,7 +200,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
     "energyEfficiencyRating": propertyData.energyLabel
   }
 
-  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/huis-te-koop/${params.city}/${params.property}`)
+  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/huis-te-koop/${city}/${property}`)
 
   return (
     <>
@@ -507,7 +503,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
                       <Mail className="w-5 h-5 mr-2" />
                       Stuur bericht
                     </Button>
-                    <Link href={`/huis-te-koop/${params.city}/${params.property}/contact`}>
+                    <Link href={`/huis-te-koop/${city}/${property}/contact`}>
                       <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg">
                         <Euro className="w-5 h-5 mr-2" />
                         Contact opnemen
@@ -525,7 +521,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
                 <CardContent>
                   <div className="space-y-4">
                     <Link 
-                      href={`/huizen-te-koop/${params.city}`}
+                      href={`/huizen-te-koop/${city}`}
                       className="block p-3 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
                     >
                       <div className="font-medium text-gray-900">
@@ -537,7 +533,7 @@ export default function SEOPropertyDetailPage({ params }: PropertyPageProps) {
                     </Link>
                     
                     <Link 
-                      href={`/huizen-te-koop/${params.city}/onder-${Math.round(propertyData.askingPrice / 1000)}k-euro`}
+                      href={`/huizen-te-koop/${city}/onder-${Math.round(propertyData.askingPrice / 1000)}k-euro`}
                       className="block p-3 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
                     >
                       <div className="font-medium text-gray-900">

@@ -21,13 +21,8 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Hoe Het Werkt | OpenHaus - Stap voor stap uitleg',
-  description: 'Ontdek hoe OpenHaus werkt. Van gratis taxatie tot succesvolle verkoop in 7 eenvoudige stappen. Geen makelaarskosten, wel professionele begeleiding.',
-  keywords: ['hoe werkt openhaus', 'vastgoed proces', 'huis verkopen stappen', 'huis kopen proces', 'zonder makelaar']
-}
+
 
 export default function HowItWorksPage() {
   const sellingSteps = [

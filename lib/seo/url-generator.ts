@@ -145,7 +145,7 @@ export class SEOUrlGenerator {
   /**
    * Convert slug back to readable text
    */
-  private static unslugify(slug: string): string {
+  public static unslugify(slug: string): string {
     return slug
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))

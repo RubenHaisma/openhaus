@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Logger } from '@/lib/monitoring/logger'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
+    // Extract the id from the URL
+    const url = new URL(request.url)
+    const id = url.pathname.split('/').pop()
+
     // For demo purposes, return mock valuation data
     const mockValuation = {
-      id: params.id,
+      id: id,
       address: 'Keizersgracht 123',
       postalCode: '1015CJ',
       city: 'Amsterdam',
@@ -63,7 +64,8 @@ export async function GET(
     return NextResponse.json(fullValuation)
   } catch (error) {
     Logger.error('Valuation retrieval failed', error as Error, {
-      valuationId: params.id
+      // id may be undefined if URL parsing fails
+      valuationId: undefined
     })
     
     return NextResponse.json(

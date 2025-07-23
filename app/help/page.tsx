@@ -13,7 +13,6 @@ import {
   MessageSquare,
   Phone,
   Mail,
-  FileText,
   Users,
   Home,
   CreditCard,
@@ -24,13 +23,8 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Help Center | OpenHaus - Ondersteuning en hulp',
-  description: 'Vind antwoorden op je vragen in ons help center. Handleidingen, video tutorials en persoonlijke ondersteuning voor alle OpenHaus diensten.',
-  keywords: ['help center', 'ondersteuning', 'hulp', 'handleidingen', 'tutorials', 'klantenservice']
-}
+
 
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState('')

@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { Logger } from '@/lib/monitoring/logger'
 import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
 
 const updatePropertySchema = z.object({
   address: z.string().optional(),
@@ -23,13 +24,11 @@ const updatePropertySchema = z.object({
   status: z.enum(['AVAILABLE', 'SOLD', 'PENDING']).optional(),
 })
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
+    const id = request.nextUrl.pathname.split("/").pop()!
     // Fetch property from the database
-    const property = await propertyService.getProperty(params.id)
+    const property = await propertyService.getProperty(id)
     if (!property) {
       return NextResponse.json(
         { error: 'Property not found' },
@@ -39,7 +38,7 @@ export async function GET(
     return NextResponse.json(property)
   } catch (error) {
     Logger.error('Property retrieval failed', error as Error, {
-      propertyId: params.id,
+      // propertyId: context.params.id,
     })
     return NextResponse.json(
       { error: 'Property retrieval failed' },
@@ -48,10 +47,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
     // Authenticate user
     const session = await getServerSession(authOptions)
@@ -59,25 +55,26 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const id = request.nextUrl.pathname.split("/").pop()!
     const body = await request.json()
     const validatedData = updatePropertySchema.parse(body)
 
     // Get current property to check ownership
-    const currentProperty = await propertyService.getProperty(params.id)
+    const currentProperty = await propertyService.getProperty(id)
     if (!currentProperty || currentProperty.userId !== session.user.id) {
       return NextResponse.json({ error: 'Property not found or unauthorized' }, { status: 404 })
     }
 
     // Update property in database
     const updateData: any = {}
-    Object.keys(validatedData).forEach(key => {
-      if (validatedData[key] !== undefined) {
-        updateData[key] = validatedData[key]
+    Object.entries(validatedData).forEach(([key, value]) => {
+      if (value !== undefined) {
+        updateData[key] = value
       }
     })
 
     const property = await prisma.property.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData
     })
 
@@ -90,12 +87,12 @@ export async function PUT(
     return NextResponse.json(property)
   } catch (error) {
     Logger.error('Property update failed', error as Error, {
-      propertyId: params.id,
+      // propertyId: context.params.id,
     })
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
       )
     }
@@ -107,10 +104,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
     // Authenticate user
     const session = await getServerSession(authOptions)
@@ -118,26 +112,27 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const id = request.nextUrl.pathname.split("/").pop()!
     // Get current property to check ownership
-    const currentProperty = await propertyService.getProperty(params.id)
+    const currentProperty = await propertyService.getProperty(id)
     if (!currentProperty || currentProperty.userId !== session.user.id) {
       return NextResponse.json({ error: 'Property not found or unauthorized' }, { status: 404 })
     }
 
     // Delete property
     await prisma.property.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     Logger.audit('Property deleted', {
       userId: session.user.id,
-      propertyId: params.id,
+      propertyId: id,
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
     Logger.error('Property deletion failed', error as Error, {
-      propertyId: params.id,
+      // propertyId: context.params.id,
     })
 
     return NextResponse.json(

@@ -35,6 +35,8 @@ interface SearchFilters {
   features?: string[]
   sortBy?: string
   sortOrder?: string
+  offset?: number
+  limit?: number
 }
 
 export function PropertySearch({ onResults }: PropertySearchProps) {

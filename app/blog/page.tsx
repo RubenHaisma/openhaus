@@ -16,17 +16,11 @@ import {
   Lightbulb,
   BarChart3,
   FileText,
-  Clock
+  Clock,
+  Euro
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Blog | OpenHaus - Vastgoed tips, trends en inzichten',
-  description: 'Lees de laatste vastgoed tips, markttrends en inzichten op de OpenHaus blog. Expert advies voor het kopen en verkopen van huizen.',
-  keywords: ['vastgoed blog', 'huizen tips', 'markttrends', 'vastgoed nieuws', 'huis kopen tips', 'huis verkopen tips']
-}
 
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('')

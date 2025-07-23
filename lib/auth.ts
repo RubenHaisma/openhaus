@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.passwordHash
+          user.passwordHash || ''
         )
 
         if (!isPasswordValid) {
@@ -69,6 +69,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup',
+    signOut: '/auth/signout',
   },
 }

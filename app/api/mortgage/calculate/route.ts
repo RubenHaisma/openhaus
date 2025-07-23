@@ -150,17 +150,17 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error },
         { status: 400 }
       )
     }
 
     // Check if it's a real data API error
-    if (error.message.includes('NHG') || error.message.includes('DNB') || error.message.includes('API')) {
+    if (error instanceof Error && (error.message.includes('NHG') || error.message.includes('DNB') || error.message.includes('API'))) {
       return NextResponse.json(
         { 
           error: 'Real financial data service unavailable',
-          message: error.message,
+          message: error.message || 'Unknown error',
           suggestion: 'Financial calculations require live 2025 data from NHG, DNB, and banks'
         },
         { status: 503 }
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Mortgage calculation failed', message: error.message },
+      { error: 'Mortgage calculation failed', message: (error as Error).message || 'Unknown error' },
       { status: 500 }
     )
   }

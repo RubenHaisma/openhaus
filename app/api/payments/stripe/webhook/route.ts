@@ -71,15 +71,15 @@ async function handlePaymentSuccess(paymentIntent: any) {
     })
 
     // Send confirmation email
-    await emailService.sendOrderConfirmation(order.buyer_id, {
-      orderNumber: order.order_number,
+    await emailService.sendOrderConfirmation(order.buyerId, {
+      orderNumber: order.orderNumber,
       amount: order.amount,
       currency: order.currency,
       id: order.id,
     })
 
     // Send payment confirmation
-    await emailService.sendPaymentConfirmation(order.buyer_id, {
+    await emailService.sendPaymentConfirmation(order.buyerId, {
       amount: paymentIntent.amount / 100,
       currency: paymentIntent.currency,
       transactionId: paymentIntent.id,

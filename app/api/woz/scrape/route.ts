@@ -51,13 +51,13 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error },
         { status: 400 }
       )
     }
 
     return NextResponse.json(
-      { error: 'WOZ scraping failed', message: error.message },
+      { error: 'WOZ scraping failed', message: (error as Error).message || 'Unknown error' },
       { status: 500 }
     )
   }

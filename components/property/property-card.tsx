@@ -63,7 +63,7 @@ export function PropertyCard({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${property.address} - ${formatPrice(property.asking_price)}`,
+          title: `${property.address} - ${formatPrice(property.askingPrice)}`,
           text: property.description,
           url: `${window.location.origin}/properties/${property.id}`,
         })

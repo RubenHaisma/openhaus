@@ -31,7 +31,7 @@ export class EmailService {
 
   constructor() {
     // Backup SMTP transporter
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: false,
@@ -68,7 +68,7 @@ export class EmailService {
         attachments: data.attachments,
       }
 
-      await sgMail.send(msg)
+      await sgMail.send(msg as any)
       return true
     } catch (error) {
       console.error('SendGrid email failed:', error)

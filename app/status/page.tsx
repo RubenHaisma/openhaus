@@ -19,13 +19,7 @@ import {
   Activity
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Status | OpenHaus - Platform status en uptime',
-  description: 'Bekijk de huidige status van het OpenHaus platform, uptime statistieken en eventuele onderhoudswerkzaamheden.',
-  keywords: ['platform status', 'uptime', 'onderhoud', 'beschikbaarheid', 'service status']
-}
 
 interface ServiceStatus {
   name: string

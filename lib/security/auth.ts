@@ -103,7 +103,7 @@ export class AuthService {
       }
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(credentials.password, user.passwordHash)
+      const isValidPassword = await bcrypt.compare(credentials.password, user.passwordHash || '')
       if (!isValidPassword) {
         throw new Error('Invalid credentials')
       }

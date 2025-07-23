@@ -13,16 +13,12 @@ import {
   Award,
   TrendingUp,
   Users,
-  Globe
+  Globe,
+  Phone
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Pers & Media | OpenHaus - Persberichten en media resources',
-  description: 'Persberichten, media resources en contact informatie voor journalisten. Ontdek het laatste nieuws over OpenHaus en de vastgoedmarkt.',
-  keywords: ['pers', 'media', 'persberichten', 'nieuws', 'journalisten', 'media kit']
-}
+
 
 export default function PressPage() {
   const pressReleases = [

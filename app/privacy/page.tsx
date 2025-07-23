@@ -13,13 +13,8 @@ import {
   CheckCircle
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy | OpenHaus - Bescherming van je gegevens',
-  description: 'Lees hoe OpenHaus je privacy beschermt en welke gegevens we verzamelen. Transparant privacybeleid conform AVG/GDPR wetgeving.',
-  keywords: ['privacy policy', 'gegevensbescherming', 'AVG', 'GDPR', 'privacy openhaus']
-}
+
 
 export default function PrivacyPage() {
   const lastUpdated = "15 december 2024"

@@ -8,24 +8,15 @@ import {
   Search, 
   Calculator, 
   TrendingUp, 
-  Euro, 
   Shield, 
-  Clock,
   Users,
-  FileText,
   Phone,
   ArrowRight,
   CheckCircle
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Onze Diensten | OpenHaus - Vastgoed zonder makelaarskosten',
-  description: 'Ontdek alle diensten van OpenHaus: huis verkopen, huis kopen, hypotheekadvies, gratis taxaties en meer. Alles voor vastgoed zonder makelaarskosten.',
-  keywords: ['vastgoeddiensten', 'huis verkopen', 'huis kopen', 'hypotheekadvies', 'woningtaxatie', 'makelaarskosten besparen']
-}
 
 export default function DienstenPage() {
   const services = [

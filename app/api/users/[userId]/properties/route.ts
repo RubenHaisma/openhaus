@@ -4,10 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { Logger } from '@/lib/monitoring/logger'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
     // Authenticate user
     const session = await getServerSession(authOptions)
@@ -15,8 +12,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Extract userId from the URL
+    const pathParts = request.nextUrl.pathname.split("/")
+    const userId = pathParts[pathParts.indexOf("users") + 1]
+
     // Check if user is requesting their own properties or is admin
-    if (session.user.id !== params.userId && session.user.role !== 'ADMIN') {
+    if (session.user.id !== userId && session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -36,12 +37,12 @@ export async function GET(
         description: 'Prachtige grachtenpand in het hart van Amsterdam.',
         features: ['Tuin', 'Balkon', 'Garage'],
         createdAt: new Date().toISOString(),
-        userId: params.userId
+        userId: userId
       }
     ]
 
     Logger.info('User properties retrieved', {
-      userId: params.userId,
+      userId: userId,
       count: mockUserProperties.length
     })
 
@@ -55,7 +56,7 @@ export async function GET(
     return NextResponse.json({ properties: propertiesWithStats })
   } catch (error) {
     Logger.error('Failed to get user properties', error as Error, {
-      userId: params.userId
+      userId: (request.nextUrl.pathname.split("/")[request.nextUrl.pathname.split("/").indexOf("users") + 1])
     })
 
     return NextResponse.json(

@@ -90,15 +90,11 @@ export default function MarketplacePage() {
         {marketStats.map((stat, index) => (
           <Card key={index}>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                Plaats je woning op ons platform en kom direct in contact met kopers. 
-                Geen makelaarskosten, geen tussenpersonen.
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  <p className={`text-sm ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                    {stat.change} vs vorige maand
-                  Plaats je woning
-                </div>
-                <div className={`p-3 rounded-full bg-gray-100 ${stat.color}`}>
+              <div className="flex flex-col gap-2">
+                <span>Plaats je woning op ons platform en kom direct in contact met kopers. Geen makelaarskosten, geen tussenpersonen.</span>
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className={`text-sm ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>{stat.change} vs vorige maand</p>
+                <div className={`p-3 rounded-full bg-gray-100 self-start ${stat.color}`}>
                   <stat.icon className="w-6 h-6" />
                 </div>
               </div>

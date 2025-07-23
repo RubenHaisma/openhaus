@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { TrendingUp, TrendingDown, Home, MapPin, Calendar, Zap } from 'lucide-react'
-import { PropertyValuation, ComparableSale, ValuationFactor } from '@/lib/kadaster'
+import { PropertyValuation } from '@/lib/property/property-service'
 import { motion } from 'framer-motion'
 
 interface ValuationResultProps {

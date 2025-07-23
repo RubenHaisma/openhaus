@@ -19,14 +19,11 @@ import {
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
-interface PriceRangePageProps {
-  params: {
-    city: string
-    priceRange: string
-  }
-}
+export default function PriceRangePropertyPage() {
+  const params = useParams();
+  const city = typeof params.city === 'string' ? params.city : Array.isArray(params.city) ? params.city[0] : '';
+  const priceRangeSlug = typeof params.priceRange === 'string' ? params.priceRange : Array.isArray(params.priceRange) ? params.priceRange[0] : '';
 
-export default function PriceRangePropertyPage({ params }: PriceRangePageProps) {
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState<string[]>([])
@@ -59,11 +56,11 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
     return { title: 'Alle prijzen' }
   }
 
-  const cityName = params.city.split('-').map(word => 
+  const cityName = city.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 
-  const priceRange = parsePriceRange(params.priceRange)
+  const priceRange = parsePriceRange(priceRangeSlug)
 
   useEffect(() => {
     const loadProperties = async () => {
@@ -108,14 +105,14 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
     }).format(price)
   }
 
-  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/huizen-te-koop/${params.city}/${params.priceRange}`)
+  const breadcrumbs = SEOUrlGenerator.generateBreadcrumbs(`/huizen-te-koop/${city}/${priceRangeSlug}`)
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "name": `Huizen te koop in ${cityName} ${priceRange.title}`,
     "description": `Ontdek huizen te koop in ${cityName} in de prijsklasse ${priceRange.title}. Bekijk het actuele aanbod van particuliere verkopers zonder makelaarskosten.`,
-    "url": `https://openhaus.nl/huizen-te-koop/${params.city}/${params.priceRange}`,
+    "url": `https://openhaus.nl/huizen-te-koop/${city}/${priceRangeSlug}`,
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": properties.length
@@ -124,7 +121,6 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
 
   return (
     <>
-      <StructuredData type="CollectionPage" data={structuredData} />
       <StructuredData type="BreadcrumbList" data={{ items: breadcrumbs }} />
       
       <div className="min-h-screen bg-gray-50">
@@ -133,7 +129,7 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Breadcrumbs */}
             <nav className="mb-6">
-              <ol className="flex items-center space-x-2 text-sm text-gray-600">
+              <ol className="flex items-center space- x-2 text-sm text-gray-600">
                 {breadcrumbs.map((crumb, index) => (
                   <li key={index} className="flex items-center">
                     {index > 0 && <span className="mx-2">/</span>}
@@ -204,7 +200,7 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
                     {priceRange.title}
                   </Badge>
                   
-                  <Link href={`/huizen-te-koop/${params.city}`}>
+                  <Link href={`/huizen-te-koop/${city}`}>
                     <Button variant="outline" size="sm">
                       Alle prijzen tonen
                     </Button>
@@ -247,7 +243,7 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
                     binnen de prijsklasse {priceRange.title}.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href={`/huizen-te-koop/${params.city}`}>
+                    <Link href={`/huizen-te-koop/${city}`}>
                       <Button>Alle prijzen bekijken</Button>
                     </Link>
                     <Link href="/buy">
@@ -267,7 +263,7 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link 
-                href={`/appartementen-te-koop/${params.city}/${params.priceRange}`}
+                href={`/appartementen-te-koop/${city}/${priceRangeSlug}`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
               >
                 <div className="font-medium text-gray-900">
@@ -277,7 +273,7 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
               </Link>
               
               <Link 
-                href={`/rijtjeshuizen-te-koop/${params.city}/${params.priceRange}`}
+                href={`/rijtjeshuizen-te-koop/${city}/${priceRangeSlug}`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
               >
                 <div className="font-medium text-gray-900">
@@ -287,7 +283,7 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
               </Link>
               
               <Link 
-                href={`/huis-verkopen/${params.city}`}
+                href={`/huis-verkopen/${city}`}
                 className="block p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
               >
                 <div className="font-medium text-gray-900">
@@ -308,7 +304,7 @@ export default function PriceRangePropertyPage({ params }: PriceRangePageProps) 
                 Krijg een gratis taxatie en plaats je advertentie zonder makelaarskosten
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href={`/huis-verkopen/${params.city}`}>
+                <Link href={`/huis-verkopen/${city}`}>
                   <Button 
                     size="lg" 
                     className="bg-white text-primary hover:bg-gray-100 px-8 py-3 text-lg font-bold"

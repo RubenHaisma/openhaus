@@ -17,13 +17,7 @@ import {
   Info
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Cookie Beleid | OpenHaus - Transparant over cookies',
-  description: 'Lees ons cookie beleid en beheer je cookie voorkeuren. Transparante uitleg over welke cookies we gebruiken en waarom.',
-  keywords: ['cookie beleid', 'cookies', 'tracking', 'privacy', 'cookie voorkeuren']
-}
 
 export default function CookiesPage() {
   const [cookieSettings, setCookieSettings] = useState({

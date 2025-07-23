@@ -19,13 +19,8 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Veelgestelde Vragen | OpenHaus - Alle antwoorden op een rij',
-  description: 'Vind antwoorden op veelgestelde vragen over het kopen en verkopen van huizen via OpenHaus. Van taxaties tot juridische aspecten.',
-  keywords: ['faq openhaus', 'veelgestelde vragen', 'huis verkopen vragen', 'huis kopen vragen', 'vastgoed hulp']
-}
+
 
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState('')

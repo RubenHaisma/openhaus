@@ -10,8 +10,9 @@ const loginSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  let body: any = undefined;
   try {
-    const body = await request.json()
+    body = await request.json()
     const clientIP = request.headers.get('x-forwarded-for') || 'unknown'
     
     // Rate limiting
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.allowed) {
       Logger.security('Login rate limit exceeded', {
         ipAddress: clientIP,
-        userAgent: request.headers.get('user-agent'),
+        userAgent: request.headers.get('user-agent') || 'unknown',
         email: body.email,
       })
       
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
       userId: result.user.id,
       email: result.user.email,
       ipAddress: clientIP,
-      userAgent: request.headers.get('user-agent'),
+      userAgent: request.headers.get('user-agent') || 'unknown',
     })
 
     // Cache user session
@@ -71,14 +72,14 @@ export async function POST(request: NextRequest) {
     return response
   } catch (error) {
     Logger.error('Login failed', error as Error, {
-      ipAddress: request.headers.get('x-forwarded-for'),
-      userAgent: request.headers.get('user-agent'),
+      ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
       email: body?.email,
     })
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+          { error: 'Validation failed', details: error },
         { status: 400 }
       )
     }

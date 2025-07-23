@@ -19,24 +19,11 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Huis Verkopen Zonder Makelaar: Complete Gids 2024 | OpenHaus',
-  description: 'Leer hoe je je huis verkoopt zonder makelaar en duizenden euro\'s bespaart. Complete stap-voor-stap gids met tips, valkuilen en juridische aspecten.',
-  keywords: [
-    'huis verkopen zonder makelaar',
-    'woning verkopen particulier',
-    'makelaarskosten besparen',
-    'huis verkopen zelf',
-    'particuliere verkoop woning'
-  ],
-  openGraph: {
-    title: 'Huis Verkopen Zonder Makelaar: Complete Gids 2024',
-    description: 'Bespaar duizenden euro\'s door je huis zelf te verkopen. Ontdek hoe in onze complete gids.',
-    images: ['/og-guide-selling.jpg'],
-  },
-}
+
+
+
+
 
 const faqData = {
   faqs: [

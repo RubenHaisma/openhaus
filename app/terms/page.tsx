@@ -14,13 +14,6 @@ import {
   Mail
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Algemene Voorwaarden | OpenHaus - Gebruiksvoorwaarden',
-  description: 'Lees de algemene voorwaarden van OpenHaus voor het gebruik van ons vastgoedplatform. Duidelijke afspraken voor veilige transacties.',
-  keywords: ['algemene voorwaarden', 'gebruiksvoorwaarden', 'terms of service', 'openhaus voorwaarden']
-}
 
 export default function TermsPage() {
   const lastUpdated = "15 december 2024"
