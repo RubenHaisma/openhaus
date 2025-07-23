@@ -118,7 +118,7 @@ export function Header() {
                   </Button>
                 </Link>
                 <Link href="/auth/signup">
-                  <Button className="opendoor-button-primary shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
                     Plaats woning
                   </Button>
                 </Link>

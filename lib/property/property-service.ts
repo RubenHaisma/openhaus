@@ -315,7 +315,16 @@ export class PropertyService {
     try {
       const properties = await prisma.property.findMany({
         where: { userId },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        }
       })
 
       return properties

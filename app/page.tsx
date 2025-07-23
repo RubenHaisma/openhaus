@@ -64,13 +64,6 @@ export default function HomePage() {
   const handleAddressSearch = async (address: string, postalCode: string) => {
     setLoading(true)
     try {
-      if (!session) {
-        // Store the search data and redirect to sign in
-        sessionStorage.setItem('pendingSearch', JSON.stringify({ address, postalCode }))
-        router.push('/auth/signin?callbackUrl=/list-property')
-        return
-      }
-
       const res = await fetch('/api/valuation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,7 +71,13 @@ export default function HomePage() {
       })
       const data = await res.json()
       if (res.ok) {
-        // Redirect to /list-property with valuation data
+        if (!session) {
+          // Store the search data and redirect to sign in
+          sessionStorage.setItem('pendingSearch', JSON.stringify({ address, postalCode, value: data.valuation.estimatedValue }))
+          router.push('/auth/signin?callbackUrl=/list-property')
+          return
+        }
+        // Redirect to list-property with valuation data
         router.push(`/list-property?address=${encodeURIComponent(address)}&postal=${encodeURIComponent(postalCode)}&value=${encodeURIComponent(data.valuation.estimatedValue)}`)
       } else {
         alert(`Fout bij het ophalen van woninggegevens: ${data.error}`)

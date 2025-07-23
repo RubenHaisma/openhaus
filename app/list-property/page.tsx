@@ -24,6 +24,19 @@ function ListPropertyPageContent() {
     if (status === 'loading') return
     
     if (!session) {
+      // Check if there's pending search data from homepage
+      const pendingSearch = sessionStorage.getItem('pendingSearch')
+      if (pendingSearch) {
+        const searchData = JSON.parse(pendingSearch)
+        const currentUrl = new URL(window.location.href)
+        currentUrl.searchParams.set('address', searchData.address)
+        currentUrl.searchParams.set('postal', searchData.postalCode)
+        if (searchData.value) {
+          currentUrl.searchParams.set('value', searchData.value.toString())
+        }
+        sessionStorage.removeItem('pendingSearch')
+        window.history.replaceState({}, '', currentUrl.toString())
+      }
       router.push('/auth/signin?callbackUrl=' + encodeURIComponent(window.location.href))
       return
     }
