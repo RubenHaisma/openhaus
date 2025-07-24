@@ -45,8 +45,20 @@ export class WOZScraper {
   async initBrowser(): Promise<void> {
     if (!this.browser && !this.browserPromise) {
       try {
+        const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
+        const isDevelopment = process.env.NODE_ENV === 'development';
+  
+        // Log environment details for debugging
+        Logger.info('Attempting to launch Puppeteer browser', {
+          nodeVersion: process.version,
+          puppeteerVersion: require('puppeteer/package.json').version,
+          executablePath: executablePath || 'default',
+          env: isDevelopment ? 'development' : 'production',
+        });
+  
         this.browserPromise = puppeteer.launch({
           headless: true,
+          executablePath,
           args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -59,14 +71,46 @@ export class WOZScraper {
             '--disable-features=VizDisplayCompositor',
             '--disable-background-timer-throttling',
             '--disable-backgrounding-occluded-windows',
-            '--disable-renderer-backgrounding'
-          ]
+            '--disable-renderer-backgrounding',
+          ],
+          timeout: isDevelopment ? 60000 : 30000, // Longer timeout in dev
+          // Add environment variable to skip Chromium download in dev if needed
+          ignoreDefaultArgs: isDevelopment && process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD ? ['--disable-extensions'] : [],
         });
+  
         this.browser = await this.browserPromise;
+        Logger.info('Browser launched successfully', { executablePath });
       } catch (err) {
-        console.error('Puppeteer failed to launch:', err);
+        Logger.error('Failed to launch Puppeteer browser', err as Error, {
+          env: process.env.NODE_ENV,
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || 'default',
+          message: (err as Error).message,
+          stack: (err as Error).stack,
+        });
+        console.log('Puppeteer launch error details:', {
+          message: (err as Error).message,
+          stack: (err as Error).stack,
+        });
+  
+        // Additional diagnostics for development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Puppeteer launch error details:', {
+            message: (err as Error).message,
+            stack: (err as Error).stack,
+          });
+          // Suggest common fixes
+          console.error(
+            'Try these steps:\n' +
+            '1. Install Chromium: `npx puppeteer browsers install chrome`\n' +
+            '2. Set PUPPETEER_EXECUTABLE_PATH in .env to your Chrome/Chromium binary\n' +
+            '3. Ensure system dependencies are installed (e.g., libx11-dev, libxkbcommon, libgtk-3-0)\n' +
+            '4. Check for sufficient disk space and permissions'
+          );
+        }
+  
         this.browserPromise = null;
         this.browser = null;
+        throw new Error(`Browser initialization failed: ${(err as Error).message}`);
       }
       this.browserPromise = null;
     }
