@@ -44,25 +44,31 @@ export class WOZScraper {
   }
   async initBrowser(): Promise<void> {
     if (!this.browser && !this.browserPromise) {
-      this.browserPromise = puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding'
-        ]
-      })
-      this.browser = await this.browserPromise
-      this.browserPromise = null
+      try {
+        this.browserPromise = puppeteer.launch({
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding'
+          ]
+        });
+        this.browser = await this.browserPromise;
+      } catch (err) {
+        console.error('Puppeteer failed to launch:', err);
+        this.browserPromise = null;
+        this.browser = null;
+      }
+      this.browserPromise = null;
     }
   }
 
@@ -323,6 +329,8 @@ export class WOZScraper {
         address,
         postalCode
       })
+      // Ensure error is always visible in production logs
+      console.error('WOZ SCRAPER ERROR:', error);
 
       return {
         success: false,
