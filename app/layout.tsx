@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Toaster } from '@/components/ui/sonner'
 import { ErrorBoundary } from '@/components/error-boundary'
+import Script from 'next/script'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -115,6 +116,19 @@ export default function RootLayout({
           <link rel="icon" href="/favicon.ico" sizes="any" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
           <link rel="manifest" href="/manifest.json" />
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-1NCEXRW2R0"
+            strategy="afterInteractive"
+            async
+          />
+          <Script id="gtag-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-1NCEXRW2R0');
+            `}
+          </Script>
         </head>
         <body className="min-h-screen bg-background font-sans antialiased">
           <ErrorBoundary>
