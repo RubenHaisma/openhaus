@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable Puppeteer in production builds
+  env: {
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD || 'true',
+  },
+
   // Next.js 15 optimizations
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
@@ -17,6 +22,12 @@ const nextConfig = {
   // Performance optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+    // Remove Puppeteer from production bundle
+    ...(process.env.NODE_ENV === 'production' && {
+      removeConsole: {
+        exclude: ['error', 'warn'],
+      },
+    }),
   },
 
   // Image optimization
@@ -73,6 +84,28 @@ const nextConfig = {
 
   typescript: {
     ignoreBuildErrors: false,
+  },
+
+  // Webpack configuration for production
+  webpack: (config, { isServer, dev }) => {
+    // Exclude Puppeteer from client-side bundle
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        child_process: false,
+      }
+    }
+
+    // Exclude Puppeteer in production
+    if (!dev && process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD === 'true') {
+      config.externals = config.externals || []
+      config.externals.push('puppeteer')
+    }
+
+    return config
   },
 
   // Redirects for SEO

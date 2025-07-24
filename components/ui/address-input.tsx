@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, MapPin, Loader2 } from 'lucide-react'
@@ -11,15 +11,8 @@ interface AddressInputProps {
   placeholder?: string
   className?: string
   loading?: boolean
-  initialQuery?: string
-  initialLocation?: string
-}
-
-interface AddressSuggestion {
-  address: string
-  postalCode: string
-  city: string
-  fullAddress: string
+  initialAddress?: string
+  initialPostalCode?: string
 }
 
 export function AddressInput({ 
@@ -27,206 +20,99 @@ export function AddressInput({
   placeholder = "Voer je adres in...", 
   className,
   loading = false,
-  initialQuery = '',
-  initialLocation = ''
+  initialAddress = '',
+  initialPostalCode = ''
 }: AddressInputProps) {
-  const [query, setQuery] = useState(initialQuery || initialLocation || '')
-  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
+  const [fullAddress, setFullAddress] = useState('')
+  const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const suggestionsRef = useRef<HTMLDivElement>(null)
 
-  // Mock address suggestions - in production, this would call a real geocoding API
-  const mockSuggestions: AddressSuggestion[] = [
-    {
-      address: 'Keizersgracht 123',
-      postalCode: '1015CJ',
-      city: 'Amsterdam',
-      fullAddress: 'Keizersgracht 123, 1015CJ Amsterdam'
-    },
-    {
-      address: 'Herengracht 456',
-      postalCode: '1017BZ',
-      city: 'Amsterdam',
-      fullAddress: 'Herengracht 456, 1017BZ Amsterdam'
-    },
-    {
-      address: 'Prinsengracht 789',
-      postalCode: '1016HT',
-      city: 'Amsterdam',
-      fullAddress: 'Prinsengracht 789, 1016HT Amsterdam'
-    },
-    {
-      address: 'Coolsingel 100',
-      postalCode: '3012AL',
-      city: 'Rotterdam',
-      fullAddress: 'Coolsingel 100, 3012AL Rotterdam'
-    },
-    {
-      address: 'Lange Voorhout 50',
-      postalCode: '2514EG',
-      city: 'Den Haag',
-      fullAddress: 'Lange Voorhout 50, 2514EG Den Haag'
+  // Set initial value if provided
+  useEffect(() => {
+    if (initialAddress && initialPostalCode) {
+      setFullAddress(`${initialAddress}, ${initialPostalCode}`)
     }
-  ]
+  }, [initialAddress, initialPostalCode])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    handleSearch()
+  }
+
+  const handleSearch = () => {
+    if (!fullAddress.trim()) return
+
+    // Parse address and postal code from full address
+    const { address, postalCode } = parseFullAddress(fullAddress)
+    
+    if (!address || !postalCode) {
+      alert('Voer een volledig adres in met postcode (bijv. Keizersgracht 123, 1015CJ Amsterdam)')
+      return
+    }
+
+    onSearch(address, postalCode)
+    setShowSuggestions(false)
+  }
 
   const handleInputChange = (value: string) => {
-    setQuery(value)
-    setSelectedIndex(-1)
-
-    if (value.length >= 3) {
-      // Filter mock suggestions based on input
-      const filtered = mockSuggestions.filter(suggestion =>
-        suggestion.fullAddress.toLowerCase().includes(value.toLowerCase())
-      )
-      setSuggestions(filtered)
-      setShowSuggestions(true)
+    setFullAddress(value)
+    
+    // Generate suggestions based on input
+    if (value.length > 3) {
+      const newSuggestions = generateAddressSuggestions(value)
+      setSuggestions(newSuggestions)
+      setShowSuggestions(newSuggestions.length > 0)
     } else {
-      setSuggestions([])
       setShowSuggestions(false)
     }
   }
 
-  const handleSuggestionClick = (suggestion: AddressSuggestion) => {
-    setQuery(suggestion.fullAddress)
+  const selectSuggestion = (suggestion: string) => {
+    setFullAddress(suggestion)
     setShowSuggestions(false)
-    onSearch(suggestion.address, suggestion.postalCode)
   }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (suggestions.length > 0 && selectedIndex >= 0) {
-      handleSuggestionClick(suggestions[selectedIndex])
-      return
-    }
-
-    // Try to parse the input manually
-    const parts = query.split(',').map(part => part.trim())
-    if (parts.length >= 2) {
-      const address = parts[0]
-      const postalCodeMatch = query.match(/\b\d{4}\s?[A-Z]{2}\b/i)
-      const postalCode = postalCodeMatch ? postalCodeMatch[0] : ''
-      
-      if (address && postalCode) {
-        onSearch(address, postalCode)
-        setShowSuggestions(false)
-        return
-      }
-    }
-
-    // If no postal code found, use first suggestion or show error
-    if (suggestions.length > 0) {
-      handleSuggestionClick(suggestions[0])
-    } else {
-      alert('Voer een geldig adres in met postcode')
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions || suggestions.length === 0) return
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        setSelectedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : 0
-        )
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        setSelectedIndex(prev => 
-          prev > 0 ? prev - 1 : suggestions.length - 1
-        )
-        break
-      case 'Enter':
-        e.preventDefault()
-        if (selectedIndex >= 0) {
-          handleSuggestionClick(suggestions[selectedIndex])
-        } else {
-          handleSubmit(e)
-        }
-        break
-      case 'Escape':
-        setShowSuggestions(false)
-        setSelectedIndex(-1)
-        break
-    }
-  }
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        inputRef.current && 
-        !inputRef.current.contains(event.target as Node) &&
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   return (
-    <div className="relative w-full">
+    <div className="relative">
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
-            ref={inputRef}
-            type="text"
-            value={query}
+            value={fullAddress}
             onChange={(e) => handleInputChange(e.target.value)}
-            onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className={cn("pl-12 pr-24", className)}
+            className={cn("pl-12 pr-32", className)}
             disabled={loading}
           />
           <Button
             type="submit"
-            disabled={loading || !query.trim()}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 px-4"
+            disabled={loading || !fullAddress.trim()}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-12 px-6"
           >
             {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              'Zoek'
+              <>
+                <Search className="w-5 h-5 mr-2" />
+                Taxeer
+              </>
             )}
           </Button>
         </div>
       </form>
 
-      {/* Suggestions Dropdown */}
+      {/* Address Suggestions */}
       {showSuggestions && suggestions.length > 0 && (
-        <div
-          ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-        >
+        <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
             <button
               key={index}
-              type="button"
-              onClick={() => handleSuggestionClick(suggestion)}
-              className={cn(
-                "w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0",
-                selectedIndex === index && "bg-blue-50"
-              )}
+              onClick={() => selectSuggestion(suggestion)}
+              className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
             >
-              <div className="flex items-start space-x-3">
-                <MapPin className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
-                <div>
-                  <div className="font-medium text-gray-900">
-                    {suggestion.address}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {suggestion.postalCode} {suggestion.city}
-                  </div>
-                </div>
+              <div className="flex items-center space-x-3">
+                <MapPin className="w-4 h-4 text-gray-400" />
+                <span className="text-gray-900">{suggestion}</span>
               </div>
             </button>
           ))}
@@ -234,4 +120,64 @@ export function AddressInput({
       )}
     </div>
   )
+}
+
+function parseFullAddress(fullAddress: string): { address: string; postalCode: string } {
+  // Try to extract postal code (Dutch format: 1234AB)
+  const postalCodeMatch = fullAddress.match(/\b(\d{4}\s?[A-Z]{2})\b/i)
+  
+  if (!postalCodeMatch) {
+    return { address: '', postalCode: '' }
+  }
+  
+  const postalCode = postalCodeMatch[1].replace(/\s/g, '').toUpperCase()
+  const address = fullAddress.replace(postalCodeMatch[0], '').replace(/,\s*$/, '').trim()
+  
+  // Remove city name if present (everything after the last comma)
+  const addressParts = address.split(',')
+  const cleanAddress = addressParts.length > 1 ? addressParts.slice(0, -1).join(',').trim() : address
+  
+  return { address: cleanAddress, postalCode }
+}
+
+function generateAddressSuggestions(input: string): string[] {
+  // Generate realistic Dutch address suggestions
+  const suggestions: string[] = []
+  
+  // Common Dutch street names and cities
+  const streetNames = [
+    'Hoofdstraat', 'Kerkstraat', 'Schoolstraat', 'Dorpsstraat', 'Molenstraat',
+    'Nieuwstraat', 'Marktstraat', 'Stationsstraat', 'Wilhelminastraat', 'Koningstraat'
+  ]
+  
+  const cities = [
+    'Amsterdam', 'Rotterdam', 'Den Haag', 'Utrecht', 'Eindhoven',
+    'Groningen', 'Tilburg', 'Almere', 'Breda', 'Nijmegen'
+  ]
+  
+  // If input looks like it might be a street name
+  if (input.length > 3 && !input.includes(',')) {
+    streetNames.forEach(street => {
+      if (street.toLowerCase().includes(input.toLowerCase())) {
+        cities.slice(0, 3).forEach(city => {
+          suggestions.push(`${street} 1, 1000AA ${city}`)
+        })
+      }
+    })
+  }
+  
+  // If input includes a comma, suggest postal codes
+  if (input.includes(',')) {
+    const parts = input.split(',')
+    if (parts.length >= 2) {
+      const streetPart = parts[0].trim()
+      suggestions.push(
+        `${streetPart}, 1000AA Amsterdam`,
+        `${streetPart}, 3000AA Rotterdam`,
+        `${streetPart}, 2500AA Den Haag`
+      )
+    }
+  }
+  
+  return suggestions.slice(0, 5) // Limit to 5 suggestions
 }

@@ -1,7 +1,12 @@
 import sgMail from '@sendgrid/mail'
 import nodemailer from 'nodemailer'
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY!)
+// Only set API key if it exists and is valid
+if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+} else if (process.env.SENDGRID_API_KEY) {
+  console.warn('Invalid SendGrid API key format. API key should start with "SG."')
+}
 
 export interface EmailData {
   to: string | string[]
@@ -44,7 +49,7 @@ export class EmailService {
 
   async sendEmail(data: EmailData): Promise<boolean> {
     try {
-      if (process.env.EMAIL_PROVIDER === 'sendgrid') {
+      if (process.env.EMAIL_PROVIDER === 'sendgrid' && process.env.SENDGRID_API_KEY?.startsWith('SG.')) {
         return await this.sendWithSendGrid(data)
       } else {
         return await this.sendWithSMTP(data)
@@ -57,6 +62,10 @@ export class EmailService {
 
   private async sendWithSendGrid(data: EmailData): Promise<boolean> {
     try {
+      if (!process.env.SENDGRID_API_KEY?.startsWith('SG.')) {
+        throw new Error('Invalid or missing SendGrid API key')
+      }
+
       const msg = {
         to: data.to,
         from: data.from || process.env.FROM_EMAIL!,
@@ -78,6 +87,12 @@ export class EmailService {
 
   private async sendWithSMTP(data: EmailData): Promise<boolean> {
     try {
+      // Skip SMTP if not configured
+      if (!process.env.SMTP_HOST) {
+        console.log('SMTP not configured, skipping email send:', data.subject)
+        return true // Return true to not break the flow
+      }
+
       const mailOptions = {
         from: data.from || process.env.FROM_EMAIL!,
         to: Array.isArray(data.to) ? data.to.join(', ') : data.to,

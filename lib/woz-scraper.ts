@@ -2,6 +2,7 @@ import puppeteer, { Browser } from 'puppeteer'
 import { prisma } from '@/lib/prisma'
 import { Logger } from '@/lib/monitoring/logger'
 import { cacheService } from '@/lib/cache/redis'
+import { productionWozScraper, type ScrapingResult as ProductionScrapingResult } from './woz-scraper-production'
 
 export interface WOZData {
   address: string
@@ -45,6 +46,12 @@ export class WOZScraper {
   async initBrowser(): Promise<void> {
     if (!this.browser && !this.browserPromise) {
       try {
+        // Skip browser initialization in production
+        if (process.env.NODE_ENV === 'production') {
+          Logger.warn('Skipping Puppeteer browser initialization in production')
+          return
+        }
+
         const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
         const isDevelopment = process.env.NODE_ENV === 'development';
   
@@ -125,6 +132,18 @@ export class WOZScraper {
 
   async getWOZValue(address: string, postalCode: string): Promise<ScrapingResult> {
     try {
+      // ALWAYS use production scraper in production or when Puppeteer is not available
+      if (process.env.NODE_ENV === 'production' || process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD === 'true') {
+        Logger.info('Using production WOZ scraper (no Puppeteer)', { address, postalCode })
+        const result = await productionWozScraper.getWOZValue(address, postalCode)
+        return {
+          success: result.success,
+          data: result.data,
+          error: result.error,
+          cached: result.cached
+        }
+      }
+
       // Create cache key
       const cacheKey = `woz:${address}:${postalCode.replace(/\s/g, '').toUpperCase()}`
       
@@ -580,6 +599,11 @@ export class WOZScraper {
   // Health check method
   async healthCheck(): Promise<boolean> {
     try {
+      // Use production scraper health check in production or when Puppeteer is disabled
+      if (process.env.NODE_ENV === 'production' || process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD === 'true') {
+        return await productionWozScraper.healthCheck()
+      }
+
       const testResult = await this.getWOZValue('Test 1', '1000AA')
       return testResult.success || testResult.cached === true
     } catch (error) {
