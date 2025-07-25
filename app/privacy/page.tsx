@@ -25,10 +25,10 @@ export default function PrivacyPage() {
       title: 'Inleiding',
       icon: Shield,
       content: `
-        OpenHaus B.V. ("wij", "ons", "OpenHaus") respecteert je privacy en is toegewijd aan het beschermen van je persoonlijke gegevens. 
+        WattVrij B.V. ("wij", "ons", "WattVrij") respecteert je privacy en is toegewijd aan het beschermen van je persoonlijke gegevens. 
         Dit privacybeleid legt uit hoe we je gegevens verzamelen, gebruiken, delen en beschermen wanneer je onze website en diensten gebruikt.
         
-        Dit beleid is van toepassing op alle diensten die worden aangeboden door OpenHaus, inclusief onze website, mobiele applicatie en gerelateerde diensten.
+        Dit beleid is van toepassing op alle diensten die worden aangeboden door WattVrij, inclusief onze website, mobiele applicatie en gerelateerde diensten.
       `
     },
     {
@@ -231,10 +231,10 @@ export default function PrivacyPage() {
         Voor vragen over dit privacybeleid of je gegevens:
         
         **Privacy Officer:**
-        Email: privacy@openhaus.nl
+        Email: privacy@WattVrij.nl
         
         **Postadres:**
-        OpenHaus B.V.
+        WattVrij B.V.
         t.a.v. Privacy Officer
         Herengracht 1
         1000 AA Amsterdam
@@ -394,11 +394,11 @@ export default function PrivacyPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a 
-                  href="mailto:privacy@openhaus.nl"
+                  href="mailto:privacy@WattVrij.nl"
                   className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary hover:bg-gray-100 rounded-lg text-lg font-bold transition-colors"
                 >
                   <Mail className="w-5 h-5 mr-2" />
-                  privacy@openhaus.nl
+                  privacy@WattVrij.nl
                 </a>
               </div>
             </CardContent>

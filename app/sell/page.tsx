@@ -175,7 +175,7 @@ export default function SellPage() {
         {/* Benefits Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Waarom verkopen via OpenHaus?
+            Waarom verkopen via WattVrij?
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

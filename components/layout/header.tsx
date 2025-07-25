@@ -50,7 +50,7 @@ export function Header() {
               <Zap className="h-6 w-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
-              OpenHaus
+              WattVrij
             </span>
           </Link>
 
@@ -138,7 +138,7 @@ export function Header() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600">
                       <Zap className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-2xl font-bold text-gray-900">OpenHaus</span>
+                    <span className="text-2xl font-bold text-gray-900">WattVrij</span>
                   </Link>
                 </div>
 

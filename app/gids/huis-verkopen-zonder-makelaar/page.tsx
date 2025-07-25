@@ -93,7 +93,7 @@ export default function SellingGuide() {
     {
       number: 4,
       title: "Plaats je advertentie online",
-      description: "Gebruik platforms zoals OpenHaus om direct contact te maken met kopers.",
+      description: "Gebruik platforms zoals WattVrij om direct contact te maken met kopers.",
       icon: Users,
       details: [
         "Schrijf een aantrekkelijke beschrijving",

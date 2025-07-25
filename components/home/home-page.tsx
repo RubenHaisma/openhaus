@@ -92,7 +92,7 @@ export function HomePage() {
     {
       name: 'Mark Janssen',
       location: 'Rotterdam',
-      text: 'Geen gedoe met bezichtigingen en onzekere kopers. OpenHaus maakte het verkopen zo eenvoudig.',
+      text: 'Geen gedoe met bezichtigingen en onzekere kopers. WattVrij maakte het verkopen zo eenvoudig.',
       rating: 5,
       amount: '€425.000'
     },
@@ -232,7 +232,7 @@ export function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-elegant-red-800 mb-6">
-              Waarom kiezen voor OpenHaus?
+              Waarom kiezen voor WattVrij?
             </h2>
             <p className="text-xl text-elegant-red-600 max-w-3xl mx-auto">
               We maken het verkopen van je huis eenvoudig, snel en transparant. 

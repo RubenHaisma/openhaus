@@ -11,7 +11,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
   const pathname = usePathname()
 
   const generateSchema = () => {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://openhaus.nl'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://WattVrij.nl'
     
     switch (type) {
       case 'RealEstateListing':
@@ -51,9 +51,9 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           "availableFrom": data.availableFrom,
           "listingAgent": {
             "@type": "RealEstateAgent",
-            "name": "OpenHaus",
+            "name": "WattVrij",
             "url": baseUrl,
-            "email": "info@openhaus.nl"
+            "email": "info@WattVrij.nl"
           }
         }
 
@@ -61,12 +61,12 @@ export function StructuredData({ type, data }: StructuredDataProps) {
         return {
           "@context": "https://schema.org",
           "@type": "RealEstateAgent",
-          "name": "OpenHaus",
+          "name": "WattVrij",
           "description": "P2P vastgoedmarktplaats - Koop en verkoop huizen direct van particulier zonder makelaarskosten",
           "url": baseUrl,
           "logo": `${baseUrl}/logo.png`,
           "image": `${baseUrl}/og-image.jpg`,
-          "email": "info@openhaus.nl",
+          "email": "info@WattVrij.nl",
           "address": {
             "@type": "PostalAddress",
             "streetAddress": "Herengracht 1",
@@ -94,9 +94,9 @@ export function StructuredData({ type, data }: StructuredDataProps) {
             "worstRating": "1"
           },
           "sameAs": [
-            "https://www.facebook.com/openhaus",
-            "https://www.linkedin.com/company/openhaus",
-            "https://twitter.com/openhaus"
+            "https://www.facebook.com/WattVrij",
+            "https://www.linkedin.com/company/WattVrij",
+            "https://twitter.com/WattVrij"
           ]
         }
 
@@ -104,7 +104,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
         return {
           "@context": "https://schema.org",
           "@type": "WebSite",
-          "name": "OpenHaus",
+          "name": "WattVrij",
           "description": "P2P vastgoedmarktplaats - Direct huis verkopen en kopen zonder makelaar",
           "url": baseUrl,
           "potentialAction": [
@@ -119,7 +119,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           ],
           "publisher": {
             "@type": "Organization",
-            "name": "OpenHaus",
+            "name": "WattVrij",
             "logo": {
               "@type": "ImageObject",
               "url": `${baseUrl}/logo.png`

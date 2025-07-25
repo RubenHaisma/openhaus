@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { SEOUrlGenerator } from '@/lib/seo/url-generator'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://openhaus.nl'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://WattVrij.nl'
   
   // Static pages
   const staticPages = [

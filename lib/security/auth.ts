@@ -70,7 +70,7 @@ export class AuthService {
       const { emailService } = await import('../integrations/email')
       await emailService.sendEmail({
         to: user.email,
-        subject: 'Verifieer je account - OpenHaus',
+        subject: 'Verifieer je account - WattVrij',
         templateId: 'email-verification-template',
         dynamicTemplateData: {
           name: user.name,

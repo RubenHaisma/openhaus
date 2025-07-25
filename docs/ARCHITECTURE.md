@@ -1,7 +1,7 @@
 # European Real Estate Platform - Technical Architecture
 
 ## Executive Summary
-Building upon the existing OpenHaus platform to create a comprehensive European real estate solution that rivals Opendoor's functionality while addressing European market specifics, regulations, and data sources.
+Building upon the existing WattVrij platform to create a comprehensive European real estate solution that rivals Opendoor's functionality while addressing European market specifics, regulations, and data sources.
 
 ## Current Stack Analysis
 - **Frontend**: Next.js 15, React 19, TypeScript

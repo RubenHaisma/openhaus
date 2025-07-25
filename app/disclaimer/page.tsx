@@ -27,7 +27,7 @@ export default function DisclaimerPage() {
       title: 'Algemene Disclaimer',
       icon: AlertTriangle,
       content: `
-        OpenHaus B.V. ("OpenHaus", "wij", "ons") biedt een online platform voor vastgoedtransacties. 
+        WattVrij B.V. ("WattVrij", "wij", "ons") biedt een online platform voor vastgoedtransacties. 
         Deze disclaimer bevat belangrijke informatie over de beperkingen van onze diensten en aansprakelijkheid.
         
         **Gebruik op eigen risico:**
@@ -49,7 +49,7 @@ export default function DisclaimerPage() {
       icon: FileText,
       content: `
         **Verantwoordelijkheid gebruikers:**
-        Alle informatie over woningen wordt verstrekt door gebruikers (verkopers). OpenHaus 
+        Alle informatie over woningen wordt verstrekt door gebruikers (verkopers). WattVrij 
         controleert deze informatie niet op juistheid of volledigheid.
         
         **Geen garantie op juistheid:**
@@ -99,7 +99,7 @@ export default function DisclaimerPage() {
       icon: Users,
       content: `
         **Faciliterende rol:**
-        OpenHaus faciliteert alleen contact tussen kopers en verkopers. Wij zijn geen 
+        WattVrij faciliteert alleen contact tussen kopers en verkopers. Wij zijn geen 
         partij bij koopovereenkomsten en treden niet op als makelaar.
         
         **Geen garantie op transacties:**
@@ -111,7 +111,7 @@ export default function DisclaimerPage() {
         
         **Geschillen:**
         Geschillen tussen kopers en verkopers moeten onderling worden opgelost. 
-        OpenHaus is niet verantwoordelijk voor het oplossen van geschillen.
+        WattVrij is niet verantwoordelijk voor het oplossen van geschillen.
         
         **Juridische procedures:**
         Alle juridische procedures (koopakte, eigendomsoverdracht, etc.) moeten 
@@ -124,7 +124,7 @@ export default function DisclaimerPage() {
       icon: Shield,
       content: `
         **Uitgesloten aansprakelijkheid:**
-        OpenHaus is niet aansprakelijk voor:
+        WattVrij is niet aansprakelijk voor:
         • Directe, indirecte of gevolgschade
         • Verlies van winst of inkomsten
         • Verlies van gegevens
@@ -235,7 +235,7 @@ export default function DisclaimerPage() {
               </h1>
             </div>
             <p className="text-xl text-gray-600 mb-6 max-w-3xl mx-auto">
-              Belangrijke informatie over het gebruik van OpenHaus, beperkingen van onze diensten 
+              Belangrijke informatie over het gebruik van WattVrij, beperkingen van onze diensten 
               en aansprakelijkheid. Lees deze informatie zorgvuldig door.
             </p>
             <Badge className="bg-orange-100 text-orange-800">
@@ -411,11 +411,11 @@ export default function DisclaimerPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a 
-                  href="mailto:legal@openhaus.nl"
+                  href="mailto:legal@WattVrij.nl"
                   className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary hover:bg-gray-100 rounded-lg text-lg font-bold transition-colors"
                 >
                   <Mail className="w-5 h-5 mr-2" />
-                  legal@openhaus.nl
+                  legal@WattVrij.nl
                 </a>
               </div>
               <p className="text-sm opacity-75 mt-4">

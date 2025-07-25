@@ -24,74 +24,74 @@ export default function PressPage() {
   const pressReleases = [
     {
       id: '1',
-      title: 'OpenHaus breidt uit naar België en Duitsland',
+      title: 'WattVrij breidt uit naar België en Duitsland',
       date: '2024-12-10',
       category: 'Bedrijfsnieuws',
-      summary: 'OpenHaus kondigt internationale expansie aan met lancering in België en Duitsland in Q2 2025.',
-      downloadUrl: '/press/openhaus-international-expansion-2024.pdf'
+      summary: 'WattVrij kondigt internationale expansie aan met lancering in België en Duitsland in Q2 2025.',
+      downloadUrl: '/press/WattVrij-international-expansion-2024.pdf'
     },
     {
       id: '2',
-      title: 'OpenHaus wint PropTech Award 2024',
+      title: 'WattVrij wint PropTech Award 2024',
       date: '2024-11-15',
       category: 'Awards',
-      summary: 'OpenHaus ontvangt de prestigieuze PropTech Award voor beste innovatie in vastgoed technologie.',
-      downloadUrl: '/press/openhaus-proptech-award-2024.pdf'
+      summary: 'WattVrij ontvangt de prestigieuze PropTech Award voor beste innovatie in vastgoed technologie.',
+      downloadUrl: '/press/WattVrij-proptech-award-2024.pdf'
     },
     {
       id: '3',
       title: '€12.5 miljoen bespaard voor Nederlandse huiseigenaren',
       date: '2024-10-22',
       category: 'Mijlpaal',
-      summary: 'OpenHaus bereikt belangrijke mijlpaal: meer dan €12.5 miljoen aan makelaarskosten bespaard.',
-      downloadUrl: '/press/openhaus-savings-milestone-2024.pdf'
+      summary: 'WattVrij bereikt belangrijke mijlpaal: meer dan €12.5 miljoen aan makelaarskosten bespaard.',
+      downloadUrl: '/press/WattVrij-savings-milestone-2024.pdf'
     },
     {
       id: '4',
       title: 'Partnership met Nederlandse Hypotheek Maatschappij',
       date: '2024-09-18',
       category: 'Partnership',
-      summary: 'Strategische samenwerking voor betere hypotheekdiensten aan OpenHaus gebruikers.',
-      downloadUrl: '/press/openhaus-nhm-partnership-2024.pdf'
+      summary: 'Strategische samenwerking voor betere hypotheekdiensten aan WattVrij gebruikers.',
+      downloadUrl: '/press/WattVrij-nhm-partnership-2024.pdf'
     },
     {
       id: '5',
-      title: 'OpenHaus haalt €15 miljoen op in Series B ronde',
+      title: 'WattVrij haalt €15 miljoen op in Series B ronde',
       date: '2024-08-05',
       category: 'Financiering',
       summary: 'Succesvolle financieringsronde onder leiding van Accel Partners voor verdere groei.',
-      downloadUrl: '/press/openhaus-series-b-funding-2024.pdf'
+      downloadUrl: '/press/WattVrij-series-b-funding-2024.pdf'
     }
   ]
 
   const mediaKit = [
     {
       title: 'Logo Pack',
-      description: 'Officiële OpenHaus logo\'s in verschillende formaten',
+      description: 'Officiële WattVrij logo\'s in verschillende formaten',
       type: 'ZIP',
       size: '2.4 MB',
-      downloadUrl: '/media/openhaus-logo-pack.zip'
+      downloadUrl: '/media/WattVrij-logo-pack.zip'
     },
     {
       title: 'Bedrijfsfoto\'s',
       description: 'High-resolution foto\'s van kantoor en team',
       type: 'ZIP',
       size: '15.8 MB',
-      downloadUrl: '/media/openhaus-photos.zip'
+      downloadUrl: '/media/WattVrij-photos.zip'
     },
     {
       title: 'Factsheet',
-      description: 'Belangrijke feiten en cijfers over OpenHaus',
+      description: 'Belangrijke feiten en cijfers over WattVrij',
       type: 'PDF',
       size: '1.2 MB',
-      downloadUrl: '/media/openhaus-factsheet.pdf'
+      downloadUrl: '/media/WattVrij-factsheet.pdf'
     },
     {
       title: 'Presentatie Template',
-      description: 'PowerPoint template met OpenHaus branding',
+      description: 'PowerPoint template met WattVrij branding',
       type: 'PPTX',
       size: '3.1 MB',
-      downloadUrl: '/media/openhaus-presentation-template.pptx'
+      downloadUrl: '/media/WattVrij-presentation-template.pptx'
     }
   ]
 
@@ -122,19 +122,19 @@ export default function PressPage() {
     {
       name: 'Sarah van der Berg',
       role: 'CEO & Oprichter',
-      email: 'sarah@openhaus.nl',
-      bio: 'Voormalig vastgoedmakelaar met 15 jaar ervaring. Oprichter van OpenHaus in 2020.'
+      email: 'sarah@WattVrij.nl',
+      bio: 'Voormalig vastgoedmakelaar met 15 jaar ervaring. Oprichter van WattVrij in 2020.'
     },
     {
       name: 'Mark Janssen',
       role: 'CTO',
-      email: 'mark@openhaus.nl',
+      email: 'mark@WattVrij.nl',
       bio: 'Tech expert gespecialiseerd in PropTech en AI-oplossingen voor vastgoed.'
     },
     {
       name: 'Lisa de Vries',
       role: 'Head of Communications',
-      email: 'press@openhaus.nl',
+      email: 'press@WattVrij.nl',
       bio: 'Verantwoordelijk voor alle externe communicatie en media relaties.'
     }
   ]
@@ -180,7 +180,7 @@ export default function PressPage() {
             </div>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Persberichten, media resources en contact informatie voor journalisten. 
-              Ontdek het laatste nieuws over OpenHaus en onze impact op de vastgoedmarkt.
+              Ontdek het laatste nieuws over WattVrij en onze impact op de vastgoedmarkt.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-primary hover:bg-primary/90 px-8 py-3">
@@ -200,7 +200,7 @@ export default function PressPage() {
         {/* Key Statistics */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            OpenHaus in Cijfers
+            WattVrij in Cijfers
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -432,11 +432,11 @@ export default function PressPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a 
-                  href="mailto:press@openhaus.nl"
+                  href="mailto:press@WattVrij.nl"
                   className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary hover:bg-gray-100 rounded-lg text-lg font-bold transition-colors"
                 >
                   <Mail className="w-5 h-5 mr-2" />
-                  press@openhaus.nl
+                  press@WattVrij.nl
                 </a>
               </div>
               <p className="text-sm opacity-75 mt-4">

@@ -117,7 +117,7 @@ export class EmailService {
   async sendWelcomeEmail(userEmail: string, userName: string): Promise<boolean> {
     return this.sendEmail({
       to: userEmail,
-      subject: 'Welkom bij OpenHaus!',
+      subject: 'Welkom bij WattVrij!',
       templateId: 'welcome-template',
       dynamicTemplateData: {
         name: userName,
@@ -180,7 +180,7 @@ export class EmailService {
   async sendPasswordReset(userEmail: string, resetToken: string): Promise<boolean> {
     return this.sendEmail({
       to: userEmail,
-      subject: 'Wachtwoord reset - OpenHaus',
+      subject: 'Wachtwoord reset - WattVrij',
       templateId: 'password-reset-template',
       dynamicTemplateData: {
         resetUrl: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`,

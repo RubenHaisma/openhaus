@@ -111,7 +111,7 @@ export function ValuationResult({ address, postalCode, valuation, onSellRequest,
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl text-lg font-semibold"
             >
               <Home className="w-5 h-5 mr-2" />
-              Verkoop je huis via OpenHaus
+              Verkoop je huis via WattVrij
             </Button>
           )}
           

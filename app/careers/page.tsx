@@ -194,7 +194,7 @@ export default function CareersPage() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Carrières bij OpenHaus
+              Carrières bij WattVrij
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Sluit je aan bij ons team en help mee aan de revolutie in de vastgoedmarkt. 
@@ -222,7 +222,7 @@ export default function CareersPage() {
         {/* Why Work With Us */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Waarom Werken Bij OpenHaus?
+            Waarom Werken Bij WattVrij?
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -254,7 +254,7 @@ export default function CareersPage() {
                     Maak Impact in PropTech
                   </h3>
                   <p className="text-gray-700 mb-4">
-                    Bij OpenHaus werk je niet alleen aan een product, maar aan een missie. 
+                    Bij WattVrij werk je niet alleen aan een product, maar aan een missie. 
                     We democratiseren de vastgoedmarkt en maken het voor iedereen toegankelijk 
                     om een huis te kopen of verkopen zonder onnodige kosten.
                   </p>
@@ -478,7 +478,7 @@ export default function CareersPage() {
                   variant="outline" 
                   className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-3 text-lg font-bold"
                 >
-                  careers@openhaus.nl
+                  careers@WattVrij.nl
                 </Button>
               </div>
             </CardContent>

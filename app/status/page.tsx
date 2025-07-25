@@ -192,7 +192,7 @@ export default function StatusPage() {
               Platform Status
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Bekijk de huidige status van alle OpenHaus services en systemen. 
+              Bekijk de huidige status van alle WattVrij services en systemen. 
               We monitoren onze diensten 24/7 voor optimale beschikbaarheid.
             </p>
             

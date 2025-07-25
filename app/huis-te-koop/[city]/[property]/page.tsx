@@ -177,7 +177,7 @@ export default function SEOPropertyDetailPage() {
     "@type": "RealEstateListing",
     "name": `${propertyData.address}, ${propertyData.city}`,
     "description": propertyData.description,
-    "url": `https://openhaus.nl/huis-te-koop/${city}/${property}`,
+    "url": `https://WattVrij.nl/huis-te-koop/${city}/${property}`,
     "image": propertyData.images,
     "price": {
       "@type": "PriceSpecification",

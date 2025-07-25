@@ -56,7 +56,7 @@ export default function AboutPage() {
   const timeline = [
     {
       year: '2020',
-      title: 'Oprichting OpenHaus',
+      title: 'Oprichting WattVrij',
       description: 'Gestart met de missie om vastgoed toegankelijker te maken voor iedereen.'
     },
     {
@@ -119,7 +119,7 @@ export default function AboutPage() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Over OpenHaus
+              Over WattVrij
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Wij revolutioneren de vastgoedmarkt door directe verbindingen te maken tussen 
@@ -185,7 +185,7 @@ export default function AboutPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    OpenHaus maakt vastgoed toegankelijk voor iedereen door de traditionele 
+                    WattVrij maakt vastgoed toegankelijk voor iedereen door de traditionele 
                     barrières weg te nemen. Wij geloven dat het kopen en verkopen van een huis 
                     eenvoudig, transparant en betaalbaar moet zijn.
                   </p>

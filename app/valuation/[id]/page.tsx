@@ -268,7 +268,7 @@ export default function ValuationPage() {
                   className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-xl text-lg font-semibold"
                 >
                   <Home className="w-5 h-5 mr-2" />
-                  Verkoop via OpenHaus
+                  Verkoop via WattVrij
                 </Button>
                 
                 <Link href="/finance">

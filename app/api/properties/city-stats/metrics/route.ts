@@ -65,7 +65,7 @@ async function getOsmAreaId(queryStr: string): Promise<number | null> {
 // Helper to get bbox from Nominatim
 async function getBBox(queryStr: string): Promise<string | null> {
   const url = `${NOMINATIM_URL}?q=${encodeURIComponent(queryStr)}&format=json&limit=1&polygon_geojson=0`
-  const res = await fetch(url, { headers: { 'User-Agent': 'openhaus/1.0' } })
+  const res = await fetch(url, { headers: { 'User-Agent': 'WattVrij/1.0' } })
   const data = await res.json()
   if (data && data[0] && data[0].boundingbox) {
     // boundingbox: [south, north, west, east]

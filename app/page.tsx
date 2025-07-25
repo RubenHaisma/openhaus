@@ -376,7 +376,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
             >
-              Waarom kiezen voor OpenHaus?
+              Waarom kiezen voor WattVrij?
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -575,7 +575,7 @@ export default function HomePage() {
                 name: 'Sarah van der Berg',
                 location: 'Amsterdam',
                 rating: 5,
-                text: 'Dankzij OpenHaus hebben we €18.000 subsidie ontvangen voor onze warmtepomp. Het proces was heel duidelijk!',
+                text: 'Dankzij WattVrij hebben we €18.000 subsidie ontvangen voor onze warmtepomp. Het proces was heel duidelijk!',
                 savings: '€1.200/jaar besparing'
               },
               {

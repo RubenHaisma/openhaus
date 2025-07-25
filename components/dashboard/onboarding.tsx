@@ -26,7 +26,7 @@ interface OnboardingStep {
 const onboardingSteps: OnboardingStep[] = [
   {
     id: 'welcome',
-    title: 'Welkom bij je OpenHaus Dashboard! 🎉',
+    title: 'Welkom bij je WattVrij Dashboard! 🎉',
     description: 'Je persoonlijke controlecentrum voor al je vastgoedactiviteiten. Hier kun je je woningen beheren, prestaties bekijken en met kopers communiceren.',
     icon: Home,
     highlight: 'sidebar'

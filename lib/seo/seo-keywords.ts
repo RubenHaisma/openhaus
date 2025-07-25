@@ -1,4 +1,4 @@
-// SEO keyword mapping for OpenHaus platform
+// SEO keyword mapping for WattVrij platform
 
 export const primaryKeywords = {
     // High-volume selling keywords

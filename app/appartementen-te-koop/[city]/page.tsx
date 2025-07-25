@@ -73,7 +73,7 @@ export default function ApartmentCityPage() {
     "@type": "CollectionPage",
     "name": `Appartementen te koop in ${cityName}`,
     "description": `Ontdek appartementen te koop in ${cityName}. Bekijk het actuele aanbod van particuliere verkopers zonder makelaarskosten. Van studio's tot penthouses.`,
-    "url": `https://openhaus.nl/appartementen-te-koop/${cityParam}`,
+    "url": `https://WattVrij.nl/appartementen-te-koop/${cityParam}`,
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": properties.length

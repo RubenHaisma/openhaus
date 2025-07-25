@@ -98,7 +98,7 @@ export default function SignUpPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
               <Home className="h-7 w-7 text-white" />
             </div>
-            <span className="text-3xl font-bold text-gray-900">OpenHaus</span>
+            <span className="text-3xl font-bold text-gray-900">WattVrij</span>
           </Link>
           <h2 className="text-3xl font-bold text-gray-900">Account aanmaken</h2>
           <p className="mt-2 text-gray-600">Start met verkopen of kopen</p>

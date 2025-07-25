@@ -11,7 +11,7 @@ interface SEOData {
 }
 
 export function generateMetadata(data: SEOData): Metadata {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://openhaus.nl'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://WattVrij.nl'
   
   return {
     title: data.title,
@@ -34,7 +34,7 @@ export function generateMetadata(data: SEOData): Metadata {
       description: data.description,
       images: data.image ? [data.image] : [`${baseUrl}/og-image.jpg`],
       url: data.canonical || baseUrl,
-      siteName: 'OpenHaus',
+      siteName: 'WattVrij',
       locale: 'nl_NL',
     },
     twitter: {
@@ -42,7 +42,7 @@ export function generateMetadata(data: SEOData): Metadata {
       title: data.title,
       description: data.description,
       images: data.image ? [data.image] : [`${baseUrl}/og-image.jpg`],
-      creator: '@openhaus',
+      creator: '@WattVrij',
     },
     alternates: {
       canonical: data.canonical,

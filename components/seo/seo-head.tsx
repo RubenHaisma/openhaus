@@ -21,14 +21,14 @@ export function SEOHead({
   canonical 
 }: SEOHeadProps) {
   const pathname = usePathname()
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://openhaus.nl'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://WattVrij.nl'
   const fullUrl = `${baseUrl}${pathname}`
   
-  const defaultTitle = 'OpenHaus – Huis Verkopen & Kopen Zonder Makelaar'
+  const defaultTitle = 'WattVrij – Huis Verkopen & Kopen Zonder Makelaar'
   const defaultDescription = 'Verkoop je huis direct aan kopers zonder makelaarskosten. Gratis woningtaxatie, veilige transacties en persoonlijke begeleiding.'
   const defaultImage = `${baseUrl}/og-image.jpg`
 
-  const seoTitle = title ? `${title} | OpenHaus` : defaultTitle
+  const seoTitle = title ? `${title} | WattVrij` : defaultTitle
   const seoDescription = description || defaultDescription
   const seoImage = image || defaultImage
   const seoCanonical = canonical || fullUrl
@@ -39,7 +39,7 @@ export function SEOHead({
       <title>{seoTitle}</title>
       <meta name="description" content={seoDescription} />
       {keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
-      <meta name="author" content="OpenHaus" />
+      <meta name="author" content="WattVrij" />
       <meta name="robots" content={noIndex ? 'noindex,nofollow' : 'index,follow'} />
       <link rel="canonical" href={seoCanonical} />
 
@@ -49,7 +49,7 @@ export function SEOHead({
       <meta property="og:description" content={seoDescription} />
       <meta property="og:image" content={seoImage} />
       <meta property="og:url" content={fullUrl} />
-      <meta property="og:site_name" content="OpenHaus" />
+      <meta property="og:site_name" content="WattVrij" />
       <meta property="og:locale" content="nl_NL" />
 
       {/* Twitter Card */}
@@ -57,7 +57,7 @@ export function SEOHead({
       <meta name="twitter:title" content={seoTitle} />
       <meta name="twitter:description" content={seoDescription} />
       <meta name="twitter:image" content={seoImage} />
-      <meta name="twitter:creator" content="@openhaus" />
+      <meta name="twitter:creator" content="@WattVrij" />
 
       {/* Additional SEO Meta Tags */}
       <meta name="theme-color" content="#dc2626" />

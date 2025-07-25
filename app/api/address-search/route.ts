@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const res = await fetch(url, {
       headers: {
         'Accept-Language': 'nl',
-        'User-Agent': 'openhaus.nl address search (info@openhaus.nl)'
+        'User-Agent': 'WattVrij.nl address search (info@WattVrij.nl)'
       }
     })
     console.log('[address-search] Response status:', res.status)

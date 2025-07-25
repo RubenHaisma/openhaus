@@ -179,7 +179,7 @@ export class SEOUrlGenerator {
    * Generate canonical URL for a page
    */
   static generateCanonicalUrl(path: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://openhaus.nl'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://WattVrij.nl'
     return `${baseUrl}${path}`
   }
 

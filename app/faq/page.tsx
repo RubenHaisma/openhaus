@@ -41,8 +41,8 @@ export default function FAQPage() {
     {
       id: '1',
       category: 'selling',
-      question: 'Hoeveel kost het om mijn huis te verkopen via OpenHaus?',
-      answer: 'Het plaatsen van je woning op OpenHaus is volledig gratis. Je betaalt geen commissie, geen advertentiekosten en geen verborgen kosten. Je bespaart hiermee de traditionele makelaarskosten van 1-2% van de verkoopprijs.'
+      question: 'Hoeveel kost het om mijn huis te verkopen via WattVrij?',
+      answer: 'Het plaatsen van je woning op WattVrij is volledig gratis. Je betaalt geen commissie, geen advertentiekosten en geen verborgen kosten. Je bespaart hiermee de traditionele makelaarskosten van 1-2% van de verkoopprijs.'
     },
     {
       id: '2',
@@ -84,13 +84,13 @@ export default function FAQPage() {
       id: '8',
       category: 'pricing',
       question: 'Wat zijn de kosten voor de koper?',
-      answer: 'Als koper betaal je geen kosten aan OpenHaus. Je betaalt wel de standaard kosten koper: overdrachtsbelasting (2%), notariskosten (€800-1500), taxatiekosten (€400-600) en eventuele hypotheekkosten.'
+      answer: 'Als koper betaal je geen kosten aan WattVrij. Je betaalt wel de standaard kosten koper: overdrachtsbelasting (2%), notariskosten (€800-1500), taxatiekosten (€400-600) en eventuele hypotheekkosten.'
     },
     {
       id: '9',
       category: 'pricing',
       question: 'Zijn er verborgen kosten?',
-      answer: 'Nee, OpenHaus heeft geen verborgen kosten. Het platform is gratis voor zowel kopers als verkopers. Je betaalt alleen de standaard kosten die bij elke woningaankoop komen kijken (notaris, belastingen, etc.).'
+      answer: 'Nee, WattVrij heeft geen verborgen kosten. Het platform is gratis voor zowel kopers als verkopers. Je betaalt alleen de standaard kosten die bij elke woningaankoop komen kijken (notaris, belastingen, etc.).'
     },
     {
       id: '10',
@@ -125,8 +125,8 @@ export default function FAQPage() {
     {
       id: '15',
       category: 'safety',
-      question: 'Is OpenHaus veilig om te gebruiken?',
-      answer: 'Ja, OpenHaus is volledig veilig. We gebruiken SSL-encryptie, verifiëren gebruikers en alle betalingen verlopen via de notaris. We delen nooit persoonlijke gegevens zonder toestemming.'
+      question: 'Is WattVrij veilig om te gebruiken?',
+      answer: 'Ja, WattVrij is volledig veilig. We gebruiken SSL-encryptie, verifiëren gebruikers en alle betalingen verlopen via de notaris. We delen nooit persoonlijke gegevens zonder toestemming.'
     },
     {
       id: '16',
@@ -143,8 +143,8 @@ export default function FAQPage() {
     {
       id: '18',
       category: 'buying',
-      question: 'Kan ik een hypotheek krijgen voor een huis via OpenHaus?',
-      answer: 'Ja, je kunt gewoon een hypotheek aanvragen bij elke bank. Het maakt voor de bank niet uit of je via een makelaar of OpenHaus koopt. Wij kunnen je doorverwijzen naar hypotheekadviseurs.'
+      question: 'Kan ik een hypotheek krijgen voor een huis via WattVrij?',
+      answer: 'Ja, je kunt gewoon een hypotheek aanvragen bij elke bank. Het maakt voor de bank niet uit of je via een makelaar of WattVrij koopt. Wij kunnen je doorverwijzen naar hypotheekadviseurs.'
     }
   ]
 
@@ -179,7 +179,7 @@ export default function FAQPage() {
               Veelgestelde Vragen
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Vind snel antwoorden op je vragen over het kopen en verkopen van huizen via OpenHaus. 
+              Vind snel antwoorden op je vragen over het kopen en verkopen van huizen via WattVrij. 
               Staat je vraag er niet bij? Neem gerust contact met ons op.
             </p>
             

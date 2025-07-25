@@ -46,10 +46,10 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: 'Email',
-      value: 'info@openhaus.nl',
+      value: 'info@WattVrij.nl',
       description: 'We reageren binnen 24 uur',
       action: 'Email ons',
-      href: 'mailto:info@openhaus.nl'
+      href: 'mailto:info@WattVrij.nl'
     },
     {
       icon: MessageSquare,
@@ -73,19 +73,19 @@ export default function ContactPage() {
     {
       icon: Users,
       title: 'Klantenservice',
-      email: 'support@openhaus.nl',
+      email: 'support@WattVrij.nl',
       description: 'Algemene vragen en ondersteuning'
     },
     {
       icon: Briefcase,
       title: 'Partnerships',
-      email: 'partnerships@openhaus.nl',
+      email: 'partnerships@WattVrij.nl',
       description: 'Zakelijke samenwerking en partnerships'
     },
     {
       icon: HelpCircle,
       title: 'Technische Support',
-      email: 'tech@openhaus.nl',
+      email: 'tech@WattVrij.nl',
       description: 'Technische problemen en bugs'
     }
   ]

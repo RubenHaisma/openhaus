@@ -496,7 +496,7 @@ export default function PropertyDetailPage() {
                 <Separator className="my-6" />
                 <div className="text-center">
                   <div className="text-sm text-gray-600 mb-2">Makelaar</div>
-                  <div className="font-semibold text-gray-900">OpenHaus</div>
+                  <div className="font-semibold text-gray-900">WattVrij</div>
                   <div className="text-sm text-gray-600">Particuliere verkoop platform</div>
                 </div>
               </CardContent>

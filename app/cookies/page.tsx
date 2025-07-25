@@ -315,7 +315,7 @@ export default function CookiesPage() {
                   <div className="flex items-start space-x-3">
                     <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
                     <div>
-                      <strong>Eerste partij cookies:</strong> Geplaatst door OpenHaus zelf
+                      <strong>Eerste partij cookies:</strong> Geplaatst door WattVrij zelf
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
@@ -471,11 +471,11 @@ export default function CookiesPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a 
-                  href="mailto:privacy@openhaus.nl"
+                  href="mailto:privacy@WattVrij.nl"
                   className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary hover:bg-gray-100 rounded-lg text-lg font-bold transition-colors"
                 >
                   <Cookie className="w-5 h-5 mr-2" />
-                  privacy@openhaus.nl
+                  privacy@WattVrij.nl
                 </a>
               </div>
             </CardContent>

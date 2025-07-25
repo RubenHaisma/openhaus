@@ -34,7 +34,7 @@ export default function HelpPage() {
       id: 'getting-started',
       title: 'Aan de slag',
       icon: Book,
-      description: 'Leer hoe je OpenHaus gebruikt',
+      description: 'Leer hoe je WattVrij gebruikt',
       articles: 12,
       color: 'bg-blue-100 text-blue-600'
     },
@@ -187,7 +187,7 @@ export default function HelpPage() {
               Help Center
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Vind antwoorden op je vragen, leer hoe je OpenHaus optimaal gebruikt 
+              Vind antwoorden op je vragen, leer hoe je WattVrij optimaal gebruikt 
               en krijg persoonlijke ondersteuning van ons team.
             </p>
             

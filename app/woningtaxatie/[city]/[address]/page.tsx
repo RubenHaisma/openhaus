@@ -181,11 +181,11 @@ export default function SEOValuationPage() {
     "@type": "RealEstateListing",
     "name": `Woningtaxatie ${addressName}, ${cityName}`,
     "description": `Gratis woningtaxatie voor ${addressName} in ${cityName}. Geschatte waarde: ${formatPrice(valuationData.valuation.estimatedValue)} gebaseerd op WOZ-gegevens en marktanalyse.`,
-    "url": `https://openhaus.nl/woningtaxatie/${city}/${address}`,
+    "url": `https://WattVrij.nl/woningtaxatie/${city}/${address}`,
     "provider": {
       "@type": "Organization",
-      "name": "OpenHaus",
-      "url": "https://openhaus.nl"
+      "name": "WattVrij",
+      "url": "https://WattVrij.nl"
     },
     "areaServed": {
       "@type": "City",

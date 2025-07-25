@@ -223,7 +223,7 @@ export default function HowItWorksPage() {
               Hoe Het Werkt
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Ontdek hoe eenvoudig het is om je huis te verkopen of kopen via OpenHaus. 
+              Ontdek hoe eenvoudig het is om je huis te verkopen of kopen via WattVrij. 
               Geen ingewikkelde processen, wel professionele begeleiding.
             </p>
             <div className="flex flex-wrap justify-center gap-8 text-lg">
@@ -248,7 +248,7 @@ export default function HowItWorksPage() {
         {/* Benefits Overview */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Waarom Kiezen Voor OpenHaus?
+            Waarom Kiezen Voor WattVrij?
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

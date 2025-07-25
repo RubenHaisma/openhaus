@@ -112,7 +112,7 @@ export default function PriceRangePropertyPage() {
     "@type": "CollectionPage",
     "name": `Huizen te koop in ${cityName} ${priceRange.title}`,
     "description": `Ontdek huizen te koop in ${cityName} in de prijsklasse ${priceRange.title}. Bekijk het actuele aanbod van particuliere verkopers zonder makelaarskosten.`,
-    "url": `https://openhaus.nl/huizen-te-koop/${city}/${priceRangeSlug}`,
+    "url": `https://WattVrij.nl/huizen-te-koop/${city}/${priceRangeSlug}`,
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": properties.length

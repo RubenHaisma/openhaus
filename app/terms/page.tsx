@@ -26,9 +26,9 @@ export default function TermsPage() {
       content: `
         In deze algemene voorwaarden worden de volgende begrippen gebruikt:
         
-        **OpenHaus:** OpenHaus B.V., gevestigd te Amsterdam, KvK nummer 87654321
+        **WattVrij:** WattVrij B.V., gevestigd te Amsterdam, KvK nummer 87654321
         
-        **Platform:** De website, mobiele applicatie en alle gerelateerde diensten van OpenHaus
+        **Platform:** De website, mobiele applicatie en alle gerelateerde diensten van WattVrij
         
         **Gebruiker:** Elke persoon die gebruik maakt van het Platform
         
@@ -38,7 +38,7 @@ export default function TermsPage() {
         
         **Woning:** Elk onroerend goed dat wordt aangeboden via het Platform
         
-        **Diensten:** Alle diensten die OpenHaus aanbiedt via het Platform
+        **Diensten:** Alle diensten die WattVrij aanbiedt via het Platform
       `
     },
     {
@@ -51,7 +51,7 @@ export default function TermsPage() {
         Als je niet akkoord gaat met deze voorwaarden, mag je het Platform niet gebruiken.
         
         **Wijzigingen:**
-        OpenHaus behoudt zich het recht voor om deze voorwaarden te wijzigen. Wijzigingen worden 
+        WattVrij behoudt zich het recht voor om deze voorwaarden te wijzigen. Wijzigingen worden 
         minimaal 30 dagen van tevoren aangekondigd via email en op het Platform.
         
         **Nieuwe versies:**
@@ -77,11 +77,11 @@ export default function TermsPage() {
         activiteiten die plaatsvinden onder je account.
         
         **Verificatie:**
-        OpenHaus kan identiteitsverificatie vereisen voor bepaalde diensten. Dit kan 
+        WattVrij kan identiteitsverificatie vereisen voor bepaalde diensten. Dit kan 
         bestaan uit het uploaden van officiële documenten.
         
         **Account opschorting:**
-        OpenHaus kan accounts opschorten of beëindigen bij overtreding van deze voorwaarden, 
+        WattVrij kan accounts opschorten of beëindigen bij overtreding van deze voorwaarden, 
         verdachte activiteiten of op verzoek van de gebruiker.
         
         **Gegevens bij beëindiging:**
@@ -107,10 +107,10 @@ export default function TermsPage() {
         
         **Content richtlijnen:**
         Alle content die je plaatst moet accuraat, legaal en niet-discriminerend zijn. 
-        OpenHaus behoudt zich het recht voor content te modereren of te verwijderen.
+        WattVrij behoudt zich het recht voor content te modereren of te verwijderen.
         
         **Intellectueel eigendom:**
-        Het Platform en alle content blijven eigendom van OpenHaus of haar licentiegevers. 
+        Het Platform en alle content blijven eigendom van WattVrij of haar licentiegevers. 
         Je krijgt alleen een beperkte licentie voor persoonlijk gebruik.
       `
     },
@@ -128,7 +128,7 @@ export default function TermsPage() {
         accurate beschrijving en recente foto's.
         
         **Eigendomsverificatie:**
-        OpenHaus kan eigendomsverificatie vereisen voordat een advertentie wordt gepubliceerd. 
+        WattVrij kan eigendomsverificatie vereisen voordat een advertentie wordt gepubliceerd. 
         Dit kan bestaan uit het tonen van eigendomsdocumenten.
         
         **Advertentie duur:**
@@ -136,7 +136,7 @@ export default function TermsPage() {
         12 maanden. Verkopers kunnen advertenties altijd eerder verwijderen.
         
         **Moderatie:**
-        OpenHaus behoudt zich het recht voor advertenties te modereren, bewerken of 
+        WattVrij behoudt zich het recht voor advertenties te modereren, bewerken of 
         verwijderen die niet voldoen aan onze richtlijnen.
       `
     },
@@ -145,12 +145,12 @@ export default function TermsPage() {
       title: 'Transacties en betalingen',
       icon: CreditCard,
       content: `
-        **Rol van OpenHaus:**
-        OpenHaus faciliteert contact tussen kopers en verkopers maar is geen partij 
+        **Rol van WattVrij:**
+        WattVrij faciliteert contact tussen kopers en verkopers maar is geen partij 
         bij de uiteindelijke koopovereenkomst.
         
         **Betalingen:**
-        Alle betalingen voor woningaankopen verlopen via een notaris. OpenHaus 
+        Alle betalingen voor woningaankopen verlopen via een notaris. WattVrij 
         handelt geen koopprijzen af.
         
         **Kosten:**
@@ -158,12 +158,12 @@ export default function TermsPage() {
         diensten hebben duidelijk vermelde kosten.
         
         **Geen garanties:**
-        OpenHaus geeft geen garanties over de totstandkoming van transacties of 
+        WattVrij geeft geen garanties over de totstandkoming van transacties of 
         de kwaliteit van woningen.
         
         **Geschillen:**
         Geschillen tussen kopers en verkopers moeten onderling worden opgelost. 
-        OpenHaus kan bemiddelen maar is niet verplicht dit te doen.
+        WattVrij kan bemiddelen maar is niet verplicht dit te doen.
       `
     },
     {
@@ -172,7 +172,7 @@ export default function TermsPage() {
       icon: Shield,
       content: `
         **Beperkte aansprakelijkheid:**
-        OpenHaus is niet aansprakelijk voor schade die voortvloeit uit het gebruik 
+        WattVrij is niet aansprakelijk voor schade die voortvloeit uit het gebruik 
         van het Platform, behoudens grove schuld of opzet.
         
         **Geen garantie op beschikbaarheid:**
@@ -180,11 +180,11 @@ export default function TermsPage() {
         altijd beschikbaar is.
         
         **Gebruikersinhoud:**
-        OpenHaus is niet aansprakelijk voor content die door gebruikers wordt geplaatst, 
+        WattVrij is niet aansprakelijk voor content die door gebruikers wordt geplaatst, 
         inclusief onjuiste informatie in woningadvertenties.
         
         **Derde partijen:**
-        Links naar externe websites zijn voor gemak. OpenHaus is niet verantwoordelijk 
+        Links naar externe websites zijn voor gemak. WattVrij is niet verantwoordelijk 
         voor de inhoud of het privacybeleid van deze sites.
         
         **Maximale aansprakelijkheid:**
@@ -223,7 +223,7 @@ export default function TermsPage() {
         Je kunt je account op elk moment beëindigen door contact op te nemen met 
         onze klantenservice of via je accountinstellingen.
         
-        **Door OpenHaus:**
+        **Door WattVrij:**
         We kunnen je toegang beëindigen bij overtreding van deze voorwaarden, 
         inactiviteit van meer dan 2 jaar, of om andere legitieme redenen.
         
@@ -259,7 +259,7 @@ export default function TermsPage() {
               </h1>
             </div>
             <p className="text-xl text-gray-600 mb-6 max-w-3xl mx-auto">
-              Deze algemene voorwaarden regelen het gebruik van het OpenHaus platform. 
+              Deze algemene voorwaarden regelen het gebruik van het WattVrij platform. 
               Door ons platform te gebruiken ga je akkoord met deze voorwaarden.
             </p>
             <Badge className="bg-blue-100 text-blue-800">
@@ -412,11 +412,11 @@ export default function TermsPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a 
-                  href="mailto:legal@openhaus.nl"
+                  href="mailto:legal@WattVrij.nl"
                   className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary hover:bg-gray-100 rounded-lg text-lg font-bold transition-colors"
                 >
                   <Mail className="w-5 h-5 mr-2" />
-                  legal@openhaus.nl
+                  legal@WattVrij.nl
                 </a>
               </div>
               <p className="text-sm opacity-75 mt-4">

@@ -27,10 +27,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://OpenHaus.nl'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://WattVrij.nl'),
   title: {
-    default: 'OpenHaus – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
-    template: '%s | OpenHaus',
+    default: 'WattVrij – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    template: '%s | WattVrij',
   },
   description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs. Officiële RVO partner.',
   keywords: [
@@ -49,9 +49,9 @@ export const metadata: Metadata = {
     'energierekening verlagen',
     'CO2 neutraal'
   ],
-  authors: [{ name: 'OpenHaus', url: 'https://OpenHaus.nl' }],
-  creator: 'OpenHaus',
-  publisher: 'OpenHaus',
+  authors: [{ name: 'WattVrij', url: 'https://WattVrij.nl' }],
+  creator: 'WattVrij',
+  publisher: 'WattVrij',
   formatDetection: {
     email: false,
     address: false,
@@ -60,25 +60,25 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'nl_NL',
-    url: 'https://OpenHaus.nl',
-    siteName: 'OpenHaus',
-    title: 'OpenHaus – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    url: 'https://WattVrij.nl',
+    siteName: 'WattVrij',
+    title: 'WattVrij – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
     description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs. Officiële RVO partner.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'OpenHaus - Energietransitie voor Nederlandse woningen',
+        alt: 'WattVrij - Energietransitie voor Nederlandse woningen',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OpenHaus – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    title: 'WattVrij – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
     description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs.',
     images: ['/og-image.jpg'],
-    creator: '@OpenHaus',
+    creator: '@WattVrij',
   },
   robots: {
     index: true,
@@ -95,9 +95,9 @@ export const metadata: Metadata = {
     google: process.env.GOOGLE_VERIFICATION_CODE,
   },
   alternates: {
-    canonical: 'https://OpenHaus.nl',
+    canonical: 'https://WattVrij.nl',
     languages: {
-      'nl-NL': 'https://OpenHaus.nl',
+      'nl-NL': 'https://WattVrij.nl',
     },
   },
   category: 'Energy & Sustainability',
