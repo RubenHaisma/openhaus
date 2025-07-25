@@ -298,3 +298,4 @@
 {"level":"warn","message":"Energy Price API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.284Z"}
 {"level":"warn","message":"BAG API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.284Z"}
 {"level":"warn","message":"CBS API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.286Z"}
+{"level":"warn","message":"No real energy projects found in database","service":"openhaus-api","timestamp":"2025-07-25T09:25:39.543Z"}

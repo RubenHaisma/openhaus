@@ -108,13 +108,16 @@ export default function HomePage() {
                   Nieuw: €3 miljard subsidie beschikbaar voor 2025
                 </div>
                 
-                <h1 className="text-6xl lg:text-8xl font-bold text-gray-900 leading-[0.9] tracking-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-gray-900 leading-[1.05] tracking-tight break-words max-w-full">
                   Maak je huis{' '}
-                  <span className="text-green-600 relative">
-                    energieneutraal
-                    <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
-                      <path d="M2 10C60 2 140 2 198 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-                    </svg>
+                  <span className="text-green-600 relative inline-block break-words max-w-full">
+                    energie{' '}
+                    <span className="relative inline-block">
+                      neutraal
+                      <svg className="absolute -bottom-2 left-0 w-full h-2 sm:h-3" viewBox="0 0 200 12" fill="none" style={{ minWidth: '100%' }}>
+                        <path d="M2 10C60 2 140 2 198 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                      </svg>
+                    </span>
                   </span>
                   <br />
                   <span className="text-gray-600">voor 2030</span>
