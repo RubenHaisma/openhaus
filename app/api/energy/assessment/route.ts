@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { epOnlineRealAPIService } from '@/lib/integrations/ep-online-real-api'
+import { realEnergyPriceService } from '@/lib/integrations/energy-prices-real'
+import { rvoOpenDataService } from '@/lib/integrations/rvo-open-data'
 import { Logger } from '@/lib/monitoring/logger'
 import { z } from 'zod'
 
@@ -20,10 +23,10 @@ export async function POST(req: NextRequest) {
 
     const { address, postalCode, propertyType, currentHeating } = validation.data
     
-    // Get current energy label from EP Online
+    // Get real current energy label from EP Online API
     const currentEnergyLabel = await getCurrentEnergyLabel(address, postalCode)
     
-    // Calculate energy assessment based on property data
+    // Calculate energy assessment based on real property data
     const assessment = await calculateEnergyAssessment({
       address,
       postalCode,
@@ -36,7 +39,8 @@ export async function POST(req: NextRequest) {
       address,
       postalCode,
       currentEnergyLabel,
-      potentialSavings: assessment.potentialSavings
+      potentialSavings: assessment.potentialSavings,
+      dataSource: assessment.dataSource
     })
 
     return NextResponse.json({ assessment })
@@ -51,16 +55,15 @@ export async function POST(req: NextRequest) {
 
 async function getCurrentEnergyLabel(address: string, postalCode: string): Promise<string> {
   try {
-    // Get real energy label from EP Online API
-    const { epOnlineService } = await import('@/lib/integrations/ep-online')
-    const energyLabel = await epOnlineService.getEnergyLabel(address, postalCode)
+    // Get real energy label from EP Online API or estimate from building data
+    const energyLabel = await epOnlineRealAPIService.getEnergyLabel(address, postalCode)
     
     if (energyLabel) {
-      return energyLabel.currentLabel
+      return energyLabel.energyLabel
     }
     
     Logger.warn('No real energy label found', { address, postalCode })
-    throw new Error('Energy label not available - EP Online API required')
+    throw new Error('Energy label not available - unable to retrieve from EP Online or estimate from building data')
   } catch (error) {
     Logger.error('Failed to get energy label', error as Error)
     throw error
@@ -75,39 +78,36 @@ async function calculateEnergyAssessment(data: {
   currentEnergyLabel: string
 }) {
   try {
-    // Get real energy prices for accurate calculations
-    const { energyPriceService } = await import('@/lib/integrations/energy-prices')
-    const marketData = await energyPriceService.getMarketData()
+    // Get real energy prices from ANWB and market data
+    const energyPrices = await realEnergyPriceService.getCurrentEnergyPrices()
     
-    if (marketData.currentPrices.length === 0) {
-      throw new Error('No real energy price data available')
+    if (!energyPrices.gas.average && !energyPrices.electricity.average) {
+      throw new Error('No real energy price data available from ANWB or market sources')
     }
     
-    // Calculate energy assessment based on real data
+    // Calculate energy assessment based on real energy prices
     const currentUsage = getEnergyUsageByLabel(data.currentEnergyLabel)
     const targetLabel = getTargetEnergyLabel(data.currentEnergyLabel)
     const targetUsage = getEnergyUsageByLabel(targetLabel)
     
     const potentialSavings = currentUsage - targetUsage
     
-    // Use real energy prices for savings calculation
-    const gasPrice = marketData.currentPrices.find(p => p.type === 'gas')?.pricePerUnit || 1.45
+    // Use real energy prices for savings calculation (prefer ANWB, fallback to market average)
+    const gasPrice = energyPrices.gas.anwb || energyPrices.gas.average || 1.45
     const annualSavings = potentialSavings * gasPrice
     
-    // Get real subsidy information
-    const { rvoApiService } = await import('@/lib/integrations/rvo-api')
-    const eligibilityResult = await rvoApiService.checkEligibility({
-      address: data.address,
-      postalCode: data.postalCode,
-      energyLabel: data.currentEnergyLabel,
-      constructionYear: 1980, // Default
-      propertyType: data.propertyType,
-      ownerOccupied: true
-    })
+    // Get real subsidy information from RVO Open Data
+    const subsidySchemes = await rvoOpenDataService.getActiveSubsidySchemes()
+    const applicableSubsidies = subsidySchemes.filter(scheme => 
+      scheme.applicableEnergyMeasures.some(measure => 
+        getEnergyRecommendations(data.currentEnergyLabel, data.currentHeating)
+          .some(rec => rec.measure.toLowerCase().includes(measure))
+      )
+    )
     
     const recommendations = getEnergyRecommendations(data.currentEnergyLabel, data.currentHeating)
     const totalInvestment = recommendations.reduce((sum, rec) => sum + rec.cost, 0)
-    const totalSubsidy = eligibilityResult.totalMaxSubsidy || 0
+    const totalSubsidy = applicableSubsidies.reduce((sum, subsidy) => sum + subsidy.maxAmount, 0)
     const netInvestment = totalInvestment - totalSubsidy
     const paybackPeriod = annualSavings > 0 ? Math.round(netInvestment / annualSavings) : 0
     
@@ -125,7 +125,9 @@ async function calculateEnergyAssessment(data: {
       recommendations,
       complianceDeadline: '2030-01-01',
       assessmentDate: new Date().toISOString(),
-      dataSource: 'Real EP Online + RVO + Energy Price APIs'
+      dataSource: `EP Online API + RVO Open Data + ANWB Energy Prices`,
+      energyPriceSource: energyPrices.gas.anwb ? 'ANWB Energy' : 'Market Average',
+      subsidySource: 'RVO Open Data Portal'
     }
   } catch (error) {
     Logger.error('Energy assessment calculation failed', error as Error)

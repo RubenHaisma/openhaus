@@ -62,12 +62,16 @@ export function MarketIntelligenceDashboard({
     fetchIntelligence()
   }, [selectedRegion])
 
-  const formatPrice = (price: number, unit: string) => {
-    return `€${price.toFixed(2)}${unit}`
+  const formatPrice = (price: number | undefined | null, unit: string) => {
+    return typeof price === 'number' && !isNaN(price)
+      ? `€${price.toFixed(2)}${unit}`
+      : 'n.b.';
   }
 
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(1)}%`
+  const formatPercentage = (value: number | null | undefined) => {
+    return typeof value === 'number' && !isNaN(value)
+      ? `${value.toFixed(1)}%`
+      : 'n.b.';
   }
 
   const getPriceChangeIcon = (current: number, forecast: number) => {
@@ -229,10 +233,10 @@ export function MarketIntelligenceDashboard({
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {formatPrice(intelligence.currentPrices.district_heating, '/kWh')}
+                  €43,79/GJ
                 </div>
                 <div className="text-sm text-gray-600">
-                  Stabiele prijzen
+                  Vaste prijs voor 2025 (incl. btw)
                 </div>
               </CardContent>
             </Card>
@@ -383,7 +387,7 @@ export function MarketIntelligenceDashboard({
                         <div>
                           <div className="text-gray-600">Resterend</div>
                           <div className="font-semibold">
-                            €{(s.remainingBudget / 1000000).toFixed(1)}M
+                            €{typeof s.remainingBudget === 'number' ? (s.remainingBudget / 1000000).toFixed(1) : 'n.b.'}M
                           </div>
                         </div>
                         <div>
@@ -415,7 +419,7 @@ export function MarketIntelligenceDashboard({
                       <div>
                         <h4 className="font-medium text-gray-900">{municipal.scheme}</h4>
                         <div className="text-sm text-gray-600">
-                          €{(municipal.remainingBudget / 1000000).toFixed(1)}M resterend
+                          €{typeof municipal.remainingBudget === 'number' ? (municipal.remainingBudget / 1000000).toFixed(1) : 'n.b.'}M resterend
                         </div>
                       </div>
                       <div className="text-right">

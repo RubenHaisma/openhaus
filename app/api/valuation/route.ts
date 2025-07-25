@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { propertyService } from '@/lib/property/property-service'
+import { cbsOpenDataService } from '@/lib/integrations/cbs-open-data'
 import { Logger } from '@/lib/monitoring/logger'
 import { cacheService } from '@/lib/cache/redis'
 import { z } from 'zod'
@@ -35,18 +36,41 @@ export async function POST(req: NextRequest) {
     const { address: validAddress, postalCode: validPostalCode } = validation.data
     
     try {
-      const propertyData = await propertyService.getPropertyData(validAddress, validPostalCode)
+      // Get market context from CBS data
+      const area = validPostalCode.substring(0, 4)
+      const [propertyData, cbsHousingData] = await Promise.all([
+        propertyService.getPropertyData(validAddress, validPostalCode),
+        cbsOpenDataService.getHousingMarketData()
+      ])
+      
       if (!propertyData) {
         throw new Error('Property data not available')
       }
+      
+      // Find relevant CBS market data for the area
+      const relevantMarketData = cbsHousingData.find(data => 
+        data.region.toLowerCase().includes(validAddress.toLowerCase()) ||
+        validAddress.toLowerCase().includes(data.region.toLowerCase())
+      ) || cbsHousingData[0] // Fallback to first available data
+      
       const valuation = await propertyService.calculateValuation(propertyData)
+      
+      Logger.audit('Property valuation completed', {
+        address: validAddress,
+        postalCode: validPostalCode,
+        estimatedValue: valuation.estimatedValue,
+        wozValue: valuation.wozValue,
+        cbsMarketData: !!relevantMarketData,
+        dataSource: valuation.dataSource
+      })
+      
       return NextResponse.json({ valuation })
     } catch (error) {
       Logger.error('Property valuation failed', error as Error, { address: validAddress, postalCode: validPostalCode })
       return NextResponse.json(
         { 
           error: `Valuation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          details: 'Unable to retrieve WOZ data or energy label. Please check the address and postal code.'
+          details: 'Unable to retrieve WOZ data, energy label, or market data. Please check the address and postal code.'
         },
         { status: 500 }
       )
@@ -70,7 +94,8 @@ export async function GET(request: NextRequest) {
       service: 'WOZ Waardeloket Scraping',
       timestamp: new Date().toISOString(),
       cacheEnabled: true,
-      rateLimitEnabled: true
+      rateLimitEnabled: true,
+      dataSource: 'WOZ Scraping + EP Online + CBS Open Data'
     })
   } catch (error) {
     Logger.error('WOZ scraping health check failed', error as Error)

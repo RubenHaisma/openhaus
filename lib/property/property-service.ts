@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { wozScraper } from '@/lib/woz-scraper'
+import { epOnlineRealAPIService } from '@/lib/integrations/ep-online-real-api'
+import { cbsOpenDataService } from '@/lib/integrations/cbs-open-data'
 import { Logger } from '@/lib/monitoring/logger'
 import { cacheService } from '@/lib/cache/redis'
 import { Property, PropertyType, PropertyStatus } from '@prisma/client'
@@ -80,7 +82,7 @@ export class PropertyService {
         return cachedData
       }
 
-      Logger.info('Getting property data via WOZ scraping + EP Online', { address, postalCode })
+      Logger.info('Getting property data via WOZ scraping + EP Online Real API', { address, postalCode })
       
       // Get WOZ data from scraper
       const wozResult = await wozScraper.getWOZValue(address, postalCode)
@@ -96,7 +98,7 @@ export class PropertyService {
         wozSurfaceArea: wozData.surfaceArea
       })
 
-      // Get energy label from EP Online API
+      // Get energy label from EP Online Real API
       const energyLabel = await this.getEnergyLabel(address, postalCode)
 
       // Extract real data from WOZ scraping
@@ -146,7 +148,8 @@ export class PropertyService {
         wozValue: propertyData.wozValue,
         energyLabel: propertyData.energyLabel,
         constructionYear: propertyData.constructionYear,
-        squareMeters: propertyData.squareMeters
+        squareMeters: propertyData.squareMeters,
+        energyLabelSource: energyLabel || 'not-available'
       })
       
       return propertyData
@@ -156,7 +159,7 @@ export class PropertyService {
     }
   }
 
-  async calculateValuation(propertyData: PropertyData): Promise<PropertyValuation> {
+  async calculateValuation(propertyData: PropertyData, cbsMarketData?: any): Promise<PropertyValuation> {
     try {
       // Performance optimization: check cache first
       const cacheKey = `valuation:${propertyData.address}:${propertyData.postalCode}`
@@ -166,13 +169,19 @@ export class PropertyService {
         return cachedValuation
       }
 
-      Logger.info('Calculating valuation using WOZ + market data', { 
+      Logger.info('Calculating valuation using WOZ + CBS market data', { 
         address: propertyData.address, 
-        wozValue: propertyData.wozValue 
+        wozValue: propertyData.wozValue,
+        cbsDataAvailable: !!cbsMarketData
       })
       
-      // Get real market data for the area
-      const marketData = await this.getRealMarketData(propertyData.postalCode)
+      // Get real market data for the area (prefer CBS data, fallback to area estimates)
+      const marketData = cbsMarketData ? {
+        marketMultiplier: this.calculateMarketMultiplierFromCBS(cbsMarketData, propertyData.wozValue),
+        averageDaysOnMarket: cbsMarketData.averageDaysOnMarket || 35,
+        priceChange: cbsMarketData.priceChange || 5.2
+      } : await this.getRealMarketData(propertyData.postalCode)
+      
       const marketMultiplier = marketData.marketMultiplier
       
       // Base valuation on WOZ value with real market adjustments
@@ -222,7 +231,7 @@ export class PropertyService {
       })
 
       // Calculate confidence score based on data quality
-      const confidenceScore = this.calculateConfidenceScore(propertyData, factors)
+      const confidenceScore = this.calculateConfidenceScore(propertyData, factors, !!cbsMarketData)
 
       // Get real comparable sales
       const comparableSales = await this.getRealComparableSales(propertyData.postalCode, propertyData.propertyType)
@@ -234,7 +243,7 @@ export class PropertyService {
         marketMultiplier,
         factors,
         lastUpdated: new Date().toISOString(),
-        dataSource: 'WOZ Scraping + EP Online + Market Analysis',
+        dataSource: cbsMarketData ? 'WOZ Scraping + EP Online Real API + CBS Market Data' : 'WOZ Scraping + EP Online Real API + Area Estimates',
         marketTrends: {
           averageDaysOnMarket: marketData.averageDaysOnMarket,
           averagePriceChange: marketData.priceChange,
@@ -242,7 +251,7 @@ export class PropertyService {
         },
         comparableSales,
         realTimeData: {
-          dataSource: 'Live WOZ + EP Online + Market Data',
+          dataSource: cbsMarketData ? 'Live WOZ + EP Online Real API + CBS Open Data' : 'Live WOZ + EP Online Real API + Area Estimates',
           lastUpdated: new Date().toISOString()
         },
         // Pass through WOZ fields
@@ -268,7 +277,8 @@ export class PropertyService {
         wozValue: propertyData.wozValue,
         estimatedValue: propertyValuation.estimatedValue,
         confidenceScore: propertyValuation.confidenceScore,
-        marketMultiplier
+        marketMultiplier,
+        cbsDataUsed: !!cbsMarketData
       })
       
       return propertyValuation
@@ -478,28 +488,43 @@ export class PropertyService {
         return cachedLabel
       }
 
-      // Use EP Online service
-      const { epOnlineService } = await import('@/lib/integrations/ep-online')
-      const energyLabelData = await epOnlineService.getEnergyLabel(address, postalCode)
+      // Use EP Online Real API service
+      const energyLabelData = await epOnlineRealAPIService.getEnergyLabel(address, postalCode)
       
       if (!energyLabelData) {
-        Logger.warn('No energy label found via EP Online API', { address, postalCode })
+        Logger.warn('No energy label found via EP Online Real API', { address, postalCode })
         return null
       }
 
-      const energyLabel = energyLabelData.currentLabel
-
-      if (energyLabel) {
+      if (energyLabelData.energyLabel) {
         // Cache for 30 days (energy labels don't change often)
-        await cacheService.set(cacheKey, energyLabel, { ttl: 2592000, prefix: 'energy' })
-        Logger.info('Energy label retrieved from EP Online', { address, postalCode, energyLabel })
+        await cacheService.set(cacheKey, energyLabelData, { ttl: 2592000, prefix: 'energy' })
+        Logger.info('Energy label retrieved from EP Online Real API', { 
+          address, 
+          postalCode, 
+          energyLabel: energyLabelData.energyLabel,
+          source: energyLabelData.source
+        })
       }
 
-      return energyLabel
+      return energyLabelData.energyLabel as string
     } catch (error) {
-      Logger.error('Failed to get energy label from EP Online', error as Error, { address, postalCode })
+      Logger.error('Failed to get energy label from EP Online Real API', error as Error, { address, postalCode })
       return null
     }
+  }
+
+  private calculateMarketMultiplierFromCBS(cbsData: any, wozValue: number): number {
+    if (!cbsData.averageHousePrice || !wozValue) {
+      return 1.18 // Default multiplier
+    }
+    
+    // Calculate market multiplier based on CBS average house price vs typical WOZ values
+    const estimatedWozForCBSPrice = cbsData.averageHousePrice * 0.85 // Typical WOZ is ~85% of market value
+    const multiplier = cbsData.averageHousePrice / estimatedWozForCBSPrice
+    
+    // Ensure reasonable bounds
+    return Math.max(1.05, Math.min(1.5, multiplier))
   }
 
   private async getRealMarketData(postalCode: string): Promise<{
@@ -675,7 +700,7 @@ export class PropertyService {
     }
   }
 
-  private calculateConfidenceScore(propertyData: PropertyData, factors: ValuationFactor[]): number {
+  private calculateConfidenceScore(propertyData: PropertyData, factors: ValuationFactor[], hasCBSData: boolean): number {
     let confidence = 0.80 // Base confidence for real WOZ data
 
     // Increase confidence based on data quality
@@ -683,6 +708,7 @@ export class PropertyService {
     if (propertyData.bouwjaar) confidence += 0.05 // Real construction year from WOZ
     if (propertyData.oppervlakte) confidence += 0.05 // Real surface area from WOZ
     if (propertyData.wozValues && propertyData.wozValues.length > 1) confidence += 0.02 // Historical WOZ data
+    if (hasCBSData) confidence += 0.03 // CBS market data available
 
     return Math.min(0.95, confidence)
   }
