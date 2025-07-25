@@ -62,30 +62,47 @@ export class EnergyPriceService {
       if (cached) return cached
 
       if (!this.apiKey) {
-        return this.getMockGasPrices()
+        Logger.warn('Energy Price API key not configured - cannot retrieve real gas prices')
+        return []
       }
 
-      const response = await fetch(`${this.baseUrl}/prices/gas`, {
+      // NED API: https://api.ned.nl/v1/utilizations
+      // Voor gas: type=0 (All), point=0 (Nederland), granularity=5 (Hour), classification=2 (Current), activity=1 (Providing)
+      const url = 'https://api.ned.nl/v1/utilizations?point=0&type=0&granularity=5&granularitytimezone=1&classification=2&activity=1'
+      const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          'X-AUTH-TOKEN': this.apiKey,
+          'accept': 'application/ld+json'
         }
       })
 
       if (!response.ok) {
-        throw new Error(`Energy Price API error: ${response.status}`)
+        Logger.error('NED API (gas) niet bereikbaar', new Error(`Status: ${response.status}`))
+        return []
       }
 
       const data = await response.json()
-      const prices = this.transformPriceData(data, 'gas')
-
-      // Cache for 1 hour
+      if (!Array.isArray(data) && !Array.isArray(data['hydra:member'])) {
+        Logger.error('NED API (gas) response heeft onverwacht formaat', new Error('No array in response'))
+        return []
+      }
+      const items = Array.isArray(data) ? data : data['hydra:member']
+      const prices: EnergyPrice[] = items.map((item: any) => ({
+        type: 'gas',
+        pricePerUnit: item.price || item.capacity || 0,
+        unit: 'kWh',
+        supplier: 'NED',
+        tariffType: 'variable',
+        contractDuration: 0,
+        validFrom: item.validfrom,
+        validUntil: item.validto,
+        region: 'NL'
+      }))
       await cacheService.set('gas-prices', prices, { ttl: 3600, prefix: 'energy' })
-
       return prices
     } catch (error) {
-      Logger.error('Failed to fetch gas prices', error as Error)
-      return this.getMockGasPrices()
+      Logger.error('Failed to fetch gas prices from NED API', error as Error)
+      return []
     }
   }
 
@@ -95,30 +112,47 @@ export class EnergyPriceService {
       if (cached) return cached
 
       if (!this.apiKey) {
-        return this.getMockElectricityPrices()
+        Logger.warn('Energy Price API key not configured - cannot retrieve real electricity prices')
+        return []
       }
 
-      const response = await fetch(`${this.baseUrl}/prices/electricity`, {
+      // NED API: https://api.ned.nl/v1/utilizations
+      // Voor elektriciteit: type=2 (Solar), point=0 (Nederland), granularity=5 (Hour), classification=2 (Current), activity=1 (Providing)
+      const url = 'https://api.ned.nl/v1/utilizations?point=0&type=2&granularity=5&granularitytimezone=1&classification=2&activity=1'
+      const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          'X-AUTH-TOKEN': this.apiKey,
+          'accept': 'application/ld+json'
         }
       })
 
       if (!response.ok) {
-        throw new Error(`Energy Price API error: ${response.status}`)
+        Logger.error('NED API (electricity) niet bereikbaar', new Error(`Status: ${response.status}`))
+        return []
       }
 
       const data = await response.json()
-      const prices = this.transformPriceData(data, 'electricity')
-
-      // Cache for 1 hour
+      if (!Array.isArray(data) && !Array.isArray(data['hydra:member'])) {
+        Logger.error('NED API (electricity) response heeft onverwacht formaat', new Error('No array in response'))
+        return []
+      }
+      const items = Array.isArray(data) ? data : data['hydra:member']
+      const prices: EnergyPrice[] = items.map((item: any) => ({
+        type: 'electricity',
+        pricePerUnit: item.price || item.capacity || 0,
+        unit: 'kWh',
+        supplier: 'NED',
+        tariffType: 'variable',
+        contractDuration: 0,
+        validFrom: item.validfrom,
+        validUntil: item.validto,
+        region: 'NL'
+      }))
       await cacheService.set('electricity-prices', prices, { ttl: 3600, prefix: 'energy' })
-
       return prices
     } catch (error) {
-      Logger.error('Failed to fetch electricity prices', error as Error)
-      return this.getMockElectricityPrices()
+      Logger.error('Failed to fetch electricity prices from NED API', error as Error)
+      return []
     }
   }
 
@@ -128,7 +162,8 @@ export class EnergyPriceService {
       if (cached) return cached
 
       if (!this.apiKey) {
-        return this.getMockPriceForecasts()
+        Logger.warn('Energy Price API key not configured - cannot retrieve price forecasts')
+        return []
       }
 
       const response = await fetch(`${this.baseUrl}/forecasts`, {
@@ -151,7 +186,7 @@ export class EnergyPriceService {
       return forecasts
     } catch (error) {
       Logger.error('Failed to fetch price forecasts', error as Error)
-      return this.getMockPriceForecasts()
+      return []
     }
   }
 
@@ -162,7 +197,8 @@ export class EnergyPriceService {
       if (cached) return cached
 
       if (!this.apiKey) {
-        return this.getMockRegionalPrices(region)
+        Logger.warn('Energy Price API key not configured - cannot retrieve regional prices')
+        throw new Error('Energy Price API key required for regional prices')
       }
 
       const response = await fetch(`${this.baseUrl}/prices/regional/${region}`, {
@@ -185,7 +221,7 @@ export class EnergyPriceService {
       return regionalPrices
     } catch (error) {
       Logger.error('Failed to fetch regional prices', error as Error)
-      return this.getMockRegionalPrices(region)
+      throw error
     }
   }
 
@@ -197,145 +233,22 @@ export class EnergyPriceService {
         this.getPriceForecasts()
       ])
 
+      if (gasPrices.length === 0 || electricityPrices.length === 0) {
+        throw new Error('No real energy price data available - API keys required')
+      }
+
       return {
         currentPrices: [...gasPrices, ...electricityPrices],
         forecasts,
         marketTrends: {
-          gasPrice: { trend: 'down', percentage: -5.2 },
-          electricityPrice: { trend: 'stable', percentage: 1.1 }
+          gasPrice: { trend: 'stable', percentage: 0 },
+          electricityPrice: { trend: 'stable', percentage: 0 }
         },
         lastUpdated: new Date().toISOString()
       }
     } catch (error) {
       Logger.error('Failed to get market data', error as Error)
       throw error
-    }
-  }
-
-  private getMockGasPrices(): EnergyPrice[] {
-    return [
-      {
-        type: 'gas',
-        pricePerUnit: 1.45,
-        unit: '€/m³',
-        supplier: 'Vattenfall',
-        tariffType: 'variable',
-        contractDuration: 12,
-        validFrom: '2024-01-01',
-        validUntil: '2024-12-31'
-      },
-      {
-        type: 'gas',
-        pricePerUnit: 1.38,
-        unit: '€/m³',
-        supplier: 'Eneco',
-        tariffType: 'fixed',
-        contractDuration: 24,
-        validFrom: '2024-01-01',
-        validUntil: '2025-12-31'
-      },
-      {
-        type: 'gas',
-        pricePerUnit: 1.52,
-        unit: '€/m³',
-        supplier: 'Essent',
-        tariffType: 'variable',
-        contractDuration: 12,
-        validFrom: '2024-01-01',
-        validUntil: '2024-12-31'
-      }
-    ]
-  }
-
-  private getMockElectricityPrices(): EnergyPrice[] {
-    return [
-      {
-        type: 'electricity',
-        pricePerUnit: 0.28,
-        unit: '€/kWh',
-        supplier: 'Vattenfall',
-        tariffType: 'variable',
-        contractDuration: 12,
-        validFrom: '2024-01-01',
-        validUntil: '2024-12-31'
-      },
-      {
-        type: 'electricity',
-        pricePerUnit: 0.26,
-        unit: '€/kWh',
-        supplier: 'Eneco',
-        tariffType: 'fixed',
-        contractDuration: 24,
-        validFrom: '2024-01-01',
-        validUntil: '2025-12-31'
-      },
-      {
-        type: 'electricity',
-        pricePerUnit: 0.31,
-        unit: '€/kWh',
-        supplier: 'Essent',
-        tariffType: 'variable',
-        contractDuration: 12,
-        validFrom: '2024-01-01',
-        validUntil: '2024-12-31'
-      }
-    ]
-  }
-
-  private getMockPriceForecasts(): PriceForecast[] {
-    return [
-      {
-        type: 'gas',
-        currentPrice: 1.45,
-        forecast3Months: 1.38,
-        forecast6Months: 1.32,
-        forecast12Months: 1.28,
-        confidence: 0.75,
-        factors: ['Mild winter expected', 'Increased LNG imports', 'Renewable energy growth'],
-        lastUpdated: new Date().toISOString()
-      },
-      {
-        type: 'electricity',
-        currentPrice: 0.28,
-        forecast3Months: 0.27,
-        forecast6Months: 0.25,
-        forecast12Months: 0.23,
-        confidence: 0.68,
-        factors: ['Solar capacity expansion', 'Wind energy growth', 'Grid improvements'],
-        lastUpdated: new Date().toISOString()
-      }
-    ]
-  }
-
-  private getMockRegionalPrices(region: string): RegionalPrices {
-    const baseGasPrice = 1.45
-    const baseElectricityPrice = 0.28
-    
-    // Regional variations
-    const regionalMultipliers: Record<string, number> = {
-      'Noord-Holland': 1.05,
-      'Zuid-Holland': 1.02,
-      'Utrecht': 1.03,
-      'Noord-Brabant': 0.98,
-      'Gelderland': 0.96,
-      'Overijssel': 0.94,
-      'Groningen': 0.92
-    }
-
-    const multiplier = regionalMultipliers[region] || 1.0
-    const gasPrice = baseGasPrice * multiplier
-    const electricityPrice = baseElectricityPrice * multiplier
-
-    return {
-      region,
-      gasPrice,
-      electricityPrice,
-      averageMonthlyBill: (gasPrice * 150) + (electricityPrice * 300), // Typical usage
-      priceComparison: {
-        national: baseGasPrice + baseElectricityPrice,
-        regional: gasPrice + electricityPrice,
-        difference: ((gasPrice + electricityPrice) - (baseGasPrice + baseElectricityPrice)) / (baseGasPrice + baseElectricityPrice) * 100
-      }
     }
   }
 
@@ -367,12 +280,17 @@ export class EnergyPriceService {
   }
 
   private transformRegionalData(data: any): RegionalPrices {
+    // Adjust this logic to match the actual structure of your API response
     return {
-      region: data.region,
-      gasPrice: data.gasPrice,
-      electricityPrice: data.electricityPrice,
-      averageMonthlyBill: data.averageMonthlyBill,
-      priceComparison: data.priceComparison
+      region: data.region || '',
+      gasPrice: data.gasPrice || 0,
+      electricityPrice: data.electricityPrice || 0,
+      averageMonthlyBill: data.averageMonthlyBill || 0,
+      priceComparison: data.priceComparison || {
+        national: 0,
+        regional: 0,
+        difference: 0
+      }
     }
   }
 }

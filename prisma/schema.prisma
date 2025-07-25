@@ -34,6 +34,11 @@ model Profile {
   auditLogs            AuditLog[]
   accounts             Account[]
   sessions             Session[]
+  offersAsBuyer        Offer[] @relation("OfferBuyer")
+  offersAsSeller       Offer[] @relation("OfferSeller")
+  valuations           Valuation[]
+  ordersAsBuyer        Order[] @relation("OrderBuyer")
+  ordersAsSeller       Order[] @relation("OrderSeller")
 
   @@map("profiles")
 }
@@ -76,6 +81,15 @@ model Property {
   city             String
   province         String
   propertyType     PropertyType @map("property_type")
+  bedrooms         Int
+  bathrooms        Int
+  askingPrice      Decimal
+  estimatedValue   Decimal?
+  confidenceScore  Float?
+  images           String[]
+  description      String?
+  features         String[]
+  energyLabel      String?
   constructionYear Int         @map("construction_year")
   squareMeters     Decimal     @map("square_meters")
   currentEnergyLabel String    @map("current_energy_label")
@@ -83,6 +97,7 @@ model Property {
   heatingType      String      @map("heating_type")
   insulationLevel  String      @map("insulation_level")
   hasRenewableEnergy Boolean   @default(false) @map("has_renewable_energy")
+  status            PropertyStatus @default(AVAILABLE)
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
 
@@ -92,8 +107,33 @@ model Property {
   subsidyApplications SubsidyApplication[]
   contractorBookings ContractorBooking[]
   energyProjects   EnergyProject[]
+  offers           Offer[]
+  valuations       Valuation[]
+  orders           Order[]
 
   @@map("properties")
+}
+
+model Offer {
+  id          String   @id @default(cuid())
+  propertyId  String
+  buyerId     String
+  sellerId    String
+  amount      Float
+  currency    String
+  message     String?
+  conditions  String[]
+  status      OfferStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  expiresAt   DateTime?
+  counterAmount Float?
+  counterMessage String?
+  rejectionMessage String?
+
+  property    Property @relation(fields: [propertyId], references: [id])
+  buyer       Profile  @relation("OfferBuyer", fields: [buyerId], references: [id])
+  seller      Profile  @relation("OfferSeller", fields: [sellerId], references: [id])
 }
 
 model EnergyAssessment {
@@ -289,6 +329,39 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model Valuation {
+  id              String   @id @default(cuid())
+  userId          String
+  propertyId      String
+  address         String
+  postalCode      String
+  city            String
+  estimatedValue  Decimal
+  confidenceScore Decimal
+  propertyDetails Json?
+  comparableSales Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            Profile  @relation(fields: [userId], references: [id])
+  property        Property @relation(fields: [propertyId], references: [id])
+}
+
+model wozCache {
+  id            String   @id @default(uuid())
+  address       String
+  postalCode    String
+  wozValue      Int
+  referenceYear Int
+  objectType    String
+  surfaceArea   Int?
+  scrapedAt     DateTime
+  sourceUrl     String
+  updatedAt     DateTime @updatedAt
+  metadata      Json?
+  @@unique([address, postalCode])
+}
+
 // Enums
 enum Role {
   HOMEOWNER
@@ -345,4 +418,48 @@ enum VerificationType {
   PHONE_VERIFICATION
 
   @@map("verification_type")
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  COUNTERED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  SOLD
+  PENDING
+  INACTIVE
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  buyerId        String
+  sellerId       String
+  propertyId     String
+  amount         Float
+  currency       String
+  paymentMethod  String
+  status         OrderStatus @default(PENDING)
+  shippingAddress Json?
+  notes          String?
+  orderNumber    String
+  metadata       Json?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  buyer          Profile    @relation("OrderBuyer", fields: [buyerId], references: [id])
+  seller         Profile    @relation("OrderSeller", fields: [sellerId], references: [id])
+  property       Property   @relation(fields: [propertyId], references: [id])
 }

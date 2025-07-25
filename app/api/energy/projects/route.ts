@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Logger } from '@/lib/monitoring/logger'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,74 +8,63 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const status = searchParams.get('status')
 
-    // Mock energy projects data
-    const projects = [
-      {
-        id: '1',
-        name: 'Warmtepomp + Isolatie Amsterdam',
-        location: 'Amsterdam Noord',
-        status: 'COMPLETED',
-        energyLabelBefore: 'D',
-        energyLabelAfter: 'A',
-        measures: ['Warmtepomp', 'Dakisolatie', 'HR++ glas'],
-        totalCost: 22000,
-        subsidyReceived: 9500,
-        energySavings: 65,
-        co2Reduction: 3200,
-        completedDate: '2024-11-15',
-        createdAt: '2024-08-01',
-        annualSavings: 1800
-      },
-      {
-        id: '2',
-        name: 'Zonnepanelen + Isolatie Rotterdam',
-        location: 'Rotterdam Centrum',
-        status: 'COMPLETED',
-        energyLabelBefore: 'C',
-        energyLabelAfter: 'A+',
-        measures: ['Zonnepanelen', 'Muurisolatie'],
-        totalCost: 18000,
-        subsidyReceived: 6000,
-        energySavings: 55,
-        co2Reduction: 2800,
-        completedDate: '2024-10-22',
-        createdAt: '2024-07-15',
-        annualSavings: 1500
-      },
-      {
-        id: '3',
-        name: 'Complete verduurzaming Utrecht',
-        location: 'Utrecht Oost',
-        status: 'COMPLETED',
-        energyLabelBefore: 'E',
-        energyLabelAfter: 'A++',
-        measures: ['Warmtepomp', 'Isolatie', 'Zonnepanelen', 'Ventilatie'],
-        totalCost: 35000,
-        subsidyReceived: 15000,
-        energySavings: 75,
-        co2Reduction: 4500,
-        completedDate: '2024-09-30',
-        createdAt: '2024-05-20',
-        annualSavings: 2400
+    // Query real energy projects from database
+    const projects = await prisma.energyProject.findMany({
+      where: status ? { status: status as any } : undefined,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        property: {
+          select: {
+            address: true,
+            city: true,
+            postalCode: true
+          }
+        }
       }
-    ]
+    })
 
-    let filteredProjects = projects
-
-    if (status) {
-      filteredProjects = projects.filter(project => project.status === status)
+    if (projects.length === 0) {
+      Logger.warn('No real energy projects found in database')
+      return NextResponse.json({
+        projects: [],
+        total: 0,
+        error: 'No real energy projects available'
+      })
     }
 
+    // Transform database projects to API format
+    const transformedProjects = projects.map(project => ({
+      id: project.id,
+      name: project.name,
+      location: `${project.property.city}, ${project.property.postalCode}`,
+      status: project.status,
+      energyLabelBefore: project.beforeEnergyLabel,
+      energyLabelAfter: project.afterEnergyLabel,
+      measures: project.energyMeasures,
+      totalCost: Number(project.totalCost),
+      subsidyReceived: Number(project.subsidyAmount),
+      energySavings: Number(project.energySavings),
+      co2Reduction: Number(project.co2Reduction),
+      completedDate: project.completionDate?.toISOString().split('T')[0],
+      createdAt: project.createdAt.toISOString().split('T')[0],
+      annualSavings: Math.round(Number(project.energySavings) * 30) // Estimate based on savings percentage
+    }))
+
     const result = {
-      projects: filteredProjects.slice(0, limit),
-      total: filteredProjects.length
+      projects: transformedProjects,
+      total: transformedProjects.length
     }
 
     return NextResponse.json(result)
   } catch (error) {
     Logger.error('Energy projects retrieval failed', error as Error)
     return NextResponse.json(
-      { error: 'Energy projects retrieval failed' },
+      { 
+        error: 'Energy projects retrieval failed',
+        projects: [],
+        total: 0
+      },
       { status: 500 }
     )
   }

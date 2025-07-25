@@ -1,6 +1,14 @@
 import { Logger } from '@/lib/monitoring/logger'
 import { cacheService } from '@/lib/cache/redis'
 
+function getLabelEnergyIndex(label?: string): number {
+  const indices: Record<string, number> = {
+    'A+++': 50, 'A++': 75, 'A+': 100, 'A': 125,
+    'B': 150, 'C': 175, 'D': 200, 'E': 250, 'F': 300, 'G': 350
+  }
+  return label ? indices[label] || 175 : 175
+}
+
 export interface EnergyLabel {
   address: string
   postalCode: string
@@ -48,8 +56,10 @@ export class EPOnlineService {
       const cached = await cacheService.get<EnergyLabel>(cacheKey, 'ep-online')
       if (cached) return cached
 
+      // Only proceed if we have a real API key
       if (!this.apiKey) {
-        return this.getMockEnergyLabel(address, postalCode)
+        Logger.warn('EP Online API key not configured - cannot retrieve real energy labels')
+        return null
       }
 
       const response = await fetch(`${this.baseUrl}/energy-labels/search`, {
@@ -79,14 +89,15 @@ export class EPOnlineService {
       return energyLabel
     } catch (error) {
       Logger.error('Failed to get energy label from EP Online', error as Error, { address, postalCode })
-      return this.getMockEnergyLabel(address, postalCode)
+      return null
     }
   }
 
   async getEnergyHistory(bagId: string): Promise<EnergyHistory[]> {
     try {
       if (!this.apiKey) {
-        return this.getMockEnergyHistory()
+        Logger.warn('EP Online API key not configured - cannot retrieve energy history')
+        return []
       }
 
       const response = await fetch(`${this.baseUrl}/energy-labels/history/${bagId}`, {
@@ -104,14 +115,15 @@ export class EPOnlineService {
       return this.transformEnergyHistory(data)
     } catch (error) {
       Logger.error('Failed to get energy history from EP Online', error as Error)
-      return this.getMockEnergyHistory()
+      return []
     }
   }
 
   async validateEnergyMeasures(measures: string[], currentLabel: string): Promise<EnergyMeasureValidation[]> {
     try {
       if (!this.apiKey) {
-        return this.getMockMeasureValidation(measures, currentLabel)
+        Logger.warn('EP Online API key not configured - cannot validate energy measures')
+        return []
       }
 
       const response = await fetch(`${this.baseUrl}/energy-measures/validate`, {
@@ -134,13 +146,14 @@ export class EPOnlineService {
       return this.transformMeasureValidation(data)
     } catch (error) {
       Logger.error('Failed to validate energy measures', error as Error)
-      return this.getMockMeasureValidation(measures, currentLabel)
+      return []
     }
   }
 
   async searchNearbyLabels(postalCode: string, radius: number = 500): Promise<EnergyLabel[]> {
     try {
       if (!this.apiKey) {
+        Logger.warn('EP Online API key not configured - cannot search nearby labels')
         return []
       }
 
@@ -168,111 +181,6 @@ export class EPOnlineService {
     }
   }
 
-  private getMockEnergyLabel(address: string, postalCode: string): EnergyLabel {
-    // Generate realistic mock data based on postal code patterns
-    const area = postalCode.substring(0, 4)
-    const labelDistribution: Record<string, string> = {
-      '1000': 'C', // Amsterdam center - mixed
-      '1001': 'D', // Amsterdam - older buildings
-      '3000': 'C', // Rotterdam center
-      '2500': 'C', // Den Haag center
-      '3500': 'B', // Utrecht - newer developments
-    }
-
-    const currentLabel = labelDistribution[area] || 'C'
-    const energyIndex = this.getLabelEnergyIndex(currentLabel)
-
-    return {
-      address,
-      postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
-      currentLabel,
-      labelDate: '2023-06-15',
-      validUntil: '2033-06-15',
-      energyIndex,
-      primaryEnergyUse: energyIndex * 1.2,
-      renewableEnergyPercentage: currentLabel <= 'B' ? 25 : 5,
-      buildingType: 'Eengezinswoning',
-      heatingType: currentLabel <= 'C' ? 'Warmtepomp' : 'Gasketel',
-      insulationLevel: currentLabel <= 'B' ? 'Goed' : 'Matig',
-      certificateNumber: 'NL-' + Date.now().toString().slice(-8)
-    }
-  }
-
-  private getMockEnergyHistory(): EnergyHistory[] {
-    return [
-      {
-        date: '2023-06-15',
-        label: 'C',
-        energyIndex: 150,
-        improvements: ['HR++ glas geplaatst', 'Dakisolatie verbeterd']
-      },
-      {
-        date: '2020-03-10',
-        label: 'D',
-        energyIndex: 180,
-        improvements: ['Nieuwe CV-ketel']
-      },
-      {
-        date: '2018-01-15',
-        label: 'E',
-        energyIndex: 220,
-        improvements: []
-      }
-    ]
-  }
-
-  private getMockMeasureValidation(measures: string[], currentLabel: string): EnergyMeasureValidation[] {
-    const measureData: Record<string, any> = {
-      'heat_pump': {
-        valid: true,
-        requirements: ['Voldoende isolatie', 'Geschikt verwarmingssysteem'],
-        potentialLabelImprovement: this.getImprovedLabel(currentLabel, 2),
-        estimatedCost: 15000,
-        estimatedSavings: 800
-      },
-      'insulation': {
-        valid: true,
-        requirements: ['Toegankelijke spouwmuur', 'Geschikte constructie'],
-        potentialLabelImprovement: this.getImprovedLabel(currentLabel, 1),
-        estimatedCost: 3500,
-        estimatedSavings: 400
-      },
-      'solar_panels': {
-        valid: true,
-        requirements: ['Geschikt dak', 'Zuidelijke oriëntatie'],
-        potentialLabelImprovement: this.getImprovedLabel(currentLabel, 1),
-        estimatedCost: 8000,
-        estimatedSavings: 600
-      }
-    }
-
-    return measures.map(measure => ({
-      measure,
-      ...measureData[measure] || {
-        valid: false,
-        requirements: ['Onbekende maatregel'],
-        potentialLabelImprovement: currentLabel,
-        estimatedCost: 0,
-        estimatedSavings: 0
-      }
-    }))
-  }
-
-  private getLabelEnergyIndex(label: string): number {
-    const indices: Record<string, number> = {
-      'A+++': 50, 'A++': 75, 'A+': 100, 'A': 125,
-      'B': 150, 'C': 175, 'D': 200, 'E': 250, 'F': 300, 'G': 350
-    }
-    return indices[label] || 175
-  }
-
-  private getImprovedLabel(currentLabel: string, steps: number): string {
-    const labels = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'A+', 'A++', 'A+++']
-    const currentIndex = labels.indexOf(currentLabel)
-    const newIndex = Math.min(labels.length - 1, currentIndex + steps)
-    return labels[newIndex]
-  }
-
   private transformEnergyLabelData(data: any): EnergyLabel {
     return {
       address: data.address,
@@ -280,7 +188,7 @@ export class EPOnlineService {
       currentLabel: data.energyLabel || data.label,
       labelDate: data.labelDate || data.registrationDate,
       validUntil: data.validUntil || data.expiryDate,
-      energyIndex: data.energyIndex || this.getLabelEnergyIndex(data.energyLabel),
+      energyIndex: data.energyIndex || getLabelEnergyIndex(data.energyLabel),
       primaryEnergyUse: data.primaryEnergyUse || 0,
       renewableEnergyPercentage: data.renewableEnergyPercentage || 0,
       buildingType: data.buildingType || 'Woning',

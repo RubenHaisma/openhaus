@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { Logger } from '@/lib/monitoring/logger'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import type { Role } from '@prisma/client'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
         name: validatedData.name,
         email: validatedData.email,
         passwordHash: hashedPassword,
-        role: validatedData.role,
+        role: validatedData.role as Role,
         verified: false
       }
     })

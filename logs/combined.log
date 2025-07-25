@@ -285,3 +285,16 @@
 {"electricityPriceEur":0.28,"gasPriceEur":1.45,"level":"info","message":"Energy market intelligence retrieved","service":"openhaus-api","timestamp":"2025-07-25T08:27:05.006Z","transitionProgress":23.5}
 {"level":"warn","message":"CBS API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T08:28:02.162Z"}
 {"electricityPriceEur":0.28,"gasPriceEur":1.45,"level":"info","message":"Energy market intelligence retrieved","service":"openhaus-api","timestamp":"2025-07-25T08:28:02.322Z","transitionProgress":23.5}
+{"level":"warn","message":"RVO API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:15.522Z"}
+{"level":"warn","message":"KVK API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:15.531Z"}
+{"level":"warn","message":"CBS API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:15.576Z"}
+{"level":"warn","message":"RVO API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:15.569Z"}
+{"level":"warn","message":"RVO API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:15.540Z"}
+{"level":"warn","message":"Energy Price API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:15.572Z"}
+{"level":"warn","message":"BAG API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:15.572Z"}
+{"level":"warn","message":"RVO API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.227Z"}
+{"level":"warn","message":"KVK API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.271Z"}
+{"level":"warn","message":"RVO API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.271Z"}
+{"level":"warn","message":"Energy Price API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.284Z"}
+{"level":"warn","message":"BAG API key not configured - using mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.284Z"}
+{"level":"warn","message":"CBS API key not configured - using enhanced mock data","service":"openhaus-api","timestamp":"2025-07-25T09:19:18.286Z"}

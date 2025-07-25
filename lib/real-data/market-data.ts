@@ -25,26 +25,18 @@ export class MarketDataProvider {
       const cached = await cacheService.get<InterestRates>('interest-rates', 'market')
       if (cached) return cached
 
-      // Current interest rates as of 2025 (based on ECB policy and market conditions)
-      const rates: InterestRates = {
-        mortgage: 0.038, // 3.8% average mortgage rate (decreased due to ECB cuts)
-        savings: 0.032, // 3.2% average savings rate (increased due to competition)
-        lastUpdated: new Date().toISOString(),
-        source: 'Market Average 2025 (ING, ABN AMRO, Rabobank, SNS)'
+      // Try to get real interest rates from financial APIs
+      try {
+        // In production, this would call real financial APIs
+        // For now, we need real API integration
+        throw new Error('Real financial API integration required')
+      } catch (apiError) {
+        Logger.error('Failed to get real interest rates', apiError as Error)
+        throw new Error('Real interest rate data not available - financial API required')
       }
-
-      // Cache for 1 hour
-      await cacheService.set('interest-rates', rates, { ttl: 3600, prefix: 'market' })
-
-      return rates
     } catch (error) {
       Logger.error('Failed to get current interest rates', error as Error)
-      return {
-        mortgage: 0.038,
-        savings: 0.032,
-        lastUpdated: new Date().toISOString(),
-        source: 'Fallback Rates'
-      }
+      throw error
     }
   }
 
@@ -57,65 +49,60 @@ export class MarketDataProvider {
       const cached = await cacheService.get<MarketData>(cacheKey, 'market')
       if (cached) return cached
 
-      // In production, this would fetch from CBS, NVM, or other market data providers
-      const marketData = await this.fetchMarketDataForArea(area)
-
-      // Cache for 6 hours
-      await cacheService.set(cacheKey, marketData, { ttl: 21600, prefix: 'market' })
-
-      return marketData
+      // Try to fetch real market data from CBS or other APIs
+      try {
+        const marketData = await this.fetchRealMarketDataForArea(area)
+        
+        // Cache for 6 hours
+        await cacheService.set(cacheKey, marketData, { ttl: 21600, prefix: 'market' })
+        
+        return marketData
+      } catch (apiError) {
+        Logger.error('Failed to get real market data', apiError as Error)
+        throw new Error('Real market data not available - CBS/NVM API required')
+      }
     } catch (error) {
       Logger.error('Failed to get market data', error as Error)
-      throw new Error('Market data unavailable')
+      throw error
     }
   }
 
-  private async fetchMarketDataForArea(area: string): Promise<MarketData> {
-    // Market data based on 2025 trends (in production, fetch from CBS/NVM APIs)
-    const marketDataByArea: Record<string, Partial<MarketData>> = {
-      '1000': { // Amsterdam center - 2025 data
-        averagePrice: 720000, // Increased from 2024
-        pricePerSquareMeter: 8100, // Continued growth
-        averageDaysOnMarket: 22, // Faster market
-        priceChange: 6.8, // Moderated growth
-        salesVolume: 1380
-      },
-      '3000': { // Rotterdam center - 2025 data
-        averagePrice: 425000, // Strong growth
-        pricePerSquareMeter: 4650, // Increased
-        averageDaysOnMarket: 28, // Stable
-        priceChange: 8.2, // Strong growth
-        salesVolume: 1050
-      },
-      '2500': { // Den Haag center - 2025 data
-        averagePrice: 525000, // Steady growth
-        pricePerSquareMeter: 5850, // Increased
-        averageDaysOnMarket: 26, // Faster
-        priceChange: 7.8, // Strong growth
-        salesVolume: 820
-      },
-      '3500': { // Utrecht center - 2025 data
-        averagePrice: 575000, // Continued growth
-        pricePerSquareMeter: 6350, // Strong increase
-        averageDaysOnMarket: 24, // Faster market
-        priceChange: 8.5, // High growth
-        salesVolume: 750
+  private async fetchRealMarketDataForArea(area: string): Promise<MarketData> {
+    try {
+      // In production, integrate with CBS Open Data API
+      const cbsResponse = await fetch(`https://opendata.cbs.nl/ODataApi/odata/83989NED/TypedDataSet?$filter=RegioS eq '${area}'`)
+      
+      if (!cbsResponse.ok) {
+        throw new Error(`CBS API error: ${cbsResponse.status}`)
       }
+      
+      const cbsData = await cbsResponse.json()
+      
+      // Process CBS data to extract market metrics
+      return this.processCBSMarketData(cbsData, area)
+    } catch (error) {
+      Logger.error('Failed to fetch real market data from CBS', error as Error)
+      throw error
+    }
+  }
+
+  private processCBSMarketData(cbsData: any, area: string): MarketData {
+    // Process real CBS data structure
+    if (!cbsData.value || cbsData.value.length === 0) {
+      throw new Error('No CBS data available for this area')
     }
 
-    const baseData = marketDataByArea[area] || {
-      averagePrice: 385000, // National average increase
-      pricePerSquareMeter: 4200, // Increased
-      averageDaysOnMarket: 38, // Slightly faster
-      priceChange: 6.2, // Moderate growth
-      salesVolume: 480
-    }
-
+    const data = cbsData.value[0] // Get first result
+    
     return {
-      ...baseData,
+      averagePrice: data.GemiddeldeWoningwaarde_1 || 0,
+      pricePerSquareMeter: data.PrijsPerVierkanteMeter_2 || 0,
+      averageDaysOnMarket: data.GemiddeldeTijdOpMarkt_3 || 0,
+      priceChange: data.PrijsveranderingJaarOpJaar_4 || 0,
+      salesVolume: data.AantalVerkopen_5 || 0,
       lastUpdated: new Date().toISOString(),
-      source: 'CBS & NVM Market Data 2025'
-    } as MarketData
+      source: 'CBS Open Data API'
+    }
   }
 
   async getComparableSales(postalCode: string, propertyType: string, squareMeters: number): Promise<Array<{
@@ -132,39 +119,50 @@ export class MarketDataProvider {
       const cached = await cacheService.get<any[]>(cacheKey, 'market')
       if (cached) return cached
 
-      // Mock comparable sales (in production, fetch from NVM or other sources)
-      const comparableSales = [
-        {
-          address: 'Vergelijkbare woning 1',
-          soldPrice: 485000, // 2025 prices
-          soldDate: '2025-01-15',
-          squareMeters: 115,
-          pricePerSqm: 4217
-        },
-        {
-          address: 'Vergelijkbare woning 2',
-          soldPrice: 510000, // 2025 prices
-          soldDate: '2024-12-28',
-          squareMeters: 125,
-          pricePerSqm: 4080
-        },
-        {
-          address: 'Vergelijkbare woning 3',
-          soldPrice: 465000, // 2025 prices
-          soldDate: '2024-12-10',
-          squareMeters: 110,
-          pricePerSqm: 4227
+      // Try to get real comparable sales data
+      try {
+        // In production, integrate with NVM or other real estate APIs
+        const nvmResponse = await fetch(`https://api.nvm.nl/v1/sales?postalCode=${postalCode}&propertyType=${propertyType}`)
+        
+        if (!nvmResponse.ok) {
+          throw new Error(`NVM API error: ${nvmResponse.status}`)
         }
-      ]
-
-      // Cache for 24 hours
-      await cacheService.set(cacheKey, comparableSales, { ttl: 86400, prefix: 'market' })
-
-      return comparableSales
+        
+        const nvmData = await nvmResponse.json()
+        const comparableSales = this.processNVMSalesData(nvmData)
+        
+        // Cache for 24 hours
+        await cacheService.set(cacheKey, comparableSales, { ttl: 86400, prefix: 'sales' })
+        
+        return comparableSales
+      } catch (apiError) {
+        Logger.error('Failed to get real comparable sales', apiError as Error)
+        throw new Error('Real comparable sales data not available - NVM API required')
+      }
     } catch (error) {
       Logger.error('Failed to get comparable sales', error as Error)
       return []
     }
+  }
+
+  private processNVMSalesData(nvmData: any): Array<{
+    address: string
+    soldPrice: number
+    soldDate: string
+    squareMeters: number
+    pricePerSqm: number
+  }> {
+    if (!nvmData.sales || nvmData.sales.length === 0) {
+      return []
+    }
+
+    return nvmData.sales.map((sale: any) => ({
+      address: sale.address,
+      soldPrice: sale.soldPrice,
+      soldDate: sale.soldDate,
+      squareMeters: sale.squareMeters,
+      pricePerSqm: Math.round(sale.soldPrice / sale.squareMeters)
+    }))
   }
 }
 

@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       verifications,
       summary,
-      recommendations: this.generateBulkRecommendations(verifications),
+      recommendations: generateBulkRecommendations(verifications),
       lastUpdated: new Date().toISOString()
     })
   } catch (error) {

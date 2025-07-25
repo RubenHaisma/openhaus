@@ -57,7 +57,7 @@ export class AuthService {
           email: data.email,
           name: data.name,
           passwordHash: hashedPassword,
-          role: data.role || Role.BUYER,
+          role: data.role || Role.HOMEOWNER,
           verified: false
         }
       })

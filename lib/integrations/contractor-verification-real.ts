@@ -242,6 +242,40 @@ export class ContractorVerificationService {
   private async getKVKCompanyInfo(kvkNumber: string): Promise<any> {
     try {
       if (!this.kvkApiKey) {
+        // Fallback: KVK Open Dataset Basis Bedrijfsgegevens
+        // Zie: https://developers.kvk.nl/nl/documentation/open-dataset-basis-bedrijfsgegevens-api
+        // Endpoint: https://opendata.kvk.nl/api/v1/hvds/basisbedrijfsgegevens/{kvknummer}
+        try {
+          const response = await fetch(`https://opendata.kvk.nl/api/v1/hvds/basisbedrijfsgegevens/${kvkNumber}`)
+          if (!response.ok) {
+            Logger.warn('KVK Open Dataset niet bereikbaar', new Error(`Status: ${response.status}`))
+            return null
+          }
+          const data = await response.json()
+          // Data kan leeg zijn als kvkNummer niet gevonden is
+          if (!data || !data.kvkNummer) {
+            Logger.warn('KVK Open Dataset: geen resultaat voor kvkNummer', { kvkNumber })
+            return null
+          }
+          return {
+            name: undefined, // Naam niet beschikbaar in deze dataset
+            isActive: data.actief === 'J',
+            registrationDate: data.datumAanvang || '',
+            address: `Postcode-regio: ${data.postcodeRegio || ''}`,
+            activities: data.activiteiten || [],
+            contactInfo: {
+              phone: undefined,
+              email: undefined,
+              website: undefined
+            }
+          }
+        } catch (openDataError) {
+          Logger.error('KVK Open Dataset fallback faalde', openDataError as Error)
+          return null
+        }
+      }
+
+      if (!this.kvkApiKey) {
         throw new Error('KVK API key not configured')
       }
 

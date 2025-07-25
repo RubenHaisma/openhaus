@@ -189,7 +189,7 @@ export class AdvancedEnergyAssessment {
       )
       
       // Perform financial analysis
-      const financialAnalysis = this.performFinancialAnalysis(recommendations, energyPrices)
+      const financialAnalysis = this.performFinancialAnalysis(recommendations)
       
       // Check compliance status
       const complianceStatus = this.assessComplianceStatus(currentState, recommendations)

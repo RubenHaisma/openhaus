@@ -56,13 +56,13 @@ export async function POST(req: NextRequest) {
     })
 
     // Get all contractors in the area
-    const contractors = await this.getContractorsInArea(
+    const contractors = await getContractorsInArea(
       projectRequirements.location, 
       projectRequirements.maxDistance
     )
     
     // Filter contractors by project type and certifications
-    const qualifiedContractors = await this.filterQualifiedContractors(
+    const qualifiedContractors = await filterQualifiedContractors(
       contractors, 
       projectRequirements
     )
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     // Calculate match scores for each contractor
     const contractorMatches = await Promise.all(
       qualifiedContractors.map(contractor => 
-        this.calculateContractorMatch(contractor, projectRequirements)
+        calculateContractorMatch(contractor, projectRequirements)
       )
     )
     
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const topMatches = sortedMatches.slice(0, 10)
     
     // Generate matching insights
-    const matchingInsights = this.generateMatchingInsights(topMatches, projectRequirements)
+    const matchingInsights = generateMatchingInsights(topMatches, projectRequirements)
 
     Logger.audit('Smart contractor matching completed', {
       location: projectRequirements.location,
@@ -101,9 +101,9 @@ export async function POST(req: NextRequest) {
         recommendedContractors: topMatches.slice(0, 3).length
       },
       recommendations: {
-        nextSteps: this.getNextSteps(topMatches),
-        timeline: this.getProjectTimeline(topMatches, projectRequirements),
-        budgetOptimization: this.getBudgetOptimization(topMatches, projectRequirements)
+        nextSteps: getNextSteps(topMatches),
+        timeline: getProjectTimeline(topMatches, projectRequirements),
+        budgetOptimization: getBudgetOptimization(topMatches, projectRequirements)
       },
       lastUpdated: new Date().toISOString()
     })
@@ -263,7 +263,7 @@ async function calculateContractorMatch(contractor: any, requirements: any): Pro
   }
   
   // Budget compatibility
-  const budgetCompatible = this.checkBudgetCompatibility(contractor, requirements.budget)
+  const budgetCompatible = checkBudgetCompatibility(contractor, requirements.budget)
   if (budgetCompatible.compatible) {
     matchReasons.push('Budget past bij gemiddelde projectwaarde')
   } else {
@@ -271,17 +271,17 @@ async function calculateContractorMatch(contractor: any, requirements: any): Pro
   }
   
   // Estimate availability
-  const availability = this.estimateAvailability(contractor)
+  const availability = estimateAvailability(contractor)
   
   // Estimate pricing
-  const pricing = this.estimatePricing(contractor, requirements)
+  const pricing = estimatePricing(contractor, requirements)
   
   return {
     contractor,
     matchScore: Math.round(matchScore),
     matchReasons,
     availability,
-    pricing,
+    pricing: pricing as any,
     qualifications: {
       certifications: contractor.certifications,
       experience: contractor.yearsExperience,
@@ -315,7 +315,7 @@ function estimateAvailability(contractor: any) {
   
   return {
     nextAvailable: nextAvailable.toISOString().split('T')[0],
-    estimatedDuration: this.estimateProjectDuration(contractor),
+    estimatedDuration: estimateProjectDuration(contractor),
     currentWorkload: contractor.currentWorkload
   }
 }
@@ -375,7 +375,7 @@ function generateMatchingInsights(matches: ContractorMatch[], requirements: any)
         const earliestDate = new Date(earliest)
         return matchDate < earliestDate ? match.availability.nextAvailable : earliest
       }, matches[0]?.availability.nextAvailable),
-      averageWaitTime: this.calculateAverageWaitTime(matches)
+      averageWaitTime: calculateAverageWaitTime(matches)
     },
     qualityIndicators: {
       highRatedContractors: matches.filter(match => match.contractor.rating >= 4.5).length,
@@ -383,8 +383,8 @@ function generateMatchingInsights(matches: ContractorMatch[], requirements: any)
       rvoVerifiedContractors: matches.filter(match => match.contractor.rvoVerified).length
     },
     riskAnalysis: {
-      commonRisks: this.identifyCommonRisks(matches),
-      mitigationStrategies: this.getMitigationStrategies(matches)
+      commonRisks: identifyCommonRisks(matches),
+      mitigationStrategies: getMitigationStrategies(matches)
     }
   }
 }
@@ -428,7 +428,7 @@ function getMitigationStrategies(matches: ContractorMatch[]): string[] {
   ]
   
   // Add specific strategies based on identified risks
-  const commonRisks = this.identifyCommonRisks(matches)
+  const commonRisks = identifyCommonRisks(matches)
   
   if (commonRisks.includes('Hoge werkdruk, langere wachttijd')) {
     strategies.push('Boek vroeg in het seizoen voor betere beschikbaarheid')

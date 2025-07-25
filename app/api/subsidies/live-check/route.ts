@@ -39,16 +39,16 @@ export async function POST(req: NextRequest) {
     const eligibilityResult = await rvoApiService.checkEligibility(propertyData)
     
     // Calculate optimal subsidy combinations
-    const optimalCombinations = this.calculateOptimalCombinations(
+    const optimalCombinations = calculateOptimalCombinations(
       eligibilityResult.eligibleSchemes,
       propertyData.plannedMeasures
     )
     
     // Get application requirements for eligible schemes
-    const applicationRequirements = await this.getApplicationRequirements(eligibilityResult.eligibleSchemes)
+    const applicationRequirements = await getApplicationRequirements(eligibilityResult.eligibleSchemes)
     
     // Calculate deadlines and urgency
-    const deadlineAnalysis = this.analyzeDeadlines(eligibilityResult.eligibleSchemes)
+    const deadlineAnalysis = analyzeDeadlines(eligibilityResult.eligibleSchemes)
 
     Logger.audit('Live subsidy check completed', {
       address: propertyData.address,
@@ -64,9 +64,9 @@ export async function POST(req: NextRequest) {
       applicationRequirements,
       deadlineAnalysis,
       recommendations: {
-        immediateActions: this.getImmediateActions(eligibilityResult),
-        timeline: this.getRecommendedTimeline(eligibilityResult.eligibleSchemes),
-        riskFactors: this.identifyRiskFactors(eligibilityResult.eligibleSchemes)
+        immediateActions: getImmediateActions(eligibilityResult),
+        timeline: getRecommendedTimeline(eligibilityResult.eligibleSchemes),
+        riskFactors: identifyRiskFactors(eligibilityResult.eligibleSchemes)
       },
       lastUpdated: new Date().toISOString()
     })
@@ -108,7 +108,7 @@ function calculateOptimalCombinations(eligibleSchemes: any[], plannedMeasures: s
       const scheme2 = eligibleSchemes[j]
       
       // Check if schemes can be combined
-      if (this.canCombineSchemes(scheme1, scheme2)) {
+      if (canCombineSchemes(scheme1, scheme2)) {
         const combinedMeasures = [
           ...scheme1.applicableEnergyMeasures,
           ...scheme2.applicableEnergyMeasures
@@ -184,9 +184,9 @@ function analyzeDeadlines(eligibleSchemes: any[]) {
       budgetRemaining: scheme.budgetRemaining,
       riskLevel: scheme.budgetRemaining < 30 ? 'high' : 
                  scheme.budgetRemaining < 60 ? 'medium' : 'low',
-      estimatedDepletion: this.estimateBudgetDepletion(scheme)
+      estimatedDepletion: estimateBudgetDepletion(scheme)
     })),
-    optimalApplicationWindow: this.calculateOptimalApplicationWindow(eligibleSchemes)
+    optimalApplicationWindow: calculateOptimalApplicationWindow(eligibleSchemes)
   }
 }
 
@@ -203,8 +203,8 @@ function estimateBudgetDepletion(scheme: any): string {
 function calculateOptimalApplicationWindow(eligibleSchemes: any[]): string {
   // Find the scheme with the earliest deadline or lowest budget
   const urgentScheme = eligibleSchemes.reduce((most, current) => {
-    const currentUrgency = this.calculateUrgencyScore(current)
-    const mostUrgency = this.calculateUrgencyScore(most)
+    const currentUrgency = calculateUrgencyScore(current)
+    const mostUrgency = calculateUrgencyScore(most)
     return currentUrgency > mostUrgency ? current : most
   })
   

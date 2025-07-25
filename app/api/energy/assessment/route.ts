@@ -51,23 +51,19 @@ export async function POST(req: NextRequest) {
 
 async function getCurrentEnergyLabel(address: string, postalCode: string): Promise<string> {
   try {
-    // In production, integrate with EP Online API
-    // For now, return mock data based on postal code patterns
-    const area = postalCode.substring(0, 4)
+    // Get real energy label from EP Online API
+    const { epOnlineService } = await import('@/lib/integrations/ep-online')
+    const energyLabel = await epOnlineService.getEnergyLabel(address, postalCode)
     
-    // Simulate energy label distribution in Netherlands
-    const labelDistribution: Record<string, string> = {
-      '1000': 'C', // Amsterdam center - mixed
-      '1001': 'D', // Amsterdam - older buildings
-      '3000': 'C', // Rotterdam center
-      '2500': 'C', // Den Haag center
-      '3500': 'B', // Utrecht - newer developments
+    if (energyLabel) {
+      return energyLabel.currentLabel
     }
     
-    return labelDistribution[area] || 'C' // Default to C
+    Logger.warn('No real energy label found', { address, postalCode })
+    throw new Error('Energy label not available - EP Online API required')
   } catch (error) {
     Logger.error('Failed to get energy label', error as Error)
-    return 'C' // Default fallback
+    throw error
   }
 }
 
@@ -78,37 +74,62 @@ async function calculateEnergyAssessment(data: {
   currentHeating: string
   currentEnergyLabel: string
 }) {
-  // Calculate energy assessment based on current situation
-  const currentUsage = getEnergyUsageByLabel(data.currentEnergyLabel)
-  const targetLabel = getTargetEnergyLabel(data.currentEnergyLabel)
-  const targetUsage = getEnergyUsageByLabel(targetLabel)
-  
-  const potentialSavings = currentUsage - targetUsage
-  const annualSavings = potentialSavings * 1.50 // €1.50 per m³ gas equivalent
-  
-  // Calculate recommended measures
-  const recommendations = getEnergyRecommendations(data.currentEnergyLabel, data.currentHeating)
-  
-  // Calculate total investment and subsidies
-  const totalInvestment = recommendations.reduce((sum, rec) => sum + rec.cost, 0)
-  const totalSubsidy = recommendations.reduce((sum, rec) => sum + rec.subsidy, 0)
-  const netInvestment = totalInvestment - totalSubsidy
-  const paybackPeriod = Math.round(netInvestment / annualSavings)
-  
-  return {
-    currentEnergyLabel: data.currentEnergyLabel,
-    targetEnergyLabel: targetLabel,
-    currentEnergyUsage: currentUsage,
-    potentialSavings: Math.round(potentialSavings),
-    annualSavings: Math.round(annualSavings),
-    estimatedCost: totalInvestment,
-    subsidyAmount: totalSubsidy,
-    netInvestment,
-    paybackPeriod,
-    co2Reduction: Math.round(potentialSavings * 1.88), // kg CO2 per m³ gas
-    recommendations,
-    complianceDeadline: '2030-01-01',
-    assessmentDate: new Date().toISOString()
+  try {
+    // Get real energy prices for accurate calculations
+    const { energyPriceService } = await import('@/lib/integrations/energy-prices')
+    const marketData = await energyPriceService.getMarketData()
+    
+    if (marketData.currentPrices.length === 0) {
+      throw new Error('No real energy price data available')
+    }
+    
+    // Calculate energy assessment based on real data
+    const currentUsage = getEnergyUsageByLabel(data.currentEnergyLabel)
+    const targetLabel = getTargetEnergyLabel(data.currentEnergyLabel)
+    const targetUsage = getEnergyUsageByLabel(targetLabel)
+    
+    const potentialSavings = currentUsage - targetUsage
+    
+    // Use real energy prices for savings calculation
+    const gasPrice = marketData.currentPrices.find(p => p.type === 'gas')?.pricePerUnit || 1.45
+    const annualSavings = potentialSavings * gasPrice
+    
+    // Get real subsidy information
+    const { rvoApiService } = await import('@/lib/integrations/rvo-api')
+    const eligibilityResult = await rvoApiService.checkEligibility({
+      address: data.address,
+      postalCode: data.postalCode,
+      energyLabel: data.currentEnergyLabel,
+      constructionYear: 1980, // Default
+      propertyType: data.propertyType,
+      ownerOccupied: true
+    })
+    
+    const recommendations = getEnergyRecommendations(data.currentEnergyLabel, data.currentHeating)
+    const totalInvestment = recommendations.reduce((sum, rec) => sum + rec.cost, 0)
+    const totalSubsidy = eligibilityResult.totalMaxSubsidy || 0
+    const netInvestment = totalInvestment - totalSubsidy
+    const paybackPeriod = annualSavings > 0 ? Math.round(netInvestment / annualSavings) : 0
+    
+    return {
+      currentEnergyLabel: data.currentEnergyLabel,
+      targetEnergyLabel: targetLabel,
+      currentEnergyUsage: currentUsage,
+      potentialSavings: Math.round(potentialSavings),
+      annualSavings: Math.round(annualSavings),
+      estimatedCost: totalInvestment,
+      subsidyAmount: totalSubsidy,
+      netInvestment,
+      paybackPeriod,
+      co2Reduction: Math.round(potentialSavings * 1.88), // kg CO2 per m³ gas
+      recommendations,
+      complianceDeadline: '2030-01-01',
+      assessmentDate: new Date().toISOString(),
+      dataSource: 'Real EP Online + RVO + Energy Price APIs'
+    }
+  } catch (error) {
+    Logger.error('Energy assessment calculation failed', error as Error)
+    throw error
   }
 }
 

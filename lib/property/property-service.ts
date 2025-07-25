@@ -298,18 +298,21 @@ export class PropertyService {
           city: propertyData.city,
           province: this.getProvinceFromPostalCode(propertyData.postalCode),
           propertyType: propertyTypeEnum,
-          bedrooms: listingData.bedrooms,
-          bathrooms: listingData.bathrooms,
-          squareMeters: propertyData.squareMeters || 100,
+          bedrooms: listingData.bedrooms || 0,
+          bathrooms: listingData.bathrooms || 0,
+          squareMeters: String(propertyData.squareMeters || 100),
           constructionYear: propertyData.constructionYear || 1980,
-          askingPrice: listingData.askingPrice,
-          estimatedValue: propertyData.wozValue,
+          askingPrice: String(listingData.askingPrice),
+          estimatedValue: String(propertyData.wozValue),
           confidenceScore: 0.8, // Default confidence
           status: PropertyStatus.AVAILABLE,
           images: listingData.images,
           description: listingData.description,
           features: listingData.features,
-          energyLabel: propertyData.energyLabel || 'C'
+          energyLabel: propertyData.energyLabel || 'C',
+          currentEnergyLabel: propertyData.energyLabel || 'C',
+          heatingType: 'Onbekend',
+          insulationLevel: 'Onbekend'
         }
       })
 
@@ -468,11 +471,6 @@ export class PropertyService {
 
   private async getEnergyLabel(address: string, postalCode: string): Promise<string | null> {
     try {
-      if (!process.env.EP_ONLINE_API_KEY) {
-        Logger.warn('EP Online API key not configured')
-        return null
-      }
-
       const cacheKey = `energy:${address}:${postalCode.replace(/\s/g, '').toUpperCase()}`
       const cachedLabel = await cacheService.get<string>(cacheKey, 'energy')
       if (cachedLabel) {
@@ -480,26 +478,16 @@ export class PropertyService {
         return cachedLabel
       }
 
-      // Call EP Online API
-      const response = await fetch('https://api.ep-online.nl/v1/energy-labels', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.EP_ONLINE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          address,
-          postalCode: postalCode.replace(/\s/g, '').toUpperCase()
-        })
-      })
-
-      if (!response.ok) {
-        Logger.warn('EP Online API request failed', { status: response.status, address, postalCode })
+      // Use EP Online service
+      const { epOnlineService } = await import('@/lib/integrations/ep-online')
+      const energyLabelData = await epOnlineService.getEnergyLabel(address, postalCode)
+      
+      if (!energyLabelData) {
+        Logger.warn('No energy label found via EP Online API', { address, postalCode })
         return null
       }
 
-      const data = await response.json()
-      const energyLabel = data.energyLabel || data.label || null
+      const energyLabel = energyLabelData.currentLabel
 
       if (energyLabel) {
         // Cache for 30 days (energy labels don't change often)

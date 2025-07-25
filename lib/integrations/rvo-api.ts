@@ -64,7 +64,33 @@ export class RVOApiService {
       if (cached) return cached
 
       if (!this.apiKey) {
-        return this.getMockSubsidySchemes()
+        Logger.warn('RVO API key niet geconfigureerd - probeer open data endpoint van RVO')
+        // Open data endpoint (voorbeeld):
+        const openDataUrl = 'https://data.rvo.nl/subsidies-regelingen/projecten?format=json'
+        const response = await fetch(openDataUrl)
+        if (!response.ok) {
+          Logger.error('RVO open data endpoint niet bereikbaar', new Error(`Status: ${response.status}`))
+          return []
+        }
+        const data = await response.json()
+        // Transformeer open data naar SubsidyScheme[]
+        const schemes = (data?.results || []).map((item: any) => ({
+          id: item.id?.toString() || item.projectnummer || '',
+          name: item.titel || item.subsidieregeling || 'RVO Subsidie',
+          provider: 'RVO',
+          description: item.omschrijving || '',
+          maxAmount: item.rijksbijdrage || 0,
+          eligibilityCriteria: {}, // Open data bevat geen criteria per project
+          applicableEnergyMeasures: [], // Niet gestructureerd in open data
+          validFrom: item.startdatum || '',
+          validUntil: item.einddatum || '',
+          budgetRemaining: 0, // Niet beschikbaar in open data
+          applicationDeadline: item.einddatum || '',
+          isActive: true // Geen status in open data, ga uit van actief
+        }))
+        // Cache voor 1 uur
+        await cacheService.set('subsidy-schemes', schemes, { ttl: 3600, prefix: 'rvo' })
+        return schemes
       }
 
       const response = await fetch(`${this.baseUrl}/subsidies/schemes`, {
@@ -87,7 +113,7 @@ export class RVOApiService {
       return schemes
     } catch (error) {
       Logger.error('Failed to fetch RVO subsidy schemes', error as Error)
-      return this.getMockSubsidySchemes()
+      return []
     }
   }
 
@@ -102,7 +128,14 @@ export class RVOApiService {
   }): Promise<EligibilityResult> {
     try {
       if (!this.apiKey) {
-        return this.getMockEligibilityResult(propertyData)
+        Logger.warn('RVO API key not configured - cannot check real eligibility')
+        return {
+          eligible: false,
+          eligibleSchemes: [],
+          totalMaxSubsidy: 0,
+          requirements: ['RVO API key required for real eligibility check'],
+          nextSteps: ['Configure RVO API access']
+        }
       }
 
       const response = await fetch(`${this.baseUrl}/subsidies/eligibility`, {
@@ -122,14 +155,21 @@ export class RVOApiService {
       return this.transformEligibilityResult(data)
     } catch (error) {
       Logger.error('Failed to check RVO eligibility', error as Error)
-      return this.getMockEligibilityResult(propertyData)
+      return {
+        eligible: false,
+        eligibleSchemes: [],
+        totalMaxSubsidy: 0,
+        requirements: ['API error occurred'],
+        nextSteps: ['Try again later']
+      }
     }
   }
 
   async getContractorCertifications(kvkNumber: string): Promise<ContractorCertification | null> {
     try {
       if (!this.apiKey) {
-        return this.getMockContractorCertification(kvkNumber)
+        Logger.warn('RVO API key not configured - cannot verify contractor certifications')
+        return null
       }
 
       const response = await fetch(`${this.baseUrl}/contractors/${kvkNumber}/certifications`, {
@@ -148,7 +188,7 @@ export class RVOApiService {
       return this.transformContractorData(data)
     } catch (error) {
       Logger.error('Failed to get contractor certifications', error as Error)
-      return this.getMockContractorCertification(kvkNumber)
+      return null
     }
   }
 
@@ -160,11 +200,10 @@ export class RVOApiService {
   }): Promise<ApplicationResult> {
     try {
       if (!this.apiKey) {
+        Logger.warn('RVO API key not configured - cannot submit real applications')
         return {
-          success: true,
-          referenceNumber: 'MOCK-' + Date.now(),
-          estimatedProcessingTime: '6-8 weeks',
-          requiredDocuments: ['Energy label', 'Property ownership proof', 'Contractor quotes']
+          success: false,
+          error: 'RVO API key required for real application submission'
         }
       }
 
@@ -198,90 +237,6 @@ export class RVOApiService {
         success: false,
         error: 'Application submission failed'
       }
-    }
-  }
-
-  private getMockSubsidySchemes(): SubsidyScheme[] {
-    return [
-      {
-        id: 'isde-2024',
-        name: 'ISDE Subsidie 2024',
-        provider: 'RVO',
-        description: 'Subsidie voor duurzame energie in bestaande woningen',
-        maxAmount: 7000,
-        eligibilityCriteria: {
-          propertyAge: 'Voor 2018',
-          ownerOccupied: true,
-          energyLabel: 'C of lager'
-        },
-        applicableEnergyMeasures: ['heat_pump', 'solar_boiler', 'biomass_boiler'],
-        validFrom: '2024-01-01',
-        validUntil: '2024-12-31',
-        budgetRemaining: 85,
-        applicationDeadline: '2024-12-31',
-        isActive: true
-      },
-      {
-        id: 'seeh-2024',
-        name: 'SEEH Subsidie 2024',
-        provider: 'RVO',
-        description: 'Subsidie energiebesparende maatregelen eigen huis',
-        maxAmount: 8000,
-        eligibilityCriteria: {
-          propertyAge: 'Voor 2018',
-          ownerOccupied: true,
-          incomeLimit: 43000
-        },
-        applicableEnergyMeasures: ['insulation', 'hr_glass', 'ventilation'],
-        validFrom: '2024-01-01',
-        validUntil: '2024-12-31',
-        budgetRemaining: 72,
-        applicationDeadline: '2024-12-31',
-        isActive: true
-      }
-    ]
-  }
-
-  private getMockEligibilityResult(propertyData: any): EligibilityResult {
-    const schemes = this.getMockSubsidySchemes()
-    const eligibleSchemes = schemes.filter(scheme => {
-      // Simple mock eligibility logic
-      if (propertyData.constructionYear > 2018) return false
-      if (propertyData.energyLabel === 'A' || propertyData.energyLabel === 'A+') return false
-      return true
-    })
-
-    return {
-      eligible: eligibleSchemes.length > 0,
-      eligibleSchemes,
-      totalMaxSubsidy: eligibleSchemes.reduce((sum, scheme) => sum + scheme.maxAmount, 0),
-      requirements: [
-        'Woning moet voor 2018 gebouwd zijn',
-        'Eigenaar-bewoner',
-        'Energielabel C of lager'
-      ],
-      nextSteps: [
-        'Vraag offertes aan bij gecertificeerde installateurs',
-        'Dien subsidieaanvraag in vóór start werkzaamheden',
-        'Bewaar alle facturen en certificaten'
-      ]
-    }
-  }
-
-  private getMockContractorCertification(kvkNumber: string): ContractorCertification {
-    return {
-      kvkNumber,
-      companyName: 'Mock Energy Solutions',
-      certifications: {
-        rvo: true,
-        isso: true,
-        komo: false,
-        validUntil: '2025-12-31'
-      },
-      specialties: ['heat_pump', 'insulation', 'solar_panels'],
-      serviceArea: ['Noord-Holland', 'Utrecht'],
-      rating: 4.7,
-      projectsCompleted: 156
     }
   }
 

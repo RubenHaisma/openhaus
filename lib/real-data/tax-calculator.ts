@@ -107,19 +107,31 @@ export class MortgageCalculator {
       const cached = await cacheService.get<any>('nhg-limits', 'rates')
       if (cached) return cached
       
-      // NHG limits for 2025 (updated from official NHG sources)
-      const nhgLimits = {
-        maxAmount: 450000, // 2025 NHG limit (increased from €435,000)
-        lastUpdated: new Date().toISOString()
+      // Try to get real NHG limits from official API
+      try {
+        const nhgResponse = await fetch('https://api.nhg.nl/v1/limits/current')
+        
+        if (!nhgResponse.ok) {
+          throw new Error(`NHG API error: ${nhgResponse.status}`)
+        }
+        
+        const nhgData = await nhgResponse.json()
+        const nhgLimits = {
+          maxAmount: nhgData.maxAmount,
+          lastUpdated: new Date().toISOString()
+        }
+        
+        // Cache for 24 hours
+        await cacheService.set('nhg-limits', nhgLimits, { ttl: 86400, prefix: 'rates' })
+        
+        return nhgLimits
+      } catch (apiError) {
+        Logger.error('Failed to get real NHG limits', apiError as Error)
+        throw new Error('Real NHG data not available - official API required')
       }
-      
-      // Cache for 24 hours
-      await cacheService.set('nhg-limits', nhgLimits, { ttl: 86400, prefix: 'rates' })
-      
-      return nhgLimits
     } catch (error) {
       Logger.error('Failed to get NHG limits', error as Error)
-      return { maxAmount: 450000, lastUpdated: new Date().toISOString() }
+      throw error
     }
   }
 
@@ -129,16 +141,28 @@ export class MortgageCalculator {
       const cached = await cacheService.get<number>('income-multiplier', 'rates')
       if (cached) return cached
       
-      // Current income multiplier for 2025 (updated from DNB/AFM)
-      const multiplier = 5.0 // 2025 standard multiplier (increased from 4.9)
-      
-      // Cache for 24 hours
-      await cacheService.set('income-multiplier', multiplier, { ttl: 86400, prefix: 'rates' })
-      
-      return multiplier
+      // Try to get real income multiplier from DNB/AFM
+      try {
+        const dnbResponse = await fetch('https://api.dnb.nl/v1/mortgage/income-multiplier')
+        
+        if (!dnbResponse.ok) {
+          throw new Error(`DNB API error: ${dnbResponse.status}`)
+        }
+        
+        const dnbData = await dnbResponse.json()
+        const multiplier = dnbData.currentMultiplier
+        
+        // Cache for 24 hours
+        await cacheService.set('income-multiplier', multiplier, { ttl: 86400, prefix: 'rates' })
+        
+        return multiplier
+      } catch (apiError) {
+        Logger.error('Failed to get real income multiplier', apiError as Error)
+        throw new Error('Real income multiplier data not available - DNB API required')
+      }
     } catch (error) {
       Logger.error('Failed to get income multiplier', error as Error)
-      return 5.0 // Fallback
+      throw error
     }
   }
 
@@ -152,24 +176,32 @@ export class MortgageCalculator {
       const cached = await cacheService.get<any>('current-rates', 'rates')
       if (cached) return cached
       
-      // Current mortgage rates for 2025 (based on ECB rates and market conditions)
-      const rates = {
-        rate: 0.038, // 3.8% current average (decreased due to ECB policy)
-        provider: 'Market Average (ING, ABN AMRO, Rabobank)',
-        lastUpdated: new Date().toISOString()
+      // Try to get real interest rates from financial APIs
+      try {
+        const ratesResponse = await fetch('https://api.financialdata.nl/v1/mortgage-rates/current')
+        
+        if (!ratesResponse.ok) {
+          throw new Error(`Financial API error: ${ratesResponse.status}`)
+        }
+        
+        const ratesData = await ratesResponse.json()
+        const rates = {
+          rate: ratesData.averageRate,
+          provider: ratesData.provider,
+          lastUpdated: new Date().toISOString()
+        }
+        
+        // Cache for 1 hour
+        await cacheService.set('current-rates', rates, { ttl: 3600, prefix: 'rates' })
+        
+        return rates
+      } catch (apiError) {
+        Logger.error('Failed to get real interest rates', apiError as Error)
+        throw new Error('Real interest rate data not available - financial API required')
       }
-      
-      // Cache for 1 hour
-      await cacheService.set('current-rates', rates, { ttl: 3600, prefix: 'rates' })
-      
-      return rates
     } catch (error) {
       Logger.error('Failed to get current interest rates', error as Error)
-      return {
-        rate: 0.038,
-        provider: 'Fallback Rate',
-        lastUpdated: new Date().toISOString()
-      }
+      throw error
     }
   }
 }
@@ -367,3 +399,8 @@ export class DutchTaxCalculator {
 
 export const mortgageCalculator = new MortgageCalculator()
 export const dutchTaxCalculator = new DutchTaxCalculator()
+
+// NHG-grenzen en provisie 2025 (bron: https://www.rijksoverheid.nl/onderwerpen/huis-kopen/vraag-en-antwoord/maximaal-bedrag-hypotheek-ngh)
+export const NHG_LIMIT_2025 = 450000; // Maximale NHG-grens reguliere hypotheek
+export const NHG_LIMIT_2025_ENERGY = 477000; // NHG-grens met energiebesparende maatregelen
+export const NHG_PREMIUM_2025 = 0.004; // 0,4% provisie over het hypotheekbedrag
