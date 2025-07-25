@@ -34,9 +34,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       intelligence,
+      anwbPrices: intelligence.anwbPrices,
       summary: {
         currentGasPrice: intelligence.currentPrices.gas,
         currentElectricityPrice: intelligence.currentPrices.electricity,
+        anwbGasPrice: intelligence.anwbPrices.gas,
+        anwbElectricityPrice: intelligence.anwbPrices.electricity,
         transitionProgress: intelligence.marketTrends.energyTransitionProgress,
         averageWaitTime: intelligence.contractorMarket.averageWaitTime,
         subsidyBudgetAlert: getSubsidyAlert(intelligence.subsidyBudgetStatus)

@@ -1,5 +1,6 @@
 import { Logger } from '@/lib/monitoring/logger'
 import { cacheService } from '@/lib/cache/redis'
+import { energyPriceService } from '@/lib/integrations/energy-prices'
 
 export interface EnergyMarketIntelligence {
   currentPrices: {
@@ -83,23 +84,14 @@ export class EnergyMarketIntelligenceService {
   private cbsApiUrl = 'https://opendata.cbs.nl/ODataApi/odata'
   private rvoApiUrl = process.env.RVO_API_URL || 'https://api.rvo.nl/v1'
   private energyPriceApiUrl = process.env.ENERGY_PRICE_API_URL
-  private apiKeys = {
-    cbs: process.env.CBS_API_KEY,
-    rvo: process.env.RVO_API_KEY,
-    energyPrice: process.env.ENERGY_PRICE_API_KEY
-  }
+  // CBS open data API does not require an API key. No key logic needed.
+  constructor() {}
 
-  constructor() {
-    if (!this.apiKeys.cbs) {
-      Logger.warn('CBS API key not configured - using enhanced mock data')
-    }
-  }
-
-  async getMarketIntelligence(): Promise<EnergyMarketIntelligence> {
+  async getMarketIntelligence(): Promise<EnergyMarketIntelligence & { anwbPrices: { gas: number | null, electricity: number | null } }> {
     try {
       const cacheKey = 'energy-market-intelligence'
-      const cached = await cacheService.get<EnergyMarketIntelligence>(cacheKey, 'market')
-      if (cached) return cached
+      const cached = await cacheService.get<any>(cacheKey, 'market')
+      if (cached && cached.anwbPrices) return cached
 
       const [
         currentPrices,
@@ -107,23 +99,26 @@ export class EnergyMarketIntelligenceService {
         marketTrends,
         subsidyStatus,
         contractorMarket,
-        regionalData
+        regionalData,
+        anwbPrices
       ] = await Promise.all([
         this.getCurrentEnergyPrices(),
         this.getEnergyPriceForecasts(),
         this.getMarketTrends(),
         this.getSubsidyBudgetStatus(),
         this.getContractorMarketData(),
-        this.getRegionalEnergyData()
+        this.getRegionalEnergyData(),
+        this.getANWBPrices()
       ])
 
-      const intelligence: EnergyMarketIntelligence = {
+      const intelligence = {
         currentPrices,
         priceForecasts,
         marketTrends,
         subsidyBudgetStatus: subsidyStatus,
         contractorMarket,
-        regionalData
+        regionalData,
+        anwbPrices
       }
 
       // Cache for 1 hour
@@ -132,6 +127,8 @@ export class EnergyMarketIntelligenceService {
       Logger.info('Energy market intelligence updated', {
         gasPriceEur: currentPrices.gas,
         electricityPriceEur: currentPrices.electricity,
+        anwbGas: anwbPrices.gas,
+        anwbElectricity: anwbPrices.electricity,
         transitionProgress: marketTrends.energyTransitionProgress
       })
 
@@ -199,19 +196,31 @@ export class EnergyMarketIntelligenceService {
     }
   }
 
+  async getANWBPrices(): Promise<{ gas: number | null, electricity: number | null }> {
+    try {
+      const [gasPrices, electricityPrices] = await Promise.all([
+        energyPriceService.getCurrentGasPrices(),
+        energyPriceService.getCurrentElectricityPrices()
+      ])
+      return {
+        gas: gasPrices.length > 0 ? gasPrices[0].pricePerUnit : null,
+        electricity: electricityPrices.length > 0 ? electricityPrices[0].pricePerUnit : null
+      }
+    } catch (error) {
+      Logger.error('Failed to get ANWB prices', error as Error)
+      return { gas: null, electricity: null }
+    }
+  }
+
   private async getCurrentEnergyPrices(): Promise<{
     gas: number
     electricity: number
     district_heating: number
   }> {
-    if (!this.apiKeys.energyPrice) {
-      throw new Error('No real energy price API key configured')
-    }
-
     try {
       const response = await fetch(`${this.energyPriceApiUrl}/current-prices`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKeys.energyPrice}`,
+          ...(this.energyPriceApiUrl ? { 'Authorization': `Bearer ${process.env.ENERGY_PRICE_API_KEY}` } : {}),
           'Content-Type': 'application/json'
         }
       })
@@ -236,14 +245,10 @@ export class EnergyMarketIntelligenceService {
     gas: PriceForecast
     electricity: PriceForecast
   }> {
-    if (!this.apiKeys.energyPrice) {
-      throw new Error('No real energy price API key configured')
-    }
-
     try {
       const response = await fetch(`${this.energyPriceApiUrl}/forecasts`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKeys.energyPrice}`,
+          ...(this.energyPriceApiUrl ? { 'Authorization': `Bearer ${process.env.ENERGY_PRICE_API_KEY}` } : {}),
           'Content-Type': 'application/json'
         }
       })
@@ -285,14 +290,14 @@ export class EnergyMarketIntelligenceService {
     bei: SubsidyBudgetStatus
     municipal: SubsidyBudgetStatus[]
   }> {
-    if (!this.apiKeys.rvo) {
+    if (!process.env.RVO_API_KEY) {
       throw new Error('No real RVO API key configured')
     }
 
     try {
       const response = await fetch(`${this.rvoApiUrl}/subsidies/budget-status`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKeys.rvo}`,
+          'Authorization': `Bearer ${process.env.RVO_API_KEY}`,
           'Content-Type': 'application/json'
         }
       })

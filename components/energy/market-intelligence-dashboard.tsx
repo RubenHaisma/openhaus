@@ -36,6 +36,7 @@ export function MarketIntelligenceDashboard({
   const [intelligence, setIntelligence] = useState<EnergyMarketIntelligence | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedRegion, setSelectedRegion] = useState(region || 'Nederland')
+  const [anwbPrices, setAnwbPrices] = useState<{ gas: number | null, electricity: number | null } | null>(null)
 
   useEffect(() => {
     const fetchIntelligence = async () => {
@@ -48,6 +49,8 @@ export function MarketIntelligenceDashboard({
         if (response.ok) {
           const data = await response.json()
           setIntelligence(data.intelligence || data.regionalData)
+          if (data.anwbPrices) setAnwbPrices(data.anwbPrices)
+          else if (data.intelligence && data.intelligence.anwbPrices) setAnwbPrices(data.intelligence.anwbPrices)
         }
       } catch (error) {
         console.error('Failed to fetch market intelligence:', error)
@@ -155,10 +158,19 @@ export function MarketIntelligenceDashboard({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {formatPrice(intelligence.currentPrices.gas, '/m³')}
+                <div className="flex flex-col gap-1">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
+                    {formatPrice(intelligence.currentPrices.gas, '/m³')}
+                    <Badge className="ml-2" variant="outline">Energieprijs.nl</Badge>
+                  </div>
+                  {anwbPrices && anwbPrices.gas !== null && (
+                    <div className="text-lg text-gray-700 flex items-center gap-2">
+                      {formatPrice(anwbPrices.gas, '/m³')}
+                      <Badge className="ml-1" variant="secondary">ANWB Energie</Badge>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 mt-2">
                   {React.createElement(
                     getPriceChangeIcon(
                       intelligence.currentPrices.gas, 
@@ -181,10 +193,19 @@ export function MarketIntelligenceDashboard({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {formatPrice(intelligence.currentPrices.electricity, '/kWh')}
+                <div className="flex flex-col gap-1">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
+                    {formatPrice(intelligence.currentPrices.electricity, '/kWh')}
+                    <Badge className="ml-2" variant="outline">Energieprijs.nl</Badge>
+                  </div>
+                  {anwbPrices && anwbPrices.electricity !== null && (
+                    <div className="text-lg text-gray-700 flex items-center gap-2">
+                      {formatPrice(anwbPrices.electricity, '/kWh')}
+                      <Badge className="ml-1" variant="secondary">ANWB Energie</Badge>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 mt-2">
                   {React.createElement(
                     getPriceChangeIcon(
                       intelligence.currentPrices.electricity, 
