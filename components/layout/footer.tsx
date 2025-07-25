@@ -1,15 +1,15 @@
 import Link from 'next/link'
-import { Home, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
+import { Zap, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 const navigation = {
   diensten: [
-    { name: 'Huis verkopen', href: '/list-property' },
-    { name: 'Huis kopen', href: '/buy' },
-    { name: 'Hypotheekadvies', href: '/finance' },
-    { name: 'Gratis taxatie', href: '/list-property' },
-    { name: 'Marktplaats', href: '/marketplace' },
+    { name: 'Gratis energieadvies', href: '/energieadvies' },
+    { name: 'Subsidie check', href: '/subsidies' },
+    { name: 'Installateurs vinden', href: '/installateurs' },
+    { name: 'ROI calculator', href: '/calculator' },
+    { name: 'Compliance tracking', href: '/compliance' },
   ],
   bedrijf: [
     { name: 'Over ons', href: '/about' },
@@ -48,24 +48,24 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <h3 className="text-3xl font-bold mb-6 text-gray-900">
-              Blijf op de hoogte van nieuwe woningen
+              Blijf op de hoogte van nieuwe subsidies
             </h3>
             <p className="text-gray-700 mb-8 text-lg">
-              Ontvang meldingen van nieuwe woningen die voldoen aan jouw criteria en tips voor particuliere verkoop.
+              Ontvang meldingen over nieuwe subsidieregelingen, energietips en updates over de energietransitie.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
               <Input
                 type="email"
                 placeholder="Je e-mailadres"
-                className="flex-1 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary h-14 text-lg"
+                className="flex-1 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-green-600 h-14 text-lg"
               />
-              <Button className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold">
+              <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold">
                 Aanmelden
               </Button>
             </div>
             <p className="text-sm text-gray-500 mt-4">
               Door je aan te melden ga je akkoord met onze{' '}
-              <Link href="/privacy" className="underline hover:text-primary text-gray-700">
+              <Link href="/privacy" className="underline hover:text-green-600 text-gray-700">
                 Privacy Policy
               </Link>
             </p>
@@ -79,23 +79,23 @@ export function Footer() {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-2 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-                <Home className="h-6 w-6 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600">
+                <Zap className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">OpenHaus</span>
+              <span className="text-2xl font-bold text-gray-900">EnergiePlatform</span>
             </div>
             <p className="text-gray-700 mb-8 max-w-sm text-lg leading-relaxed">
-              Koop en verkoop huizen direct van particulier in Nederland. 
-              Snel, transparant en zonder makelaarskosten.
+              Maak je woning energieneutraal voor 2030. Gratis advies, subsidies tot €25.000 
+              en gecertificeerde installateurs.
             </p>
             {/* Contact Info */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-primary flex-shrink-0" />
-                <span className="text-gray-900 text-lg">info@openhaus.nl</span>
+                <Mail className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-gray-900 text-lg">info@energieplatform.nl</span>
               </div>
               <div className="flex items-center space-x-3">
-                <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-green-600 flex-shrink-0" />
                 <span className="text-gray-900 text-lg">Amsterdam, Nederland</span>
               </div>
             </div>
@@ -105,7 +105,7 @@ export function Footer() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-500 hover:text-primary transition-colors"
+                  className="text-gray-500 hover:text-green-600 transition-colors"
                 >
                   <span className="sr-only">{item.name}</span>
                   <item.icon className="h-6 w-6" />
@@ -124,7 +124,7 @@ export function Footer() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-gray-700 hover:text-primary transition-colors"
+                    className="text-gray-700 hover:text-green-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -142,7 +142,7 @@ export function Footer() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-gray-700 hover:text-primary transition-colors"
+                    className="text-gray-700 hover:text-green-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -160,7 +160,7 @@ export function Footer() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-gray-700 hover:text-primary transition-colors"
+                    className="text-gray-700 hover:text-green-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -178,7 +178,7 @@ export function Footer() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-gray-700 hover:text-primary transition-colors"
+                    className="text-gray-700 hover:text-green-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -194,11 +194,11 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-500">
-              © 2024 OpenHaus. Alle rechten voorbehouden.
+              © 2024 EnergiePlatform. Alle rechten voorbehouden.
             </p>
             <div className="flex items-center space-x-8 text-gray-500">
               <span>🇳🇱 Nederlands</span>
-              <span>AFM vergunning: 12345678</span>
+              <span>RVO Partner</span>
               <span>KvK: 87654321</span>
             </div>
           </div>

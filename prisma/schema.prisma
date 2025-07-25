@@ -17,7 +17,7 @@ model Profile {
   image                String?
   name                 String
   passwordHash         String?   @map("password_hash")
-  role                 Role      @default(BUYER)
+  role                 Role      @default(HOMEOWNER)
   verified             Boolean   @default(false)
   failedLoginAttempts  Int       @default(0) @map("failed_login_attempts")
   lockedUntil          DateTime? @map("locked_until")
@@ -26,19 +26,12 @@ model Profile {
   updatedAt            DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  buyerOrders          Order[]   @relation("BuyerOrders")
-  sellerOrders         Order[]   @relation("SellerOrders")
-  buyerOffers          Offer[]   @relation("BuyerOffers")
-  sellerOffers         Offer[]   @relation("SellerOffers")
-  reviewsGiven         Review[]  @relation("ReviewsGiven")
-  reviewsReceived      Review[]  @relation("ReviewsReceived")
+  properties           Property[]
+  energyAssessments    EnergyAssessment[]
+  subsidyApplications  SubsidyApplication[]
+  contractorBookings   ContractorBooking[]
   verificationTokens   VerificationToken[]
   auditLogs            AuditLog[]
-  valuations           Valuation[]
-  mortgageApplications MortgageApplication[]
-  buyerTransactions    Transaction[] @relation("BuyerTransactions")
-  sellerTransactions   Transaction[] @relation("SellerTransactions")
-  properties           Property[]
   accounts             Account[]
   sessions             Session[]
 
@@ -83,99 +76,185 @@ model Property {
   city             String
   province         String
   propertyType     PropertyType @map("property_type")
-  bedrooms         Int
-  bathrooms        Int
-  squareMeters     Decimal     @map("square_meters")
   constructionYear Int         @map("construction_year")
-  askingPrice      Decimal     @map("asking_price")
-  estimatedValue   Decimal     @map("estimated_value")
-  confidenceScore  Decimal     @map("confidence_score")
-  status           PropertyStatus @default(AVAILABLE)
-  images           String[]
-  description      String
-  features         String[]
-  energyLabel      String      @map("energy_label")
+  squareMeters     Decimal     @map("square_meters")
+  currentEnergyLabel String    @map("current_energy_label")
+  targetEnergyLabel String?    @map("target_energy_label")
+  heatingType      String      @map("heating_type")
+  insulationLevel  String      @map("insulation_level")
+  hasRenewableEnergy Boolean   @default(false) @map("has_renewable_energy")
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
 
   // Relations
   user             Profile     @relation(fields: [userId], references: [id])
-  orders           Order[]
-  offers           Offer[]
-  transactions     Transaction[]
+  energyAssessments EnergyAssessment[]
+  subsidyApplications SubsidyApplication[]
+  contractorBookings ContractorBooking[]
+  energyProjects   EnergyProject[]
 
   @@map("properties")
 }
 
-model Order {
-  id               String      @id @default(cuid())
-  orderNumber      String      @unique @map("order_number")
-  buyerId          String      @map("buyer_id")
-  sellerId         String      @map("seller_id")
-  propertyId       String      @map("property_id")
-  amount           Decimal
-  currency         String      @default("EUR")
-  status           OrderStatus @default(PENDING)
-  paymentMethod    String      @map("payment_method")
-  paymentIntentId  String?     @map("payment_intent_id")
-  shippingAddress  Json?       @map("shipping_address")
-  trackingNumber   String?     @map("tracking_number")
-  notes            String?
-  metadata         Json?
-  createdAt        DateTime    @default(now()) @map("created_at")
-  updatedAt        DateTime    @updatedAt @map("updated_at")
+model EnergyAssessment {
+  id                    String   @id @default(cuid())
+  userId                String   @map("user_id")
+  propertyId            String   @map("property_id")
+  currentEnergyLabel    String   @map("current_energy_label")
+  targetEnergyLabel     String   @map("target_energy_label")
+  currentEnergyUsage    Decimal  @map("current_energy_usage")
+  potentialSavings      Decimal  @map("potential_savings")
+  estimatedCost         Decimal  @map("estimated_cost")
+  paybackPeriod         Int      @map("payback_period")
+  co2Reduction          Decimal  @map("co2_reduction")
+  recommendations       Json     @map("recommendations")
+  complianceDeadline    DateTime @map("compliance_deadline")
+  assessmentDate        DateTime @default(now()) @map("assessment_date")
+  createdAt             DateTime @default(now()) @map("created_at")
 
   // Relations
-  buyer            Profile     @relation("BuyerOrders", fields: [buyerId], references: [id])
-  seller           Profile     @relation("SellerOrders", fields: [sellerId], references: [id])
-  property         Property    @relation(fields: [propertyId], references: [id])
+  user                  Profile  @relation(fields: [userId], references: [id])
+  property              Property @relation(fields: [propertyId], references: [id])
 
-  @@map("orders")
+  @@map("energy_assessments")
 }
 
-model Offer {
-  id               String      @id @default(cuid())
-  propertyId       String      @map("property_id")
-  buyerId          String      @map("buyer_id")
-  sellerId         String      @map("seller_id")
-  amount           Decimal
-  currency         String      @default("EUR")
-  status           OfferStatus @default(PENDING)
-  message          String?
-  counterAmount    Decimal?    @map("counter_amount")
-  counterMessage   String?     @map("counter_message")
-  rejectionMessage String?     @map("rejection_message")
-  conditions       String[]
-  expiresAt        DateTime?   @map("expires_at")
-  createdAt        DateTime    @default(now()) @map("created_at")
-  updatedAt        DateTime    @updatedAt @map("updated_at")
+model SubsidyScheme {
+  id                String   @id @default(cuid())
+  name              String
+  description       String
+  provider          String   // RVO, Municipality, etc.
+  maxAmount         Decimal  @map("max_amount")
+  eligibilityCriteria Json   @map("eligibility_criteria")
+  applicableEnergyMeasures String[] @map("applicable_energy_measures")
+  validFrom         DateTime @map("valid_from")
+  validUntil        DateTime @map("valid_until")
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   // Relations
-  buyer            Profile     @relation("BuyerOffers", fields: [buyerId], references: [id])
-  seller           Profile     @relation("SellerOffers", fields: [sellerId], references: [id])
-  property         Property    @relation(fields: [propertyId], references: [id])
+  applications      SubsidyApplication[]
 
-  @@map("offers")
+  @@map("subsidy_schemes")
 }
 
-model Review {
-  id               String   @id @default(cuid())
-  reviewerId       String   @map("reviewer_id")
-  revieweeId       String   @map("reviewee_id")
-  orderId          String?  @map("order_id")
-  rating           Int
-  title            String?
-  comment          String?
-  verifiedPurchase Boolean  @default(false) @map("verified_purchase")
-  helpfulVotes     Int      @default(0) @map("helpful_votes")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+model SubsidyApplication {
+  id                String            @id @default(cuid())
+  userId            String            @map("user_id")
+  propertyId        String            @map("property_id")
+  subsidySchemeId   String            @map("subsidy_scheme_id")
+  status            SubsidyStatus     @default(DRAFT)
+  amountRequested   Decimal           @map("amount_requested")
+  amountApproved    Decimal?          @map("amount_approved")
+  amountPaid        Decimal?          @map("amount_paid")
+  applicationData   Json              @map("application_data")
+  rvoReference      String?           @map("rvo_reference")
+  submittedAt       DateTime?         @map("submitted_at")
+  approvedAt        DateTime?         @map("approved_at")
+  paidAt            DateTime?         @map("paid_at")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
 
   // Relations
-  reviewer         Profile  @relation("ReviewsGiven", fields: [reviewerId], references: [id])
-  reviewee         Profile  @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+  user              Profile           @relation(fields: [userId], references: [id])
+  property          Property          @relation(fields: [propertyId], references: [id])
+  subsidyScheme     SubsidyScheme     @relation(fields: [subsidySchemeId], references: [id])
 
-  @@map("reviews")
+  @@map("subsidy_applications")
+}
+
+model Contractor {
+  id                String   @id @default(cuid())
+  companyName       String   @map("company_name")
+  contactName       String   @map("contact_name")
+  email             String   @unique
+  phone             String
+  address           String
+  city              String
+  province          String
+  postalCode        String   @map("postal_code")
+  specialties       String[] // heat_pumps, insulation, solar_panels, etc.
+  certifications    Json     // RVO certifications, etc.
+  rating            Decimal  @default(0)
+  reviewCount       Int      @default(0) @map("review_count")
+  isVerified        Boolean  @default(false) @map("is_verified")
+  isActive          Boolean  @default(true) @map("is_active")
+  serviceRadius     Int      @map("service_radius") // km
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  bookings          ContractorBooking[]
+  reviews           ContractorReview[]
+
+  @@map("contractors")
+}
+
+model ContractorBooking {
+  id                String         @id @default(cuid())
+  userId            String         @map("user_id")
+  propertyId        String         @map("property_id")
+  contractorId      String         @map("contractor_id")
+  serviceType       String         @map("service_type")
+  description       String
+  status            BookingStatus  @default(REQUESTED)
+  quotedAmount      Decimal?       @map("quoted_amount")
+  finalAmount       Decimal?       @map("final_amount")
+  scheduledDate     DateTime?      @map("scheduled_date")
+  completedDate     DateTime?      @map("completed_date")
+  notes             String?
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  user              Profile        @relation(fields: [userId], references: [id])
+  property          Property       @relation(fields: [propertyId], references: [id])
+  contractor        Contractor     @relation(fields: [contractorId], references: [id])
+  review            ContractorReview?
+
+  @@map("contractor_bookings")
+}
+
+model ContractorReview {
+  id                String            @id @default(cuid())
+  bookingId         String            @unique @map("booking_id")
+  contractorId      String            @map("contractor_id")
+  rating            Int
+  title             String?
+  comment           String?
+  wouldRecommend    Boolean           @map("would_recommend")
+  createdAt         DateTime          @default(now()) @map("created_at")
+
+  // Relations
+  booking           ContractorBooking @relation(fields: [bookingId], references: [id])
+  contractor        Contractor        @relation(fields: [contractorId], references: [id])
+
+  @@map("contractor_reviews")
+}
+
+model EnergyProject {
+  id                String        @id @default(cuid())
+  propertyId        String        @map("property_id")
+  name              String
+  description       String
+  energyMeasures    String[]      @map("energy_measures")
+  status            ProjectStatus @default(PLANNING)
+  startDate         DateTime?     @map("start_date")
+  completionDate    DateTime?     @map("completion_date")
+  totalCost         Decimal       @map("total_cost")
+  subsidyAmount     Decimal       @map("subsidy_amount")
+  energySavings     Decimal       @map("energy_savings") // percentage
+  co2Reduction      Decimal       @map("co2_reduction")
+  beforeEnergyLabel String        @map("before_energy_label")
+  afterEnergyLabel  String?       @map("after_energy_label")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  property          Property      @relation(fields: [propertyId], references: [id])
+
+  @@map("energy_projects")
 }
 
 model VerificationToken {
@@ -210,115 +289,10 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model Valuation {
-  id               String   @id @default(cuid())
-  userId           String?  @map("user_id")
-  address          String
-  postalCode       String   @map("postal_code")
-  city             String
-  estimatedValue   Decimal  @map("estimated_value")
-  confidenceScore  Decimal  @map("confidence_score")
-  propertyDetails  Json     @map("property_details")
-  comparableSales  Json[]   @map("comparable_sales")
-  createdAt        DateTime @default(now()) @map("created_at")
-
-  // Relations
-  user             Profile? @relation(fields: [userId], references: [id])
-
-  @@map("valuations")
-}
-
-model WozCache {
-  id            String   @id @default(cuid())
-  address       String
-  postalCode    String   @map("postal_code")
-  wozValue      Int      @map("woz_value")
-  referenceYear Int      @map("reference_year")
-  objectType    String   @map("object_type")
-  surfaceArea   Decimal? @map("surface_area")
-  scrapedAt     DateTime @map("scraped_at")
-  sourceUrl     String   @map("source_url")
-  metadata      Json?    @map("metadata") // Store additional WOZ fields
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  @@unique([address, postalCode])
-  @@map("woz_cache")
-}
-
-model MarketDataCache {
-  id               String   @id @default(cuid())
-  postalCodeArea   String   @unique @map("postal_code_area")
-  marketMultiplier Decimal  @map("market_multiplier")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-  createdAt        DateTime @default(now()) @map("created_at")
-
-  @@map("market_data_cache")
-}
-
-model Transaction {
-  id             String            @id @default(cuid())
-  buyerId        String            @map("buyer_id")
-  sellerId       String            @map("seller_id")
-  propertyId     String            @map("property_id")
-  purchasePrice  Decimal           @map("purchase_price")
-  status         TransactionStatus @default(PENDING)
-  notaryId       String?           @map("notary_id")
-  inspectionDate DateTime?         @map("inspection_date")
-  signingDate    DateTime?         @map("signing_date")
-  createdAt      DateTime          @default(now()) @map("created_at")
-  updatedAt      DateTime          @updatedAt @map("updated_at")
-
-  // Relations
-  buyer          Profile           @relation("BuyerTransactions", fields: [buyerId], references: [id])
-  seller         Profile           @relation("SellerTransactions", fields: [sellerId], references: [id])
-  property       Property          @relation(fields: [propertyId], references: [id])
-  notary         Notary?           @relation(fields: [notaryId], references: [id])
-
-  @@map("transactions")
-}
-
-model Notary {
-  id             String        @id @default(cuid())
-  name           String
-  firmName       String        @map("firm_name")
-  address        String
-  city           String
-  phone          String
-  email          String
-  specialties    String[]
-  rating         Decimal
-  availableSlots Json[]        @map("available_slots")
-  createdAt      DateTime      @default(now()) @map("created_at")
-
-  // Relations
-  transactions   Transaction[]
-
-  @@map("notaries")
-}
-
-model MortgageApplication {
-  id             String                    @id @default(cuid())
-  userId         String                    @map("user_id")
-  propertyId     String?                   @map("property_id")
-  loanAmount     Decimal                   @map("loan_amount")
-  income         Decimal
-  employmentType String                    @map("employment_type")
-  status         MortgageApplicationStatus @default(DRAFT)
-  documents      String[]
-  createdAt      DateTime                  @default(now()) @map("created_at")
-  updatedAt      DateTime                  @updatedAt @map("updated_at")
-
-  // Relations
-  user           Profile                   @relation(fields: [userId], references: [id])
-
-  @@map("mortgage_applications")
-}
-
 // Enums
 enum Role {
-  BUYER
-  SELLER
+  HOMEOWNER
+  CONTRACTOR
   ADMIN
 
   @@map("role")
@@ -332,33 +306,37 @@ enum PropertyType {
   @@map("property_type")
 }
 
-enum PropertyStatus {
-  AVAILABLE
-  SOLD
-  PENDING
-
-  @@map("property_status")
-}
-
-enum OrderStatus {
-  PENDING
-  PAID
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-
-  @@map("order_status")
-}
-
-enum OfferStatus {
-  PENDING
-  ACCEPTED
+enum SubsidyStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
   REJECTED
-  COUNTERED
-  EXPIRED
+  PAID
 
-  @@map("offer_status")
+  @@map("subsidy_status")
+}
+
+enum BookingStatus {
+  REQUESTED
+  QUOTED
+  ACCEPTED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("booking_status")
+}
+
+enum ProjectStatus {
+  PLANNING
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("project_status")
 }
 
 enum VerificationType {
@@ -367,23 +345,4 @@ enum VerificationType {
   PHONE_VERIFICATION
 
   @@map("verification_type")
-}
-
-enum TransactionStatus {
-  PENDING
-  INSPECTION_SCHEDULED
-  NOTARY_APPOINTED
-  COMPLETED
-  CANCELLED
-
-  @@map("transaction_status")
-}
-
-enum MortgageApplicationStatus {
-  DRAFT
-  SUBMITTED
-  APPROVED
-  REJECTED
-
-  @@map("mortgage_application_status")
 }

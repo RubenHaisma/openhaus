@@ -5,10 +5,9 @@ import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { AddressInput } from '@/components/ui/address-input'
-import { ValuationResult } from '@/components/valuation/valuation-result'
-import { PropertyCard } from '@/components/property/property-card'
+import { EnergyAssessmentResult } from '@/components/energy/energy-assessment-result'
 import { 
-  Home, 
+  Zap, 
   TrendingUp, 
   Shield, 
   Clock, 
@@ -17,13 +16,12 @@ import {
   ArrowRight,
   Users,
   Award,
-  Zap,
-  Search,
-  MapPin,
-  Calculator,
-  DollarSign,
+  Euro,
   Calendar,
-  FileText
+  FileText,
+  Leaf,
+  Home,
+  Calculator
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -32,20 +30,19 @@ import Image from 'next/image'
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { propertyService } from '@/lib/property/property-service'
 
 export default function HomePage() {
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const [featuredProperties, setFeaturedProperties] = useState([])
+  const [featuredProjects, setFeaturedProjects] = useState([])
 
   const { data: featuredData } = useQuery({
-    queryKey: ['featured-properties'],
+    queryKey: ['featured-projects'],
     queryFn: async () => {
-      const response = await fetch('/api/properties?limit=3&status=AVAILABLE')
+      const response = await fetch('/api/energy/projects?limit=3&status=COMPLETED')
       if (!response.ok) {
-        throw new Error('Failed to fetch featured properties')
+        throw new Error('Failed to fetch featured projects')
       }
       return response.json()
     },
@@ -53,16 +50,16 @@ export default function HomePage() {
   })
 
   useEffect(() => {
-    if (featuredData?.properties) {
-      setFeaturedProperties(featuredData.properties)
+    if (featuredData?.projects) {
+      setFeaturedProjects(featuredData.projects)
     }
   }, [featuredData])
 
   const handleAddressSearch = async (address: string, postalCode: string) => {
     setLoading(true)
     try {
-      // Get REAL property valuation - NO MOCK DATA
-      const res = await fetch('/api/valuation', {
+      // Get energy assessment for the property
+      const res = await fetch('/api/energy/assessment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address, postalCode }),
@@ -71,35 +68,29 @@ export default function HomePage() {
       if (res.ok) {
         const data = await res.json()
         
-        // Validate that we received real valuation data
-        if (!data.valuation || !data.valuation.estimatedValue) {
-          throw new Error('Invalid valuation data received')
-        }
-        
         if (!session) {
           // Store the search data and redirect to sign in
-          sessionStorage.setItem('pendingSearch', JSON.stringify({ address, postalCode, value: data.valuation.estimatedValue }))
-          router.push('/auth/signin?callbackUrl=/list-property')
+          sessionStorage.setItem('pendingAssessment', JSON.stringify({ address, postalCode, assessment: data.assessment }))
+          router.push('/auth/signin?callbackUrl=/energy-plan')
           return
         }
-        // Redirect to list-property with valuation data
-        router.push(`/list-property?address=${encodeURIComponent(address)}&postal=${encodeURIComponent(postalCode)}&value=${encodeURIComponent(data.valuation.estimatedValue)}`)
+        // Redirect to energy plan with assessment data
+        router.push(`/energy-plan?address=${encodeURIComponent(address)}&postal=${encodeURIComponent(postalCode)}`)
       } else {
         const errorData = await res.json()
-        throw new Error(errorData.error || 'Valuation failed')
+        throw new Error(errorData.error || 'Energy assessment failed')
       }
     } catch (error: any) {
-      console.error('Address search failed:', error)
-      alert(`Fout bij het ophalen van woninggegevens: ${error.message}. Controleer het adres en probeer het opnieuw.`)
+      console.error('Energy assessment failed:', error)
+      alert(`Fout bij het ophalen van energiegegevens: ${error.message}. Controleer het adres en probeer het opnieuw.`)
     } finally {
       setLoading(false)
     }
   }
 
-  // Remove valuation/result display logic and just show the AddressInput as before
   return (
     <div className="bg-white">
-      {/* Hero Section - OpenDoor Style */}
+      {/* Hero Section - Energy Transition Focus */}
       <section className="opendoor-hero min-h-screen flex items-center">
         <div className="hero-content">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center min-h-[80vh]">
@@ -111,27 +102,26 @@ export default function HomePage() {
               className="space-y-10"
             >
               <div className="space-y-8">
-                <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  Nieuw: Nu ook beschikbaar in Duitsland en Frankrijk
+                <div className="inline-flex items-center px-4 py-2 bg-green-50 rounded-full text-green-700 text-sm font-medium">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                  Nieuw: €3 miljard subsidie beschikbaar voor 2025
                 </div>
                 
                 <h1 className="text-6xl lg:text-8xl font-bold text-gray-900 leading-[0.9] tracking-tight">
-                  Koop en verkoop{' '}
-                  <span className="text-primary relative">
-                    direct
+                  Maak je huis{' '}
+                  <span className="text-green-600 relative">
+                    energieneutraal
                     <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
                       <path d="M2 10C60 2 140 2 198 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
                     </svg>
                   </span>
                   <br />
-                  <span className="text-gray-600">van particulier</span>
+                  <span className="text-gray-600">voor 2030</span>
                 </h1>
                 
                 <p className="text-2xl lg:text-3xl text-gray-600 leading-relaxed max-w-2xl font-light">
-                  Vind je <strong className="font-semibold text-gray-900">droomhuis of verkoop direct</strong> aan andere particulieren. 
-                  Geen makelaarskosten, geen tussenpersonen. 
-                  <br />Gewoon eerlijke deals tussen mensen.
+                  Krijg <strong className="font-semibold text-gray-900">gratis energieadvies</strong>, vind gecertificeerde installateurs 
+                  en ontvang tot <strong className="font-semibold text-green-600">€25.000 subsidie</strong> voor je energietransitie.
                 </p>
               </div>
 
@@ -139,8 +129,8 @@ export default function HomePage() {
               <div className="space-y-6">
                 <AddressInput
                   onSearch={handleAddressSearch}
-                  placeholder="Zoek woningen of voer je adres in voor een gratis taxatie..."
-                  className="opendoor-input shadow-2xl h-16 text-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/20"
+                  placeholder="Voer je adres in voor gratis energieadvies..."
+                  className="opendoor-input shadow-2xl h-16 text-xl border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-500/20"
                   loading={loading}
                 />
                 
@@ -149,19 +139,19 @@ export default function HomePage() {
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     </div>
-                    <span className="font-medium">Gratis platform</span>
+                    <span className="font-medium">Gratis energieadvies</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     </div>
-                    <span className="font-medium">Direct contact</span>
+                    <span className="font-medium">Subsidie tot €25.000</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     </div>
-                    <span className="font-medium">Geen makelaarskosten</span>
+                    <span className="font-medium">Gecertificeerde installateurs</span>
                   </div>
                 </div>
               </div>
@@ -177,14 +167,14 @@ export default function HomePage() {
               <div className="relative group">
                 {/* Main Image */}
                 <img
-                  src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg"
-                  alt="Modern house"
+                  src="https://images.pexels.com/photos/9875414/pexels-photo-9875414.jpeg"
+                  alt="Energy efficient home with solar panels"
                   className="w-full h-[400px] lg:h-[600px] object-cover rounded-3xl shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
                 />
                 
                 {/* Decorative Elements */}
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20 blur-xl"></div>
-                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-red-400 to-pink-600 rounded-full opacity-20 blur-xl"></div>
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full opacity-20 blur-xl"></div>
+                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20 blur-xl"></div>
                 
                 {/* Floating Stats Card */}
                 <motion.div 
@@ -195,13 +185,13 @@ export default function HomePage() {
                 >
                   <div className="flex items-center space-x-6">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-gray-900">2.847</div>
-                      <div className="text-sm text-gray-600 font-medium">Huizen verkocht</div>
+                      <div className="text-3xl font-bold text-green-800">€3.2B</div>
+                      <div className="text-sm text-gray-600">Subsidie beschikbaar</div>
                     </div>
                     <div className="w-px h-16 bg-gray-200"></div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-primary">€650M+</div>
-                      <div className="text-sm text-gray-600 font-medium">Totale waarde</div>
+                      <div className="text-3xl font-bold text-blue-600">2030</div>
+                      <div className="text-sm text-gray-600">Deadline</div>
                     </div>
                   </div>
                   
@@ -210,7 +200,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
                       <div className="flex items-center space-x-1">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Live data</span>
+                        <span>RVO gecertificeerd</span>
                       </div>
                       <span>•</span>
                       <span>Laatste update: vandaag</span>
@@ -227,11 +217,11 @@ export default function HomePage() {
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-green-600" />
+                      <Leaf className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-gray-900">+12%</div>
-                      <div className="text-xs text-gray-600">Dit jaar</div>
+                      <div className="text-sm font-bold text-gray-900">CO₂ neutraal</div>
+                      <div className="text-xs text-gray-600">2050 doel</div>
                     </div>
                   </div>
                 </motion.div>
@@ -251,8 +241,8 @@ export default function HomePage() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <div className="text-4xl font-bold text-gray-900 mb-2">2.500+</div>
-              <div className="text-gray-600">Huizen verkocht</div>
+              <div className="text-4xl font-bold text-gray-900 mb-2">€3.2B</div>
+              <div className="text-gray-600">Subsidie beschikbaar</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -260,8 +250,8 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <div className="text-4xl font-bold text-primary mb-2">€450M+</div>
-              <div className="text-gray-600">Totale waarde</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">2.8M</div>
+              <div className="text-gray-600">Woningen te verduurzamen</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -278,8 +268,8 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <div className="text-4xl font-bold text-gray-900 mb-2">14 dagen</div>
-              <div className="text-gray-600">Gemiddelde verkoop</div>
+              <div className="text-4xl font-bold text-gray-900 mb-2">500+</div>
+              <div className="text-gray-600">Gecertificeerde installateurs</div>
             </motion.div>
           </div>
         </div>
@@ -305,7 +295,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-xl text-gray-600 max-w-3xl mx-auto"
             >
-              Van taxatie tot sleuteloverdracht in 4 eenvoudige stappen
+              Van energieadvies tot subsidie-aanvraag in 4 eenvoudige stappen
             </motion.p>
           </div>
 
@@ -313,31 +303,31 @@ export default function HomePage() {
             {[
               {
                 step: '1',
-                title: 'Plaats advertentie',
-                description: 'Upload je woning met foto\'s en beschrijving op ons platform',
+                title: 'Energieadvies',
+                description: 'Krijg een gratis energieadvies op basis van je woning en huidige energielabel',
                 icon: Calculator,
                 color: 'bg-blue-500'
               },
               {
                 step: '2',
-                title: 'Ontvang interesse',
-                description: 'Geïnteresseerde kopers nemen direct contact met je op',
-                icon: DollarSign,
+                title: 'Subsidie check',
+                description: 'Ontdek welke subsidies beschikbaar zijn en hoeveel je kunt besparen',
+                icon: Euro,
                 color: 'bg-green-500'
               },
               {
                 step: '3',
-                title: 'Onderhandel direct',
-                description: 'Onderhandel rechtstreeks met kopers over prijs en voorwaarden',
-                icon: FileText,
+                title: 'Installateur kiezen',
+                description: 'Vergelijk offertes van gecertificeerde installateurs in jouw regio',
+                icon: Users,
                 color: 'bg-purple-500'
               },
               {
                 step: '4',
-                title: 'Notaris & overdracht',
-                description: 'Regel samen met de koper de notaris en eigendomsoverdracht',
-                icon: Home,
-                color: 'bg-primary'
+                title: 'Uitvoering & subsidie',
+                description: 'Laat het werk uitvoeren en ontvang je subsidie automatisch',
+                icon: CheckCircle,
+                color: 'bg-green-600'
               }
             ].map((item, index) => (
               <motion.div 
@@ -379,7 +369,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
             >
-              Waarom kiezen voor OpenHaus?
+              Waarom kiezen voor EnergiePlatform?
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -388,29 +378,29 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-xl text-gray-600 max-w-3xl mx-auto"
             >
-              We maken het verkopen van je huis eenvoudig, snel en transparant
+              We maken de energietransitie eenvoudig, betaalbaar en betrouwbaar
             </motion.p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                icon: Clock,
-                title: 'Sneller dan makelaars',
-                description: 'Direct contact met kopers betekent snellere reacties en kortere doorlooptijden dan via makelaars.',
-                color: 'bg-blue-100 text-blue-600'
+                icon: Zap,
+                title: 'Maximale subsidie',
+                description: 'Automatische check op alle beschikbare subsidies en optimale combinaties voor jouw situatie.',
+                color: 'bg-yellow-100 text-yellow-600'
               },
               {
                 icon: Shield,
-                title: 'Veilige transacties',
-                description: 'Alle communicatie verloopt via ons platform. Identiteitsverificatie en veilige berichtgeving.',
+                title: 'Gecertificeerde installateurs',
+                description: 'Alleen RVO-gecertificeerde installateurs met bewezen track record en kwaliteitsgarantie.',
                 color: 'bg-green-100 text-green-600'
               },
               {
                 icon: TrendingUp,
-                title: 'Geen makelaarskosten',
-                description: 'Bespaar duizenden euro\'s aan makelaarskosten door direct te handelen met andere particulieren.',
-                color: 'bg-purple-100 text-purple-600'
+                title: 'ROI transparantie',
+                description: 'Duidelijke berekening van terugverdientijd en energiebesparing voor elke maatregel.',
+                color: 'bg-blue-100 text-blue-600'
               }
             ].map((feature, index) => (
               <motion.div 
@@ -439,7 +429,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Properties */}
+      {/* Featured Projects */}
       <section className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="flex justify-between items-end mb-16">
@@ -451,7 +441,7 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
               >
-                Nieuwste woningen
+                Recente projecten
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -460,32 +450,60 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 className="text-xl text-gray-600"
               >
-                Ontdek woningen van particulieren zonder makelaarskosten
+                Zie hoe andere eigenaren hun woning verduurzaamd hebben
               </motion.p>
             </div>
-            <Link href="/buy">
+            <Link href="/projecten">
               <Button className="opendoor-button-secondary hidden sm:flex items-center space-x-2">
-                <span>Alle woningen</span>
+                <span>Alle projecten</span>
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
           </div>
 
           <div className="property-grid">
-            {featuredProperties.length > 0 ? (
-              featuredProperties.map((property: any, index: number) => (
+            {featuredProjects.length > 0 ? (
+              featuredProjects.map((project: any, index: number) => (
                 <motion.div
-                  key={property.id}
+                  key={project.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <PropertyCard property={property} />
+                  <Card className="opendoor-card overflow-hidden">
+                    <div className="aspect-video bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
+                      <Leaf className="w-16 h-16 text-green-600" />
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Badge className="bg-green-100 text-green-800">
+                          Label {project.energyLabelBefore} → {project.energyLabelAfter}
+                        </Badge>
+                        <Badge variant="outline">
+                          €{project.subsidyReceived?.toLocaleString()} subsidie
+                        </Badge>
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">
+                        {project.location}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        {project.measures?.join(', ')}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-green-600 font-semibold">
+                          {project.energySavings}% besparing
+                        </span>
+                        <span className="text-gray-500 text-sm">
+                          {project.completedDate}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </motion.div>
               ))
             ) : (
-              // Loading skeleton for featured properties
+              // Loading skeleton for featured projects
               Array.from({ length: 3 }).map((_, index) => (
               <motion.div
                 key={index}
@@ -510,9 +528,9 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-16 sm:hidden">
-            <Link href="/buy">
+            <Link href="/projecten">
               <Button className="opendoor-button-primary">
-                Alle woningen bekijken
+                Alle projecten bekijken
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
@@ -540,7 +558,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-xl text-gray-600"
             >
-              Meer dan 2.500 tevreden klanten gingen je voor
+              Meer dan 2.500 tevreden eigenaren gingen je voor
             </motion.p>
           </div>
 
@@ -550,22 +568,22 @@ export default function HomePage() {
                 name: 'Sarah van der Berg',
                 location: 'Amsterdam',
                 rating: 5,
-                text: 'Binnen 3 dagen verkocht! Geen gedoe met bezichtigingen en een eerlijke prijs. Precies wat ze beloven.',
-                avatar: '/avatars/sarah.jpg'
+                text: 'Dankzij EnergiePlatform hebben we €18.000 subsidie ontvangen voor onze warmtepomp. Het proces was heel duidelijk!',
+                savings: '€1.200/jaar besparing'
               },
               {
                 name: 'Mark Janssen',
                 location: 'Rotterdam',
                 rating: 5,
-                text: 'Super service en transparant proces. Ze hielden me op de hoogte van elke stap. Aanrader!',
-                avatar: '/avatars/mark.jpg'
+                text: 'Van energielabel G naar A+ in 6 maanden. De installateur was vakkundig en de subsidie werd snel uitgekeerd.',
+                savings: '€1.800/jaar besparing'
               },
               {
                 name: 'Lisa de Vries',
                 location: 'Utrecht',
                 rating: 5,
-                text: 'Eindelijk een makelaar die doet wat ze zeggen. Snel, eerlijk en professioneel.',
-                avatar: '/avatars/lisa.jpg'
+                text: 'Eindelijk een platform dat alle subsidies overzichtelijk maakt. We hebben meer gekregen dan verwacht!',
+                savings: '€2.100/jaar besparing'
               }
             ].map((testimonial, index) => (
               <motion.div
@@ -586,12 +604,13 @@ export default function HomePage() {
                       "{testimonial.text}"
                     </p>
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                        <Users className="w-6 h-6 text-gray-500" />
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <Leaf className="w-6 h-6 text-green-600" />
                       </div>
                       <div>
                         <div className="font-bold text-gray-900">{testimonial.name}</div>
                         <div className="text-gray-600">{testimonial.location}</div>
+                        <div className="text-green-600 font-semibold text-sm">{testimonial.savings}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -603,7 +622,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="section-padding bg-gradient-to-r from-primary to-primary/90 text-white">
+      <section className="section-padding bg-gradient-to-r from-green-600 to-green-700 text-white">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -613,25 +632,27 @@ export default function HomePage() {
             className="space-y-8"
           >
             <h2 className="text-4xl lg:text-5xl font-bold leading-tight">
-              Klaar om te beginnen?
+              Klaar voor de energietransitie?
             </h2>
             <p className="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">
-              Plaats je woning of zoek je droomhuis op ons platform
+              Start vandaag met je gratis energieadvies en ontdek hoeveel je kunt besparen
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center max-w-lg mx-auto">
               <Button 
                 size="lg" 
-                className="bg-white text-primary hover:bg-gray-100 px-10 py-4 rounded-lg text-xl font-bold shadow-lg hover:shadow-xl transition-all"
+                className="bg-white text-green-600 hover:bg-gray-100 px-10 py-4 rounded-lg text-xl font-bold shadow-lg hover:shadow-xl transition-all"
               >
-                Plaats je woning
+                <Calculator className="w-6 h-6 mr-2" />
+                Start energieadvies
               </Button>
-              <Link href="/buy">
+              <Link href="/subsidies">
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-2 border-white text-red-500 hover:bg-white hover:text-primary px-10 py-4 rounded-lg text-xl font-bold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-10 py-4 rounded-lg text-xl font-bold"
                 >
-                  Bekijk woningen
+                  <Euro className="w-6 h-6 mr-2" />
+                  Bekijk subsidies
                 </Button>
               </Link>
             </div>

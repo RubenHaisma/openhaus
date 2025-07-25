@@ -5,16 +5,16 @@ import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Home, Menu, X, Phone, User, LogOut } from 'lucide-react'
+import { Zap, Menu, X, Phone, User, LogOut } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navigation = [
-  { name: 'Verkopen', href: '/huis-verkopen/amsterdam' },
-  { name: 'Kopen', href: '/buy' },
-  { name: 'Financiering', href: '/finance' },
+  { name: 'Energieadvies', href: '/energieadvies' },
+  { name: 'Subsidies', href: '/subsidies' },
+  { name: 'Installateurs', href: '/installateurs' },
   { name: 'Over ons', href: '/about' },
 ]
 
@@ -45,11 +45,11 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary group-hover:bg-primary/90 transition-colors">
-              <Home className="h-6 w-6 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 group-hover:bg-green-700 transition-colors">
+              <Zap className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors">
-              OpenHaus
+            <span className="text-2xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
+              EnergiePlatform
             </span>
           </Link>
 
@@ -59,20 +59,20 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="nav-link text-gray-700 hover:text-primary font-semibold transition-all duration-200 relative text-lg group"
+                className="nav-link text-gray-700 hover:text-green-600 font-semibold transition-all duration-200 relative text-lg group"
               >
                 {item.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all duration-200 group-hover:w-full"></span>
               </Link>
             ))}
             
             {session && (
               <Link
                 href="/dashboard"
-                className="nav-link text-gray-700 hover:text-primary font-semibold transition-all duration-200 text-lg group"
+                className="nav-link text-gray-700 hover:text-green-600 font-semibold transition-all duration-200 text-lg group"
               >
                 Dashboard
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all duration-200 group-hover:w-full"></span>
               </Link>
             )}
           </nav>
@@ -108,13 +108,13 @@ export function Header() {
             ) : (
               <div className="flex items-center space-x-3">
                 <Link href="/auth/signin">
-                  <Button variant="ghost" className="text-gray-700 hover:text-primary text-lg font-semibold transition-all duration-200">
+                  <Button variant="ghost" className="text-gray-700 hover:text-green-600 text-lg font-semibold transition-all duration-200">
                     Inloggen
                   </Button>
                 </Link>
                 <Link href="/auth/signup">
-                  <Button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
-                    Plaats woning
+                  <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                    Gratis energieadvies
                   </Button>
                 </Link>
               </div>
@@ -134,10 +134,10 @@ export function Header() {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between pb-6 border-b border-neutral-200">
                   <Link href="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-                      <Home className="h-6 w-6 text-white" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600">
+                      <Zap className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-2xl font-bold text-gray-900">OpenHaus</span>
+                    <span className="text-2xl font-bold text-gray-900">EnergiePlatform</span>
                   </Link>
                 </div>
 
@@ -149,7 +149,7 @@ export function Header() {
                         key={item.name}
                         href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block px-4 py-4 text-lg font-semibold text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                        className="block px-4 py-4 text-lg font-semibold text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         {item.name}
                       </Link>
@@ -159,7 +159,7 @@ export function Header() {
                       <Link
                         href="/dashboard"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block px-4 py-4 text-lg font-semibold text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+                        className="block px-4 py-4 text-lg font-semibold text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
                       >
                         Dashboard
                       </Link>
@@ -205,8 +205,8 @@ export function Header() {
                           </Button>
                         </Link>
                         <Link href="/auth/signup">
-                          <Button className="opendoor-button-primary w-full">
-                            Plaats woning
+                          <Button className="bg-green-600 hover:bg-green-700 text-white w-full">
+                            Gratis energieadvies
                           </Button>
                         </Link>
                       </div>

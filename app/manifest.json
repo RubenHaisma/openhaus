@@ -1,11 +1,11 @@
 {
-  "name": "OpenHaus - Direct je huis verkopen of kopen",
-  "short_name": "OpenHaus",
-  "description": "Ontvang een bod op je woning binnen enkele minuten. Regel je verkoop of aankoop volledig digitaal.",
+  "name": "EnergiePlatform - Energietransitie voor Nederlandse woningen",
+  "short_name": "EnergiePlatform",
+  "description": "Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidies tot €25.000 en gecertificeerde installateurs.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0ea5e9",
+  "theme_color": "#16a34a",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -21,7 +21,7 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["business", "finance"],
+  "categories": ["business", "utilities", "productivity"],
   "lang": "nl",
   "dir": "ltr"
 }

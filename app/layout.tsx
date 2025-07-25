@@ -21,38 +21,37 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#0ea5e9' },
-    { media: '(prefers-color-scheme: dark)', color: '#0ea5e9' },
+    { media: '(prefers-color-scheme: light)', color: '#16a34a' },
+    { media: '(prefers-color-scheme: dark)', color: '#16a34a' },
   ],
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://openhaus.nl'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://energieplatform.nl'),
   title: {
-    default: 'OpenHaus – Huizen te koop en verkopen zonder makelaar | Nederland',
-    template: '%s | OpenHaus',
+    default: 'EnergiePlatform – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    template: '%s | EnergiePlatform',
   },
-  description: 'Huizen te koop van particulieren in Amsterdam, Rotterdam, Utrecht en Den Haag. Verkoop je huis zonder makelaarskosten. Gratis woningtaxatie.',
+  description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs. Officiële RVO partner.',
   keywords: [
-    'huis verkopen',
-    'huis kopen',
-    'huizen te koop',
-    'appartementen te koop',
-    'woningtaxatie',
-    'Nederland',
-    'zonder makelaar',
-    'particuliere verkoop',
-    'hypotheek',
-    'notaris',
-    'vastgoed',
-    'amsterdam',
-    'rotterdam',
-    'utrecht',
-    'den haag'
+    'energietransitie',
+    'energieadvies',
+    'subsidie warmtepomp',
+    'energielabel verbeteren',
+    'isolatie subsidie',
+    'zonnepanelen',
+    'energieneutraal 2030',
+    'RVO subsidie',
+    'ISDE subsidie',
+    'energiebesparing',
+    'duurzame energie',
+    'klimaatakkoord',
+    'energierekening verlagen',
+    'CO2 neutraal'
   ],
-  authors: [{ name: 'OpenHaus', url: 'https://openhaus.nl' }],
-  creator: 'OpenHaus',
-  publisher: 'OpenHaus',
+  authors: [{ name: 'EnergiePlatform', url: 'https://energieplatform.nl' }],
+  creator: 'EnergiePlatform',
+  publisher: 'EnergiePlatform',
   formatDetection: {
     email: false,
     address: false,
@@ -61,25 +60,25 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'nl_NL',
-    url: 'https://openhaus.nl',
-    siteName: 'OpenHaus',
-    title: 'OpenHaus – Huizen te koop en verkopen zonder makelaar | Nederland',
-    description: 'Huizen te koop van particulieren in Amsterdam, Rotterdam, Utrecht en Den Haag. Verkoop je huis zonder makelaarskosten. Gratis woningtaxatie.',
+    url: 'https://energieplatform.nl',
+    siteName: 'EnergiePlatform',
+    title: 'EnergiePlatform – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs. Officiële RVO partner.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'OpenHaus - Huizen te koop en verkopen zonder makelaar',
+        alt: 'EnergiePlatform - Energietransitie voor Nederlandse woningen',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OpenHaus – Huizen te koop en verkopen zonder makelaar | Nederland',
-    description: 'Huizen te koop van particulieren in Amsterdam, Rotterdam, Utrecht en Den Haag. Verkoop je huis zonder makelaarskosten.',
+    title: 'EnergiePlatform – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs.',
     images: ['/og-image.jpg'],
-    creator: '@openhaus',
+    creator: '@energieplatform',
   },
   robots: {
     index: true,
@@ -96,12 +95,12 @@ export const metadata: Metadata = {
     google: process.env.GOOGLE_VERIFICATION_CODE,
   },
   alternates: {
-    canonical: 'https://openhaus.nl',
+    canonical: 'https://energieplatform.nl',
     languages: {
-      'nl-NL': 'https://openhaus.nl',
+      'nl-NL': 'https://energieplatform.nl',
     },
   },
-  category: 'Real Estate',
+  category: 'Energy & Sustainability',
 }
 
 export default function RootLayout({
