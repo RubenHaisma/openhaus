@@ -30,6 +30,7 @@ import Image from 'next/image'
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import { Badge } from '@/components/ui/badge'
 
 export default function HomePage() {
   const { data: session } = useSession()

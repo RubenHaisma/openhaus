@@ -8,6 +8,7 @@ const navigation = {
     { name: 'Gratis energieadvies', href: '/energieadvies' },
     { name: 'Subsidie check', href: '/subsidies' },
     { name: 'Installateurs vinden', href: '/installateurs' },
+    { name: 'Markt intelligentie', href: '/markt-intelligentie' },
     { name: 'ROI calculator', href: '/calculator' },
     { name: 'Compliance tracking', href: '/compliance' },
   ],

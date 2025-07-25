@@ -15,6 +15,7 @@ const navigation = [
   { name: 'Energieadvies', href: '/energieadvies' },
   { name: 'Subsidies', href: '/subsidies' },
   { name: 'Installateurs', href: '/installateurs' },
+  { name: 'Markt Intelligentie', href: '/markt-intelligentie' },
   { name: 'Over ons', href: '/about' },
 ]
 
