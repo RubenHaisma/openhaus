@@ -67,7 +67,7 @@ export class BAGApiService {
       if (cached) return cached
 
       if (!this.apiKey) {
-        return this.getMockBuildingData(address, postalCode)
+        throw new Error('No real BAG API key configured')
       }
 
       // First, get the BAG ID from address
@@ -97,14 +97,14 @@ export class BAGApiService {
       return buildingData
     } catch (error) {
       Logger.error('Failed to get building data from BAG', error as Error, { address, postalCode })
-      return this.getMockBuildingData(address, postalCode)
+      throw new Error('No real building data available')
     }
   }
 
   async getConstructionDetails(bagId: string): Promise<ConstructionDetails | null> {
     try {
       if (!this.apiKey) {
-        return this.getMockConstructionDetails()
+        throw new Error('No real BAG API key configured')
       }
 
       const response = await fetch(`${this.baseUrl}/verblijfsobjecten/${bagId}/details`, {
@@ -123,14 +123,14 @@ export class BAGApiService {
       return this.transformConstructionDetails(data)
     } catch (error) {
       Logger.error('Failed to get construction details from BAG', error as Error)
-      return this.getMockConstructionDetails()
+      throw new Error('No real construction details available')
     }
   }
 
   async getUsagePermits(bagId: string): Promise<UsagePermit[]> {
     try {
       if (!this.apiKey) {
-        return this.getMockUsagePermits()
+        throw new Error('No real BAG API key configured')
       }
 
       const response = await fetch(`${this.baseUrl}/verblijfsobjecten/${bagId}/gebruiksvergunningen`, {
@@ -148,7 +148,7 @@ export class BAGApiService {
       return this.transformUsagePermits(data)
     } catch (error) {
       Logger.error('Failed to get usage permits from BAG', error as Error)
-      return this.getMockUsagePermits()
+      throw new Error('No real usage permits available')
     }
   }
 
@@ -180,75 +180,6 @@ export class BAGApiService {
   private extractHouseNumber(address: string): number {
     const match = address.match(/\d+/)
     return match ? parseInt(match[0]) : 1
-  }
-
-  private getMockBuildingData(address: string, postalCode: string): BuildingData {
-    const area = postalCode.substring(0, 4)
-    
-    // Generate realistic data based on postal code area
-    const buildingYearRanges: Record<string, number> = {
-      '1000': 1920, // Amsterdam center - old
-      '1001': 1900, // Amsterdam - very old
-      '3000': 1950, // Rotterdam center - post-war
-      '2500': 1930, // Den Haag center
-      '3500': 1960, // Utrecht - newer
-    }
-
-    const baseYear = buildingYearRanges[area] || 1970
-    const buildingYear = baseYear + Math.floor(Math.random() * 30)
-
-    return {
-      bagId: 'BAG-' + Date.now().toString(),
-      address,
-      postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
-      buildingYear,
-      buildingType: 'Woonhuis',
-      usageFunction: 'Woonfunctie',
-      surfaceArea: 100 + Math.floor(Math.random() * 100),
-      volume: 300 + Math.floor(Math.random() * 200),
-      numberOfFloors: Math.floor(Math.random() * 3) + 1,
-      constructionMaterial: buildingYear < 1950 ? 'Baksteen' : 'Beton',
-      roofType: 'Hellend dak',
-      heatingInstallation: buildingYear > 2000 ? 'HR-ketel' : 'Conventionele ketel',
-      monumentStatus: buildingYear < 1920,
-      lastRenovation: buildingYear < 1980 ? 2010 + Math.floor(Math.random() * 14) : undefined,
-      coordinates: {
-        lat: 52.3676 + (Math.random() - 0.5) * 0.1,
-        lng: 4.9041 + (Math.random() - 0.5) * 0.1
-      }
-    }
-  }
-
-  private getMockConstructionDetails(): ConstructionDetails {
-    return {
-      foundationType: 'Gewapend beton',
-      wallMaterial: 'Baksteen met spouwmuur',
-      roofMaterial: 'Dakpannen',
-      windowType: 'HR++ glas',
-      insulationLevel: {
-        roof: 'Goed geïsoleerd',
-        walls: 'Matig geïsoleerd',
-        floor: 'Basis isolatie',
-        windows: 'HR++ glas'
-      },
-      ventilationSystem: 'Mechanische ventilatie',
-      heatingSystem: 'CV-ketel op gas',
-      hotWaterSystem: 'Combiketel',
-      renewableEnergy: []
-    }
-  }
-
-  private getMockUsagePermits(): UsagePermit[] {
-    return [
-      {
-        permitNumber: 'VG-2023-001234',
-        permitType: 'Gebruiksvergunning',
-        description: 'Woonfunctie eengezinswoning',
-        issueDate: '2023-01-15',
-        status: 'Geldig',
-        relatedToEnergy: false
-      }
-    ]
   }
 
   private transformBuildingData(data: any): BuildingData {

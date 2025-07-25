@@ -289,7 +289,7 @@ export class DutchTaxCalculator {
         total,
         breakdown,
         realTimeRates: {
-          source: 'Belastingdienst & KNB Tarieven 2024',
+          source: 'Belastingdienst & KNB Tarieven 2025',
           lastUpdated: new Date().toISOString()
         }
       }

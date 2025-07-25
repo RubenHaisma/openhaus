@@ -82,8 +82,11 @@ export default function HomePage() {
         throw new Error(errorData.error || 'Energy assessment failed')
       }
     } catch (error: any) {
-      console.error('Energy assessment failed:', error)
-      alert(`Fout bij het ophalen van energiegegevens: ${error.message}. Controleer het adres en probeer het opnieuw.`)
+      let msg = error.message;
+      if (msg.includes('No real energy price data available')) {
+        msg = 'Energieadvies niet beschikbaar: actuele energieprijzen ontbreken. Probeer het later opnieuw of neem contact op.';
+      }
+      alert(`Fout bij het ophalen van energiegegevens: ${msg}`);
     } finally {
       setLoading(false)
     }
@@ -373,7 +376,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
             >
-              Waarom kiezen voor EnergiePlatform?
+              Waarom kiezen voor OpenHaus?
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -572,7 +575,7 @@ export default function HomePage() {
                 name: 'Sarah van der Berg',
                 location: 'Amsterdam',
                 rating: 5,
-                text: 'Dankzij EnergiePlatform hebben we €18.000 subsidie ontvangen voor onze warmtepomp. Het proces was heel duidelijk!',
+                text: 'Dankzij OpenHaus hebben we €18.000 subsidie ontvangen voor onze warmtepomp. Het proces was heel duidelijk!',
                 savings: '€1.200/jaar besparing'
               },
               {
@@ -653,7 +656,7 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-10 py-4 rounded-lg text-xl font-bold"
+                  className="border-2 border-white text-green-600 hover:bg-white hover:text-green-600 px-10 py-4 rounded-lg text-xl font-bold"
                 >
                   <Euro className="w-6 h-6 mr-2" />
                   Bekijk subsidies

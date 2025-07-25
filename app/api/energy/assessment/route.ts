@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ assessment })
-  } catch (error) {
+  } catch (error: any) {
     Logger.error('Energy assessment failed', error as Error)
     return NextResponse.json(
-      { error: 'Energy assessment failed' },
+      { error: error?.message || 'Energy assessment failed' },
       { status: 500 }
     )
   }

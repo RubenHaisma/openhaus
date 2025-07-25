@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, MapPin, Loader2 } from 'lucide-react'
@@ -24,8 +24,11 @@ export function AddressInput({
   initialPostalCode = ''
 }: AddressInputProps) {
   const [fullAddress, setFullAddress] = useState('')
-  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [suggestions, setSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
+  const [suggestionsError, setSuggestionsError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Set initial value if provided
   useEffect(() => {
@@ -41,34 +44,53 @@ export function AddressInput({
 
   const handleSearch = () => {
     if (!fullAddress.trim()) return
-
-    // Parse address and postal code from full address
     const { address, postalCode } = parseFullAddress(fullAddress)
-    
     if (!address || !postalCode) {
       alert('Voer een volledig adres in met postcode (bijv. Keizersgracht 123, 1015CJ Amsterdam)')
       return
     }
-
     onSearch(address, postalCode)
     setShowSuggestions(false)
   }
 
-  const handleInputChange = (value: string) => {
+  const handleInputChange = async (value: string) => {
     setFullAddress(value)
-    
-    // Generate suggestions based on input
+    setSuggestionsError(null)
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
     if (value.length > 3) {
-      const newSuggestions = generateAddressSuggestions(value)
-      setSuggestions(newSuggestions)
-      setShowSuggestions(newSuggestions.length > 0)
+      setSuggestionsLoading(true)
+      setShowSuggestions(false)
+      const controller = new AbortController()
+      abortControllerRef.current = controller
+      try {
+        // Use the Next.js API route as a proxy
+        const res = await fetch(`/api/address-search?q=${encodeURIComponent(value)}`, {
+          signal: controller.signal,
+        })
+        if (!res.ok) throw new Error('Fout bij ophalen van adressuggesties')
+        const data = await res.json()
+        setSuggestions(data)
+        setShowSuggestions(data.length > 0)
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          setSuggestionsError('Fout bij ophalen van adressuggesties')
+          setSuggestions([])
+          setShowSuggestions(false)
+        }
+      } finally {
+        setSuggestionsLoading(false)
+      }
     } else {
+      setSuggestions([])
       setShowSuggestions(false)
     }
   }
 
-  const selectSuggestion = (suggestion: string) => {
-    setFullAddress(suggestion)
+  const selectSuggestion = (suggestion: any) => {
+    // Compose a nice address string for the input
+    setFullAddress(suggestion.display_name)
     setShowSuggestions(false)
   }
 
@@ -83,6 +105,7 @@ export function AddressInput({
             placeholder={placeholder}
             className={cn("pl-12 pr-32", className)}
             disabled={loading}
+            autoComplete="off"
           />
           <Button
             type="submit"
@@ -100,19 +123,29 @@ export function AddressInput({
           </Button>
         </div>
       </form>
-
       {/* Address Suggestions */}
-      {showSuggestions && suggestions.length > 0 && (
+      {suggestionsLoading && (
+        <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto p-4 text-center text-gray-500">
+          <Loader2 className="w-5 h-5 animate-spin inline-block mr-2" /> Laden...
+        </div>
+      )}
+      {suggestionsError && (
+        <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-red-200 rounded-lg shadow-lg max-h-60 overflow-y-auto p-4 text-center text-red-500">
+          {suggestionsError}
+        </div>
+      )}
+      {showSuggestions && suggestions.length > 0 && !suggestionsLoading && !suggestionsError && (
         <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
             <button
-              key={index}
+              key={suggestion.place_id || index}
               onClick={() => selectSuggestion(suggestion)}
               className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+              type="button"
             >
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-900">{suggestion}</span>
+                <span className="text-gray-900">{suggestion.display_name}</span>
               </div>
             </button>
           ))}
@@ -125,59 +158,37 @@ export function AddressInput({
 function parseFullAddress(fullAddress: string): { address: string; postalCode: string } {
   // Try to extract postal code (Dutch format: 1234AB)
   const postalCodeMatch = fullAddress.match(/\b(\d{4}\s?[A-Z]{2})\b/i)
-  
   if (!postalCodeMatch) {
     return { address: '', postalCode: '' }
   }
-  
   const postalCode = postalCodeMatch[1].replace(/\s/g, '').toUpperCase()
-  const address = fullAddress.replace(postalCodeMatch[0], '').replace(/,\s*$/, '').trim()
-  
-  // Remove city name if present (everything after the last comma)
-  const addressParts = address.split(',')
-  const cleanAddress = addressParts.length > 1 ? addressParts.slice(0, -1).join(',').trim() : address
-  
-  return { address: cleanAddress, postalCode }
-}
 
-function generateAddressSuggestions(input: string): string[] {
-  // Generate realistic Dutch address suggestions
-  const suggestions: string[] = []
-  
-  // Common Dutch street names and cities
-  const streetNames = [
-    'Hoofdstraat', 'Kerkstraat', 'Schoolstraat', 'Dorpsstraat', 'Molenstraat',
-    'Nieuwstraat', 'Marktstraat', 'Stationsstraat', 'Wilhelminastraat', 'Koningstraat'
-  ]
-  
-  const cities = [
-    'Amsterdam', 'Rotterdam', 'Den Haag', 'Utrecht', 'Eindhoven',
-    'Groningen', 'Tilburg', 'Almere', 'Breda', 'Nijmegen'
-  ]
-  
-  // If input looks like it might be a street name
-  if (input.length > 3 && !input.includes(',')) {
-    streetNames.forEach(street => {
-      if (street.toLowerCase().includes(input.toLowerCase())) {
-        cities.slice(0, 3).forEach(city => {
-          suggestions.push(`${street} 1, 1000AA ${city}`)
-        })
+  // Remove postal code and trailing commas/spaces
+  let addressPart = fullAddress.replace(postalCodeMatch[0], '').replace(/,?\s*$/, '').trim()
+
+  // Try to extract the first occurrence of a house number and street name (Dutch style)
+  // e.g. 'Europaplein 779', '779 Europaplein', '779, Europaplein, ...'
+  // We'll look for either 'streetname housenumber' or 'housenumber streetname'
+  // and ignore extra locality/country info
+  let address = ''
+  // Try 'streetname housenumber' (e.g. 'Europaplein 779')
+  let match = addressPart.match(/([A-Za-zÀ-ÿ'\-\. ]+\d+[A-Za-z]?)/)
+  if (match) {
+    address = match[1].trim()
+  } else {
+    // Try 'housenumber streetname' (e.g. '779 Europaplein')
+    match = addressPart.match(/(\d+[A-Za-z]? [A-Za-zÀ-ÿ'\-\. ]+)/)
+    if (match) {
+      address = match[1].trim()
+    } else {
+      // Try splitting by comma and taking the first two parts (e.g. '779, Europaplein, ...')
+      const parts = addressPart.split(',').map(p => p.trim()).filter(Boolean)
+      if (parts.length >= 2 && /^\d+/.test(parts[0])) {
+        address = `${parts[1]} ${parts[0]}`.trim()
+      } else if (parts.length > 0) {
+        address = parts[0]
       }
-    })
-  }
-  
-  // If input includes a comma, suggest postal codes
-  if (input.includes(',')) {
-    const parts = input.split(',')
-    if (parts.length >= 2) {
-      const streetPart = parts[0].trim()
-      suggestions.push(
-        `${streetPart}, 1000AA Amsterdam`,
-        `${streetPart}, 3000AA Rotterdam`,
-        `${streetPart}, 2500AA Den Haag`
-      )
     }
   }
-  
-  return suggestions.slice(0, 5) // Limit to 5 suggestions
+  return { address, postalCode }
 }

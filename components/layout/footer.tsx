@@ -83,7 +83,7 @@ export function Footer() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600">
                 <Zap className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">EnergiePlatform</span>
+              <span className="text-2xl font-bold text-gray-900">OpenHaus</span>
             </div>
             <p className="text-gray-700 mb-8 max-w-sm text-lg leading-relaxed">
               Maak je woning energieneutraal voor 2030. Gratis advies, subsidies tot €25.000 
@@ -93,7 +93,7 @@ export function Footer() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <span className="text-gray-900 text-lg">info@energieplatform.nl</span>
+                <span className="text-gray-900 text-lg">info@OpenHaus.nl</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-5 h-5 text-green-600 flex-shrink-0" />
@@ -195,7 +195,7 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-500">
-              © 2024 EnergiePlatform. Alle rechten voorbehouden.
+              © 2025 OpenHaus. Alle rechten voorbehouden.
             </p>
             <div className="flex items-center space-x-8 text-gray-500">
               <span>🇳🇱 Nederlands</span>

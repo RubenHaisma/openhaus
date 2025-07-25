@@ -108,7 +108,7 @@ export default function EnergyAdvicePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16">
+      <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16 mt-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -169,7 +169,7 @@ export default function EnergyAdvicePage() {
         {/* Benefits Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Waarom energieadvies van EnergiePlatform?
+            Waarom energieadvies van OpenHaus?
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

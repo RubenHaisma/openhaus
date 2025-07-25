@@ -1,4 +1,4 @@
-# EnergiePlatform - Energy Transition Compliance Platform for Netherlands
+# OpenHaus - Energy Transition Compliance Platform for Netherlands
 
 A comprehensive digital platform helping Dutch property owners navigate the mandatory energy transition requirements, connect with certified contractors, and access government subsidies.
 
@@ -43,7 +43,7 @@ Our platform integrates with official Dutch energy transition data:
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd energieplatform
+cd OpenHaus
 ```
 
 2. **Install dependencies**
@@ -187,7 +187,7 @@ This project is licensed under the MIT License.
 
 ## 🆘 Support
 
-For support, email support@energieplatform.nl or create an issue in this repository.
+For support, email support@OpenHaus.nl or create an issue in this repository.
 
 ---
 

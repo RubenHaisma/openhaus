@@ -68,11 +68,25 @@ export class RVOApiService {
         // Open data endpoint (voorbeeld):
         const openDataUrl = 'https://data.rvo.nl/subsidies-regelingen/projecten?format=json'
         const response = await fetch(openDataUrl)
+        const contentType = response.headers.get('content-type') || ''
         if (!response.ok) {
-          Logger.error('RVO open data endpoint niet bereikbaar', new Error(`Status: ${response.status}`))
+          const body = await response.text()
+          Logger.error('RVO open data endpoint niet bereikbaar', new Error(`Status: ${response.status}, Body: ${body.slice(0, 500)}`))
           return []
         }
-        const data = await response.json()
+        if (!contentType.includes('application/json')) {
+          const body = await response.text()
+          Logger.error('RVO open data endpoint returned non-JSON', new Error(`Content-Type: ${contentType}, Body: ${body.slice(0, 500)}`))
+          return []
+        }
+        let data
+        try {
+          data = await response.json()
+        } catch (jsonErr) {
+          const body = await response.text()
+          Logger.error('Failed to parse JSON from RVO open data endpoint', new Error(`Error: ${jsonErr}, Body: ${body.slice(0, 500)}`))
+          return []
+        }
         // Transformeer open data naar SubsidyScheme[]
         const schemes = (data?.results || []).map((item: any) => ({
           id: item.id?.toString() || item.projectnummer || '',
@@ -88,6 +102,10 @@ export class RVOApiService {
           applicationDeadline: item.einddatum || '',
           isActive: true // Geen status in open data, ga uit van actief
         }))
+        Logger.info(`RVO open data: parsed ${schemes.length} subsidy schemes`)
+        if (schemes.length === 0) {
+          Logger.warn('RVO open data endpoint returned 0 subsidy schemes')
+        }
         // Cache voor 1 uur
         await cacheService.set('subsidy-schemes', schemes, { ttl: 3600, prefix: 'rvo' })
         return schemes

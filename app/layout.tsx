@@ -27,10 +27,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://energieplatform.nl'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://OpenHaus.nl'),
   title: {
-    default: 'EnergiePlatform – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
-    template: '%s | EnergiePlatform',
+    default: 'OpenHaus – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    template: '%s | OpenHaus',
   },
   description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs. Officiële RVO partner.',
   keywords: [
@@ -49,9 +49,9 @@ export const metadata: Metadata = {
     'energierekening verlagen',
     'CO2 neutraal'
   ],
-  authors: [{ name: 'EnergiePlatform', url: 'https://energieplatform.nl' }],
-  creator: 'EnergiePlatform',
-  publisher: 'EnergiePlatform',
+  authors: [{ name: 'OpenHaus', url: 'https://OpenHaus.nl' }],
+  creator: 'OpenHaus',
+  publisher: 'OpenHaus',
   formatDetection: {
     email: false,
     address: false,
@@ -60,25 +60,25 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'nl_NL',
-    url: 'https://energieplatform.nl',
-    siteName: 'EnergiePlatform',
-    title: 'EnergiePlatform – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    url: 'https://OpenHaus.nl',
+    siteName: 'OpenHaus',
+    title: 'OpenHaus – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
     description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs. Officiële RVO partner.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'EnergiePlatform - Energietransitie voor Nederlandse woningen',
+        alt: 'OpenHaus - Energietransitie voor Nederlandse woningen',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'EnergiePlatform – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
+    title: 'OpenHaus – Energietransitie voor Nederlandse woningen | Subsidies & Installateurs',
     description: 'Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidie tot €25.000 en gecertificeerde installateurs.',
     images: ['/og-image.jpg'],
-    creator: '@energieplatform',
+    creator: '@OpenHaus',
   },
   robots: {
     index: true,
@@ -95,9 +95,9 @@ export const metadata: Metadata = {
     google: process.env.GOOGLE_VERIFICATION_CODE,
   },
   alternates: {
-    canonical: 'https://energieplatform.nl',
+    canonical: 'https://OpenHaus.nl',
     languages: {
-      'nl-NL': 'https://energieplatform.nl',
+      'nl-NL': 'https://OpenHaus.nl',
     },
   },
   category: 'Energy & Sustainability',

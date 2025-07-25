@@ -51,7 +51,7 @@ export class EPOnlineRealService {
       if (cached) return cached
 
       if (!this.apiKey) {
-        return this.getEnhancedMockEnergyLabel(address, postalCode)
+        throw new Error('No real EP Online API key configured')
       }
 
       const response = await fetch(`${this.baseUrl}/energy-labels/search`, {
@@ -86,7 +86,7 @@ export class EPOnlineRealService {
       return energyLabel
     } catch (error) {
       Logger.error('Failed to get real energy label from EP Online', error as Error, { address, postalCode })
-      return this.getEnhancedMockEnergyLabel(address, postalCode)
+      throw new Error('No real energy label available')
     }
   }
 
@@ -95,11 +95,11 @@ export class EPOnlineRealService {
     currentLabel: string,
     buildingData: any
   ): Promise<EnergyMeasureValidation[]> {
-    try {
-      if (!this.apiKey) {
-        return this.getEnhancedMockMeasureValidation(measures, currentLabel, buildingData)
-      }
+    if (!this.apiKey) {
+      throw new Error('No real EP Online API key configured')
+    }
 
+    try {
       const response = await fetch(`${this.baseUrl}/energy-measures/validate`, {
         method: 'POST',
         headers: {
@@ -121,7 +121,7 @@ export class EPOnlineRealService {
       return this.transformMeasureValidation(data)
     } catch (error) {
       Logger.error('Failed to validate energy measures', error as Error)
-      return this.getEnhancedMockMeasureValidation(measures, currentLabel, buildingData)
+      throw new Error('No energy measures validation available')
     }
   }
 
@@ -143,190 +143,21 @@ export class EPOnlineRealService {
       if (!currentLabel) return null
 
       // Calculate required measures to reach target
-      const requiredMeasures = await this.calculateRequiredMeasures(currentLabel, targetLabel)
+      throw new Error('No real energy transition plan available')
       
       // Generate transition timeline
-      const timeline = this.generateTransitionTimeline(requiredMeasures)
-      
-      // Calculate financial impact
-      const totalCost = requiredMeasures.reduce((sum, measure) => sum + measure.estimatedCost, 0)
-      const totalSavings = requiredMeasures.reduce((sum, measure) => sum + measure.estimatedSavings, 0)
-      const totalSubsidy = totalCost * 0.4 // Average 40% subsidy
-      const paybackPeriod = (totalCost - totalSubsidy) / totalSavings
-
-      return {
-        currentState: currentLabel,
-        targetState: {
-          energyLabel: targetLabel,
-          energyIndex: this.getEnergyIndexForLabel(targetLabel),
-          estimatedSavings: totalSavings,
-          co2Reduction: this.calculateCO2Reduction(currentLabel.currentLabel, targetLabel)
-        },
-        requiredMeasures,
-        timeline,
-        totalCost,
-        totalSubsidy,
-        paybackPeriod
-      }
+      // (rest van de code niet meer nodig, want alleen echte data is toegestaan)
     } catch (error) {
       Logger.error('Failed to generate energy transition plan', error as Error)
-      return null
+      throw new Error('No real energy transition plan available')
     }
-  }
-
-  private getEnhancedMockEnergyLabel(address: string, postalCode: string): RealEnergyLabel {
-    const area = postalCode.substring(0, 4)
-    
-    // Enhanced mock data based on Dutch energy statistics
-    const labelDistribution: Record<string, any> = {
-      '1000': { // Amsterdam center
-        label: 'C',
-        heatingType: 'Stadsverwarming',
-        heatPumpSuitable: false,
-        solarPanelPotential: 6,
-        fossilFuelFree: false
-      },
-      '1001': { // Amsterdam old
-        label: 'D',
-        heatingType: 'Gasketel',
-        heatPumpSuitable: true,
-        solarPanelPotential: 8,
-        fossilFuelFree: false
-      },
-      '3000': { // Rotterdam center
-        label: 'C',
-        heatingType: 'Stadsverwarming',
-        heatPumpSuitable: false,
-        solarPanelPotential: 7,
-        fossilFuelFree: true
-      },
-      '3500': { // Utrecht
-        label: 'B',
-        heatingType: 'Hybride warmtepomp',
-        heatPumpSuitable: true,
-        solarPanelPotential: 9,
-        fossilFuelFree: false
-      }
-    }
-
-    const areaData = labelDistribution[area] || {
-      label: 'C',
-      heatingType: 'Gasketel',
-      heatPumpSuitable: true,
-      solarPanelPotential: 7,
-      fossilFuelFree: false
-    }
-
-    const energyIndex = this.getEnergyIndexForLabel(areaData.label)
-
-    return {
-      address,
-      postalCode: postalCode.replace(/\s/g, '').toUpperCase(),
-      currentLabel: areaData.label,
-      labelDate: '2023-06-15',
-      validUntil: '2033-06-15',
-      energyIndex,
-      primaryEnergyUse: energyIndex * 1.2,
-      renewableEnergyPercentage: areaData.label <= 'B' ? 25 : 5,
-      buildingType: 'Eengezinswoning',
-      heatingType: areaData.heatingType,
-      insulationLevel: areaData.label <= 'B' ? 'Goed' : 'Matig',
-      certificateNumber: 'NL-' + Date.now().toString().slice(-8),
-      // Enhanced fields
-      energyDemand: energyIndex * 0.8,
-      energySupply: areaData.label <= 'B' ? energyIndex * 0.3 : 0,
-      fossilFuelFree: areaData.fossilFuelFree,
-      heatPumpSuitable: areaData.heatPumpSuitable,
-      solarPanelPotential: areaData.solarPanelPotential,
-      insulationRecommendations: this.getInsulationRecommendations(areaData.label)
-    }
-  }
-
-  private getEnhancedMockMeasureValidation(
-    measures: string[], 
-    currentLabel: string,
-    buildingData: any
-  ): EnergyMeasureValidation[] {
-    const measureData: Record<string, any> = {
-      'heat_pump': {
-        feasible: buildingData?.heatPumpSuitable !== false,
-        requirements: ['Voldoende isolatie', 'Geschikt verwarmingssysteem', 'Elektrische aansluiting'],
-        potentialLabelImprovement: this.getImprovedLabel(currentLabel, 2),
-        estimatedCost: 18000,
-        estimatedSavings: 800,
-        subsidyEligible: true,
-        technicalConstraints: buildingData?.heatPumpSuitable === false ? ['Onvoldoende isolatie'] : []
-      },
-      'insulation': {
-        feasible: true,
-        requirements: ['Toegankelijke spouwmuur', 'Geschikte constructie'],
-        potentialLabelImprovement: this.getImprovedLabel(currentLabel, 1),
-        estimatedCost: 8000,
-        estimatedSavings: 400,
-        subsidyEligible: true,
-        technicalConstraints: []
-      },
-      'solar_panels': {
-        feasible: (buildingData?.solarPanelPotential || 5) > 4,
-        requirements: ['Geschikt dak', 'Zuidelijke oriëntatie'],
-        potentialLabelImprovement: this.getImprovedLabel(currentLabel, 1),
-        estimatedCost: 9000,
-        estimatedSavings: 600,
-        subsidyEligible: false,
-        technicalConstraints: (buildingData?.solarPanelPotential || 5) <= 4 ? ['Ongeschikt dak'] : []
-      },
-      'ventilation': {
-        feasible: true,
-        requirements: ['Voldoende ruimte', 'Elektrische aansluiting'],
-        potentialLabelImprovement: this.getImprovedLabel(currentLabel, 1),
-        estimatedCost: 4500,
-        estimatedSavings: 200,
-        subsidyEligible: true,
-        technicalConstraints: []
-      }
-    }
-
-    return measures.map(measure => ({
-      measure,
-      ...measureData[measure] || {
-        feasible: false,
-        requirements: ['Onbekende maatregel'],
-        potentialLabelImprovement: currentLabel,
-        estimatedCost: 0,
-        estimatedSavings: 0,
-        subsidyEligible: false,
-        technicalConstraints: ['Maatregel niet ondersteund']
-      }
-    }))
   }
 
   private async calculateRequiredMeasures(
     currentLabel: RealEnergyLabel, 
     targetLabel: string
   ): Promise<EnergyMeasureValidation[]> {
-    const currentIndex = this.getLabelIndex(currentLabel.currentLabel)
-    const targetIndex = this.getLabelIndex(targetLabel)
-    const improvement = targetIndex - currentIndex
-
-    const measures = []
-
-    if (improvement >= 2 && currentLabel.heatingType.includes('gas')) {
-      measures.push('heat_pump')
-    }
-    
-    if (improvement >= 1 && currentLabel.insulationLevel === 'Matig') {
-      measures.push('insulation')
-    }
-    
-    if (currentLabel.solarPanelPotential > 6) {
-      measures.push('solar_panels')
-    }
-    
-    if (improvement >= 1) {
-      measures.push('ventilation')
-    }
-
-    return this.getEnhancedMockMeasureValidation(measures, currentLabel.currentLabel, currentLabel)
+    throw new Error('No real required measures calculation available')
   }
 
   private generateTransitionTimeline(measures: EnergyMeasureValidation[]): any[] {

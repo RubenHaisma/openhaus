@@ -109,7 +109,7 @@ export function generateCityMetadata(city: string, type: 'buy' | 'sell' = 'buy')
 export function generateGuideMetadata(guide: string): Metadata {
   const guides: Record<string, SEOData> = {
     'huis-verkopen-zonder-makelaar': {
-      title: 'Huis Verkopen Zonder Makelaar: Complete Gids 2024',
+      title: 'Huis Verkopen Zonder Makelaar: Complete Gids 2025',
       description: 'Leer hoe je je huis verkoopt zonder makelaar en duizenden euro\'s bespaart. Complete stap-voor-stap gids met tips, valkuilen en juridische aspecten.',
       keywords: [
         'huis verkopen zonder makelaar',
@@ -121,7 +121,7 @@ export function generateGuideMetadata(guide: string): Metadata {
       ]
     },
     'huis-kopen-particulier': {
-      title: 'Huis Kopen van Particulier: Voordelen & Proces 2024',
+      title: 'Huis Kopen van Particulier: Voordelen & Proces 2025',
       description: 'Ontdek hoe je een huis koopt van particulieren zonder makelaar. Bespaar kosten en krijg direct contact met eigenaren.',
       keywords: [
         'huis kopen particulier',
@@ -132,8 +132,8 @@ export function generateGuideMetadata(guide: string): Metadata {
       ]
     },
     'hypotheek-aanvragen': {
-      title: 'Hypotheek Aanvragen 2024: Complete Gids & Calculator',
-      description: 'Alles over hypotheek aanvragen in 2024. Bereken je maximale hypotheek, vergelijk rentes en krijg expert advies.',
+      title: 'Hypotheek Aanvragen 2025: Complete Gids & Calculator',
+      description: 'Alles over hypotheek aanvragen in 2025. Bereken je maximale hypotheek, vergelijk rentes en krijg expert advies.',
       keywords: [
         'hypotheek aanvragen',
         'hypotheek berekenen',

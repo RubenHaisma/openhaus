@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
         subsidyAmount: 7500,
         energySavings: 45,
         co2Reduction: 2800,
-        createdAt: '2024-08-15',
-        completedDate: '2024-11-20',
+        createdAt: '2025-01-01',
+        completedDate: '2025-01-01',
         annualSavings: 1200
       },
       {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         subsidyAmount: 3000,
         energySavings: 25,
         co2Reduction: 1200,
-        createdAt: '2024-11-01',
+        createdAt: '2025-01-01',
         annualSavings: 600
       }
     ]

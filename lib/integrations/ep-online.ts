@@ -41,7 +41,7 @@ export interface EnergyMeasureValidation {
 }
 
 export class EPOnlineService {
-  private baseUrl = process.env.EP_ONLINE_API_URL || 'https://api.ep-online.nl/v1'
+  private baseUrl = process.env.EP_ONLINE_API_URL || 'https://public.ep-online.nl/api/v5'
   private apiKey = process.env.EP_ONLINE_API_KEY
 
   constructor() {
@@ -50,28 +50,55 @@ export class EPOnlineService {
     }
   }
 
+  /**
+   * Extracts huisnummer (house number) and street from a Dutch address string.
+   * Returns { huisnummer, street }
+   */
+  private parseDutchAddress(address: string): { huisnummer: string, street: string } {
+    // Try to match 'street housenumber' or 'housenumber street'
+    let match = address.match(/([A-Za-zÀ-ÿ'\-\. ]+)(\d+[A-Za-z]?)/)
+    if (match) {
+      return { street: match[1].trim(), huisnummer: match[2].trim() }
+    }
+    match = address.match(/(\d+[A-Za-z]?)\s*([A-Za-zÀ-ÿ'\-\. ]+)/)
+    if (match) {
+      return { huisnummer: match[1].trim(), street: match[2].trim() }
+    }
+    // Fallback: try to split by space and guess
+    const parts = address.split(' ').map(p => p.trim()).filter(Boolean)
+    if (parts.length >= 2 && /^\d+/.test(parts[0])) {
+      return { huisnummer: parts[0], street: parts.slice(1).join(' ') }
+    }
+    return { huisnummer: '', street: address }
+  }
+
   async getEnergyLabel(address: string, postalCode: string): Promise<EnergyLabel | null> {
     try {
       const cacheKey = `energy-label:${address}:${postalCode.replace(/\s/g, '').toUpperCase()}`
       const cached = await cacheService.get<EnergyLabel>(cacheKey, 'ep-online')
       if (cached) return cached
 
-      // Only proceed if we have a real API key
       if (!this.apiKey) {
         Logger.warn('EP Online API key not configured - cannot retrieve real energy labels')
         return null
       }
 
-      const response = await fetch(`${this.baseUrl}/energy-labels/search`, {
-        method: 'POST',
+      // Parse address to get huisnummer
+      const { huisnummer } = this.parseDutchAddress(address)
+      const postcode = postalCode.replace(/\s/g, '').toUpperCase()
+      if (!huisnummer || !postcode) {
+        Logger.warn('Missing huisnummer or postcode for EP-Online lookup', { address, postalCode })
+        return null
+      }
+
+      // Build the GET URL
+      const url = `${this.baseUrl}/PandEnergielabel/Adres?postcode=${encodeURIComponent(postcode)}&huisnummer=${encodeURIComponent(huisnummer)}`
+      const response = await fetch(url, {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          address,
-          postalCode: postalCode.replace(/\s/g, '').toUpperCase()
-        })
+          'Authorization': this.apiKey,
+          'accept': 'application/json'
+        }
       })
 
       if (!response.ok) {
@@ -79,12 +106,28 @@ export class EPOnlineService {
         throw new Error(`EP Online API error: ${response.status}`)
       }
 
-      const data = await response.json()
-      const energyLabel = this.transformEnergyLabelData(data)
-
-      // Cache for 30 days (energy labels don't change often)
+      const data = await response.json();
+      const labelData = Array.isArray(data) && data.length > 0 ? data[0] : null;
+      if (!labelData || !labelData.Energieklasse) {
+        Logger.warn('No energy label found in EP-Online response', { address, postalCode, data })
+        return null
+      }
+      const energyLabel: EnergyLabel = {
+        address: address,
+        postalCode: postcode,
+        currentLabel: labelData.Energieklasse,
+        labelDate: labelData.Registratiedatum || '',
+        validUntil: labelData.Geldig_tot || '',
+        energyIndex: labelData.EnergieIndex || getLabelEnergyIndex(labelData.Energieklasse),
+        primaryEnergyUse: 0,
+        renewableEnergyPercentage: labelData.Aandeel_hernieuwbare_energie || 0,
+        buildingType: labelData.Gebouwtype || 'Woning',
+        heatingType: 'Onbekend',
+        insulationLevel: 'Onbekend',
+        certificateNumber: labelData.BAGVerblijfsobjectID || ''
+      }
+      // Cache for 30 days
       await cacheService.set(cacheKey, energyLabel, { ttl: 2592000, prefix: 'ep-online' })
-
       Logger.info('Energy label retrieved from EP Online', { address, postalCode, label: energyLabel.currentLabel })
       return energyLabel
     } catch (error) {

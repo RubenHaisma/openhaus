@@ -32,13 +32,19 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(validatedData.password, 12)
 
+    // Map frontend roles to Prisma enum values
+    const roleMap: Record<string, Role> = {
+      BUYER: 'HOMEOWNER',
+      SELLER: 'CONTRACTOR',
+    }
+
     // Create user
     const user = await prisma.profile.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
         passwordHash: hashedPassword,
-        role: validatedData.role as Role,
+        role: roleMap[validatedData.role] ?? 'HOMEOWNER',
         verified: false
       }
     })

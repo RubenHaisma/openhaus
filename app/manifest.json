@@ -1,6 +1,6 @@
 {
-  "name": "EnergiePlatform - Energietransitie voor Nederlandse woningen",
-  "short_name": "EnergiePlatform",
+  "name": "OpenHaus - Energietransitie voor Nederlandse woningen",
+  "short_name": "OpenHaus",
   "description": "Maak je woning energieneutraal voor 2030. Gratis energieadvies, subsidies tot €25.000 en gecertificeerde installateurs.",
   "start_url": "/",
   "display": "standalone",

@@ -173,7 +173,7 @@ export default function CitySellingPage() {
           {/* Market Overview */}
           <section className="mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-              Woningmarkt {cityData.name} in 2024
+              Woningmarkt {cityData.name} in 2025
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

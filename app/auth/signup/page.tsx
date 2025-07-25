@@ -215,7 +215,7 @@ export default function SignUpPage() {
               </div>
 
               <div>
-                <Label>Ik wil voornamelijk</Label>
+                <Label>Rol</Label>
                 <div className="flex space-x-4 mt-2">
                   <div className="flex items-center space-x-2">
                     <input
@@ -226,7 +226,7 @@ export default function SignUpPage() {
                       checked={formData.role === 'BUYER'}
                       onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as 'BUYER' | 'SELLER' }))}
                     />
-                    <Label htmlFor="buyer">Kopen</Label>
+                    <Label htmlFor="buyer">Eigenaar</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <input
@@ -237,7 +237,7 @@ export default function SignUpPage() {
                       checked={formData.role === 'SELLER'}
                       onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as 'BUYER' | 'SELLER' }))}
                     />
-                    <Label htmlFor="seller">Verkopen</Label>
+                    <Label htmlFor="seller">Installateur</Label>
                   </div>
                 </div>
               </div>

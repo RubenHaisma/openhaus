@@ -259,7 +259,7 @@ export function EnergyAssessmentResult({
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-green-800">2024</div>
+                <div className="text-lg font-bold text-green-800">2025</div>
                 <div className="text-sm text-green-600">Dit jaar</div>
               </div>
             </div>

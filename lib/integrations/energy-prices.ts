@@ -61,47 +61,26 @@ export class EnergyPriceService {
       const cached = await cacheService.get<EnergyPrice[]>('gas-prices', 'energy')
       if (cached) return cached
 
-      if (!this.apiKey) {
-        Logger.warn('Energy Price API key not configured - cannot retrieve real gas prices')
-        return []
-      }
-
-      // NED API: https://api.ned.nl/v1/utilizations
-      // Voor gas: type=0 (All), point=0 (Nederland), granularity=5 (Hour), classification=2 (Current), activity=1 (Providing)
-      const url = 'https://api.ned.nl/v1/utilizations?point=0&type=0&granularity=5&granularitytimezone=1&classification=2&activity=1'
-      const response = await fetch(url, {
-        headers: {
-          'X-AUTH-TOKEN': this.apiKey,
-          'accept': 'application/ld+json'
-        }
-      })
-
-      if (!response.ok) {
-        Logger.error('NED API (gas) niet bereikbaar', new Error(`Status: ${response.status}`))
-        return []
-      }
-
-      const data = await response.json()
-      if (!Array.isArray(data) && !Array.isArray(data['hydra:member'])) {
-        Logger.error('NED API (gas) response heeft onverwacht formaat', new Error('No array in response'))
-        return []
-      }
-      const items = Array.isArray(data) ? data : data['hydra:member']
-      const prices: EnergyPrice[] = items.map((item: any) => ({
+      // Use LJPc-solutions/Energieprijzen-NL for real Dutch consumer gas price
+      const res = await fetch('https://energie.ljpc.nl/gas/anwb-energie-nu.txt')
+      if (!res.ok) throw new Error('Failed to fetch gas price from ljpc.nl')
+      const priceText = await res.text()
+      const price = parseFloat(priceText.replace(',', '.'))
+      const prices: EnergyPrice[] = [{
         type: 'gas',
-        pricePerUnit: item.price || item.capacity || 0,
-        unit: 'kWh',
-        supplier: 'NED',
+        pricePerUnit: price,
+        unit: 'm³',
+        supplier: 'ANWB Energie',
         tariffType: 'variable',
         contractDuration: 0,
-        validFrom: item.validfrom,
-        validUntil: item.validto,
+        validFrom: new Date().toISOString(),
+        validUntil: '',
         region: 'NL'
-      }))
+      }]
       await cacheService.set('gas-prices', prices, { ttl: 3600, prefix: 'energy' })
       return prices
     } catch (error) {
-      Logger.error('Failed to fetch gas prices from NED API', error as Error)
+      Logger.error('Failed to fetch gas prices from ljpc.nl', error as Error)
       return []
     }
   }
@@ -111,47 +90,26 @@ export class EnergyPriceService {
       const cached = await cacheService.get<EnergyPrice[]>('electricity-prices', 'energy')
       if (cached) return cached
 
-      if (!this.apiKey) {
-        Logger.warn('Energy Price API key not configured - cannot retrieve real electricity prices')
-        return []
-      }
-
-      // NED API: https://api.ned.nl/v1/utilizations
-      // Voor elektriciteit: type=2 (Solar), point=0 (Nederland), granularity=5 (Hour), classification=2 (Current), activity=1 (Providing)
-      const url = 'https://api.ned.nl/v1/utilizations?point=0&type=2&granularity=5&granularitytimezone=1&classification=2&activity=1'
-      const response = await fetch(url, {
-        headers: {
-          'X-AUTH-TOKEN': this.apiKey,
-          'accept': 'application/ld+json'
-        }
-      })
-
-      if (!response.ok) {
-        Logger.error('NED API (electricity) niet bereikbaar', new Error(`Status: ${response.status}`))
-        return []
-      }
-
-      const data = await response.json()
-      if (!Array.isArray(data) && !Array.isArray(data['hydra:member'])) {
-        Logger.error('NED API (electricity) response heeft onverwacht formaat', new Error('No array in response'))
-        return []
-      }
-      const items = Array.isArray(data) ? data : data['hydra:member']
-      const prices: EnergyPrice[] = items.map((item: any) => ({
+      // Use LJPc-solutions/Energieprijzen-NL for real Dutch consumer electricity price
+      const res = await fetch('https://energie.ljpc.nl/stroom/anwb-energie-nu.txt')
+      if (!res.ok) throw new Error('Failed to fetch electricity price from ljpc.nl')
+      const priceText = await res.text()
+      const price = parseFloat(priceText.replace(',', '.'))
+      const prices: EnergyPrice[] = [{
         type: 'electricity',
-        pricePerUnit: item.price || item.capacity || 0,
+        pricePerUnit: price,
         unit: 'kWh',
-        supplier: 'NED',
+        supplier: 'ANWB Energie',
         tariffType: 'variable',
         contractDuration: 0,
-        validFrom: item.validfrom,
-        validUntil: item.validto,
+        validFrom: new Date().toISOString(),
+        validUntil: '',
         region: 'NL'
-      }))
+      }]
       await cacheService.set('electricity-prices', prices, { ttl: 3600, prefix: 'energy' })
       return prices
     } catch (error) {
-      Logger.error('Failed to fetch electricity prices from NED API', error as Error)
+      Logger.error('Failed to fetch electricity prices from ljpc.nl', error as Error)
       return []
     }
   }
